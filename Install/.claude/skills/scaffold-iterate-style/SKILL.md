@@ -40,6 +40,8 @@ After each topic's review cycle completes, the reviewer must answer these 5 ques
 | 5 | **What is the hardest edge case this doc must define — but currently doesn't?** The scenario that exposes the biggest gap. |
 | 6 | **What does this doc assume another doc defines — but that doc does not actually define?** The hidden cross-doc dependency that will break at implementation. |
 
+**Change impact check (mandatory for every accepted issue):** For each doc change accepted during review, identify: (1) which other Step 5 docs must also change for consistency, (2) which downstream artifacts are affected (engine UI doc, specs, art, audio), (3) whether the current doc explicitly references those dependencies. If a doc change would silently require updates elsewhere and the dependency is not visible → flag as a seam risk.
+
 Failure probe findings are deduplicated against topic findings by root cause. New issues discovered via the probe are added to the topic's issue list and adjudicated normally.
 
 **Budget priority:** When `--topics` is omitted and `--iterations` is low (≤ 3), run Topic 7 first instead of last. Topic 7 is the highest-value topic — it catches seam failures that per-doc reviews miss. With tight budgets, per-doc topics can be truncated but Topic 7 must run.
@@ -121,7 +123,7 @@ This doc gets attacked on whether the building blocks are sufficient and properl
 3. Is the kit sufficient to build all major panels without inventing new atoms?
 4. Does the doc stay at component level instead of drifting into screen layout?
 5. Would two UI devs build the same kinds of panels from this kit?
-6. Can 3+ components coexist in the same panel without visual conflict (overlapping states, competing colors, crowded spacing)?
+6. **Panel composition stress:** Can multiple components with different priorities, states, and update rates coexist in one panel without hierarchy collapse, spacing failure, interaction confusion, or alert intrusion into normal panel content?
 
 ---
 
@@ -149,6 +151,7 @@ This doc gets attacked on whether the player can act clearly and consistently �
 4. What persists when switching context?
 5. Where would two developers diverge most when implementing the same interaction?
 6. What happens when the player clicks the wrong thing? Is misclick recovery defined (undo, deselect, cancel)?
+7. **Cancellation model clarity:** Is it clear how the player cancels placement, exits a mode, clears selection, or backs out of an action? Are cancel semantics (right-click, ESC, back button) consistent across all modes? What happens to selection state when canceling?
 
 **Player learning check:** If a player learns "right-click = command" in one mode, does right-click mean command in every mode? Flag mode-specific exceptions that break learned behavior.
 
@@ -179,6 +182,7 @@ This doc gets attacked under realistic gameplay conditions, not tidy table check
 4. Are critical failures explained clearly enough for recovery?
 5. Does every critical event use redundant channels?
 6. What happens when the same event fires repeatedly in rapid succession? Does the feedback system handle spam (debounce, collapse, count), or does it overwhelm the player?
+7. **Suppression/collapse discipline:** When multiple similar or repeated events occur, does the system define when feedback stacks, collapses into a count, refreshes the timer, or is suppressed entirely? Do low-priority confirmations disappear under critical alerts? Do sustained alerts stop retriggering?
 
 **Failure recovery test (mandatory):** For at least one failed action:
 1. Is the cause of failure clear to the player?
@@ -213,6 +217,7 @@ This doc gets attacked on whether sound reinforces the visual experience — not
 4. Can music coexist with alert readability?
 5. Does audio-direction define character, while feedback-system defines timing?
 6. Does repeated exposure to the same sounds degrade clarity or become annoying? Are audio fatigue mitigation rules defined (variation, cooldown, volume ducking)?
+7. **Mix layer discipline:** Are audio layers (music, ambient, UI clicks, alerts, critical signals, voice/barks) clearly separated with priority and ducking expectations? Can a developer know which layer a new sound belongs to?
 
 ---
 
@@ -403,18 +408,29 @@ Only include context files that exist — skip missing ones silently.
 ### Loop Structure
 
 ```
-Outer Loop (iterations — fresh review of updated doc)
-└── Per Topic:
-    └── Inner Loop (exchanges — back-and-forth conversation)
-        ├── Reviewer raises issues (structured JSON via doc-review.py)
-        ├── Claude evaluates each: AGREE / PUSHBACK / PARTIAL
-        ├── Reviewer counter-responds
-        └── ... until consensus or max-exchanges
-    └── Consensus: reviewer summarizes final position
-    └── Apply changes: accepted issues are applied to the doc
+Outer Loop (iterations — fresh review of updated docs)
+│
+├── Topic 7 (runs first when budget is tight):
+│   ├── End-to-end scenario test
+│   ├── Information load stress test
+│   ├── Spec derivation test
+│   └── If any mandatory gate fails → stop per-doc topics, apply fixes,
+│       restart from Topic 7 in next iteration
+│
+├── Per-Doc Topics (1–6, if Topic 7 passed):
+│   └── Per Topic:
+│       └── Inner Loop (exchanges — back-and-forth conversation)
+│           ├── Reviewer raises issues (structured JSON via doc-review.py)
+│           ├── Claude evaluates each: AGREE / PUSHBACK / PARTIAL
+│           ├── Reviewer counter-responds
+│           └── ... until consensus or max-exchanges
+│       └── Failure probe (6 questions) + change impact check
+│       └── Consensus → apply accepted changes
+│
+└── Re-read updated docs → next outer iteration if issues remain
 ```
 
-Each topic gets its own review → respond → consensus cycle via the Python `doc-review.py` script. After all topics in one outer iteration, re-read updated docs and start the next outer iteration if issues remain.
+Each topic gets its own review → respond → consensus cycle via the Python `doc-review.py` script. Topic 7 runs first and can short-circuit: if a mandatory gate fails (end-to-end scenario, information load stress, or spec derivation), stop remaining per-doc topics for that iteration, apply accepted fixes, and restart from Topic 7 in the next iteration. Per-doc topics only run when Topic 7 passes.
 
 **Stop conditions** (any one stops iteration):
 - **Clean** — a complete topic pass produces no new issues.
