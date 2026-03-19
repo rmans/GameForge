@@ -341,6 +341,175 @@ Include these detection patterns in the reviewer's system prompt. They represent
 
 8. **Vocabulary fragmentation** — the same concept has different names across different docs. "morale_state" in entity-components, "morale_band" in state-transitions, "mood_level" in authority.md. All refer to the same thing. The glossary is clean, but the reference docs aren't.
 
+## Per-Doc Mandatory Interrogation
+
+For every Step 3 doc in scope, the reviewer must run the doc's specialized failure-mode check **in addition to** the topic questions. This is not optional — it is mandatory. Each doc owns a different dimension of the simulation contract.
+
+### architecture.md
+
+**Unique responsibility:** How systems are structured, ordered, and wired — the engineering skeleton.
+
+**Attack surface:**
+- **Ordering bugs** — where would tick-ordering bugs appear first? Which system pairs have the tightest freshness dependency?
+- **Timing assumptions** — what assumption about "same tick" vs "next tick" is most likely wrong or undocumented?
+- **Identity edge cases** — what happens when a handle slot is reused? When a reference survives save/load but the target doesn't? When two systems hold references to the same entity and one destroys it?
+- **Boot races** — can any system's init depend on another system that hasn't initialized yet? Can signals fire before wiring is complete?
+- **Mid-tick visibility** — when System A mutates state during its tick, which later systems see the new value this tick? Is this rule explicit or assumed?
+- **Operational middle gap** — does the doc bridge high-level rules and implementable behavior, or is there a gap developers must fill by convention?
+
+**Questions the reviewer must answer:**
+1. Where would ordering bugs appear first?
+2. What assumption about timing is most likely wrong?
+3. What behavior depends on undocumented "same tick" guarantees?
+
+---
+
+### authority.md
+
+**Unique responsibility:** Who owns what — single-writer discipline for every piece of mutable state.
+
+**Attack surface:**
+- **Functional overlap** — can two systems both effectively control the same player-visible outcome through different variables, making authority technically clean but operationally misleading?
+- **Lifecycle-split authority** — does one system initialize a value, another update it, and a third clear it? That pattern has no true single owner across time.
+- **Reservation/claim ownership** — who owns assignments, reservations, claims, locks, and pending intents? What invalidates them? Who cleans up on interruption or entity death?
+- **Arbitration clarity** — when multiple systems influence the same outcome (hunger vs danger, job priority vs self-preservation), where does final arbitration happen?
+- **Recovery source of truth** — after interruption or corruption, which doc layer determines "what is the correct state now"?
+
+**Questions the reviewer must answer:**
+1. Where can two systems still both effectively control the same outcome?
+2. What lifecycle has no single owner across time?
+3. What breaks during interruption or cleanup — who clears stale state?
+
+---
+
+### interfaces.md
+
+**Unique responsibility:** Cross-system contracts — what data flows between systems, with what guarantees.
+
+**Attack surface:**
+- **Fallback path sufficiency** — when contracts fail, data is missing, or handlers reject, is the fallback behavior documented clearly enough that two developers implement the same recovery?
+- **Mechanism duplication** — is the same interaction documented as both a signal and a query, or both an intent and a direct call? Multiple mechanisms for the same thing create edge-case divergence.
+- **Authority-to-trigger clarity** — for state-changing contracts, is it clear who detects the condition vs who owns the state vs who performs the transition?
+- **Contract stability** — are any contracts already showing signs they want to split into narrower contracts?
+- **Contract granularity** — are contracts too vague to implement ("System A sends data to System B") or too engine-specific ("calls B.process_update(dict)")?
+
+**Questions the reviewer must answer:**
+1. Which contract is most likely to fail in real gameplay?
+2. Where is fallback behavior undefined?
+3. Which contract will be implemented differently by two developers?
+
+---
+
+### state-transitions.md
+
+**Unique responsibility:** Discrete state machines — what states exist, what transitions are legal, and what timing governs them.
+
+**Attack surface:**
+- **Interrupted transitions** — what happens when a transition is interrupted mid-flow? If a colonist starts transitioning to Working but the task is cancelled during the same tick, which state wins?
+- **Missing illegal transitions** — for complex state machines (5+ states), which obviously dangerous transitions are not explicitly listed as illegal?
+- **Timing ambiguity** — does "immediate" mean within the owning system's tick, or globally instant? Could a developer get this wrong?
+- **Boot-time validity** — are initial states defined for every state machine? Can all machines reach a valid state before the first tick?
+- **Cross-machine coordination** — when two state machines interact (entity lifecycle + task lifecycle), are the coordination points explicit?
+
+**Questions the reviewer must answer:**
+1. Which transition is ambiguous under interruption?
+2. Which state machine is missing illegal transitions?
+3. Which transitions depend on timing not guaranteed by architecture.md?
+
+---
+
+### entity-components.md
+
+**Unique responsibility:** Entity data shapes — what fields exist, who owns them, how they persist.
+
+**Attack surface:**
+- **Irrecoverable data** — which fields, if lost or corrupted, cannot be reconstructed from other state? Those are the highest-risk persistence targets.
+- **Lifecycle gaps** — are there fields with unclear creation/destruction timing? Fields that are written once and never updated but also never explicitly frozen?
+- **Stale reference accumulation** — which `ref`-type fields are most likely to hold stale handles? Are validation rules documented for each?
+- **Container schema sharpness** — are `list`, `dict`, `set` fields challenged when inner types are unspecified?
+- **Cross-field invariants** — are there fields that only make sense in combination (hp ≤ hp_max, morale drifts toward target)? Are those relationships documented?
+- **In-flight objects** — are reservations, queued jobs, pending intents, and claims modeled here? Or do they fall between entity-components and authority?
+
+**Questions the reviewer must answer:**
+1. What data cannot be reconstructed if lost?
+2. Which fields have unclear lifecycle — created but never explicitly managed?
+3. Where will stale references accumulate fastest?
+
+---
+
+### resource-definitions.md
+
+**Unique responsibility:** Resources, production chains, and the economic model.
+
+**Attack surface:**
+- **Operational viability** — can every defined resource actually flow through the simulation? Are there resources that are economically defined but operationally impossible to move, store, or consume under current contracts?
+- **Dead resources** — are there resources defined but not meaningfully used by any system, chain, or gameplay mechanic?
+- **Production chain completeness** — can every Tier 2+ resource be traced back to Tier 1 sources? Are there broken chains?
+- **Logistics realism** — do storage types, transportability values, and hauling contracts support real movement through the sim?
+- **Fungible/unique confusion** — are any resources modeled as both fungible counts and unique item entities?
+
+**Questions the reviewer must answer:**
+1. Which resource cannot actually flow through the sim as designed?
+2. Which production chain is incomplete or broken?
+3. Which resource is defined but unused by any system?
+
+---
+
+### signal-registry.md
+
+**Unique responsibility:** The event vocabulary — what signals exist, what they carry, who fires them, who consumes them.
+
+**Attack surface:**
+- **Fan-out risk** — which signals have too many consumers? High fan-out creates debugging opacity and ordering sensitivity.
+- **Semantic duplication** — are two signals expressing almost the same event with slightly different payloads? Event model bloat creates wiring confusion.
+- **Delivery guarantee realism** — are fire-and-forget signals actually safe to lose? Are "reliable" signals actually reliable in the engine?
+- **Missing critical events** — are there gameplay-critical state changes with no corresponding signal? Systems that need to know but aren't wired?
+- **Payload sufficiency** — do consumers need follow-up queries because the payload is too thin?
+- **Redundancy** — for critical gameplay events, is there a backup channel if the signal is missed?
+
+**Questions the reviewer must answer:**
+1. Which signals are overloaded (too many consumers, too broad)?
+2. Which critical events are missing signal coverage entirely?
+3. Which signals should not exist (duplicates, unused, or misclassified)?
+
+---
+
+### balance-params.md
+
+**Unique responsibility:** Tunable numbers — rates, thresholds, capacities, multipliers.
+
+**Attack surface:**
+- **Tuning coupling** — which parameters cannot be tuned independently? Interdependent parameters documented in isolation become tuning traps.
+- **Hidden constants** — are important behavioral numbers still embedded in system designs, state-transition triggers, or interface assumptions instead of registered here?
+- **Player-visible mapping** — for each parameter, is it clear what player-visible behavior it governs? A parameter without a clear gameplay effect is misplaced or a sign the behavior isn't understood.
+- **Behavioral anchoring** — does each parameter have a testable impact? "Mood decay rate" should predictably affect visible mood over a known time period.
+- **TBD density** — for systems that have been designed and are ready for implementation, are their parameters still TBD?
+
+**Questions the reviewer must answer:**
+1. Which parameters cannot be tuned independently?
+2. Which parameters don't map to player-visible behavior?
+3. Which important numbers are secretly defined elsewhere (in prose, in system docs, in state-transition triggers)?
+
+---
+
+### enums-and-statuses.md
+
+**Unique responsibility:** Shared cross-system vocabulary — state names that must mean the same thing everywhere.
+
+**Attack surface:**
+- **Abstraction layer split** — is each enum simulation truth (authoritative state), derived interpretation (computed band/classification), or presentation (UI label)? That boundary gets muddy. Simulation vocab belongs here; display labels belong in glossary.
+- **Naming drift** — do enum values exactly match state-transitions.md? Are there near-synonyms that will cause bugs?
+- **Enum explosion** — are there enums that are growing unbounded? Enums with 15+ values may be masking a data model problem.
+- **Single-system leaks** — are there enums only used by one system that shouldn't be in the shared vocabulary?
+- **Authority gaps** — does every shared enum have an explicit owning authority? Who decides what "Brownout" means?
+
+**Questions the reviewer must answer:**
+1. Where is vocabulary split across abstraction layers (simulation vs interpretation vs UI)?
+2. Which enums are presentation, not simulation — and shouldn't be here?
+3. Where will naming drift reappear first?
+
+---
+
 ## Arguments
 
 | Argument | Required | Default | Description |
@@ -391,7 +560,7 @@ Read and pass as `--context-files` to the Python script:
 | `design/glossary.md` | Canonical terminology |
 | `scaffold/doc-authority.md` | Document authority ranking, same-rank conflict resolution rules, deprecation protocol |
 | `design/systems/_index.md` + system files | System design cross-check |
-| `decisions/known-issues.md` | Known gaps and constraints |
+| `decisions/known-issues/_index.md` | Known gaps and constraints |
 | Engine docs (if they exist) | Viability verification for architecture decisions |
 | ADRs with status `Accepted` | Decision compliance |
 | Design signals from fix-references (if `--signals` provided) | Focus areas for the reviewer |
@@ -400,7 +569,28 @@ Only include context files that exist — skip missing ones silently.
 
 ## Execution
 
-Follow the same topic loop, inner loop (exchanges), consensus, and apply-changes pattern as `/scaffold-iterate-systems`.
+### Loop Structure
+
+```
+Outer Loop (iterations — fresh review of updated docs)
+├── Per Topic (6 topic questions):
+│   └── Inner Loop (exchanges — back-and-forth conversation)
+│       ├── Reviewer raises issues (structured JSON via doc-review.py)
+│       ├── Claude evaluates each: AGREE / PUSHBACK / PARTIAL
+│       ├── Reviewer counter-responds
+│       └── ... until consensus or max-exchanges
+│   └── Consensus: reviewer summarizes final position
+│   └── Apply changes: accepted issues applied to Step 3 docs
+│
+├── Per Doc in scope (mandatory interrogation):
+│   └── Reviewer answers doc-specific failure-mode questions
+│   └── Claude evaluates findings against existing topic results
+│   └── Deduplicate: merge with topic findings by root cause
+│
+└── Cross-topic consistency check → resolve contradictions
+```
+
+Each topic gets its own review → respond → consensus cycle via the Python `doc-review.py` script. After topics complete, the per-doc mandatory interrogation runs for each doc in scope. Findings are deduplicated against topic results by root cause. After all topics and per-doc checks in one outer iteration, re-read updated docs and start the next outer iteration if issues remain.
 
 **Stop conditions** (any one stops iteration):
 - **Clean** — a complete topic pass produces no new issues.
@@ -477,7 +667,7 @@ These tests apply to both reviewer-proposed changes AND existing Step 3 content 
 ### Review Log
 
 Create review log in `scaffold/decisions/review/`:
-- Name: `ITERATE-references-[target-or-all]-<YYYY-MM-DD>.md`
+- Name: `ITERATE-references-[target-or-all]-<YYYY-MM-DD-HHMMSS>.md`
 - Use the template at `scaffold/templates/review-template.md`.
 - Update `scaffold/decisions/review/_index.md` with a new row.
 
@@ -535,7 +725,7 @@ Create review log in `scaffold/decisions/review/`:
 - **Never resolve cross-doc contradictions by weakening the higher-rank doc.** If the lower-rank doc looks more complete or more current but conflicts with the canonical source, either align the lower doc or escalate to the user. Never "split the difference" between ranks.
 - **Never blindly accept.** Every issue gets evaluated against project context.
 - **Pushback is expected and healthy.** The reviewer is adversarial — disagreement is normal.
-- **Reappearing material issues escalate to the user.** Escalate when the same material issue persists for 2 outer iterations, or when the reviewer and Claude remain split after max-exchanges on a topic.
+- **Escalate only after real adjudication failure.** The same material issue must remain unresolved after adjudication attempts across 2 outer iterations. Reviewer repetition of a locked issue is not an adjudication failure — the lock holds. Escalate immediately (skip the 2-iteration wait) if the issue depends on a missing or contradictory Step 1-2 decision.
 - **When --target is set, respect edit scope.** Cross-doc issues found during targeted review are flagged for fix-references, not fixed directly.
 - **Sleep between API calls.** Add `sleep 10` between topic transitions.
 - **Clean up temporary files** after use.
