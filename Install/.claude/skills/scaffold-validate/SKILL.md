@@ -1,6 +1,6 @@
 ---
 name: scaffold-validate
-description: Run cross-reference and planning-pipeline validation across all scaffold documents. Reports broken references, missing registrations, glossary violations, synchronization drift across spec and task pipelines (slice tables, indexes, status fields, triage logs), engine doc structural integrity (Step 3 alignment, cross-engine consistency, layer boundary compliance), and cross-cutting integrity (decision closure, workflow compliance, upstream change staleness).
+description: Run cross-reference and planning-pipeline validation across all scaffold documents. Reports broken references, missing registrations, glossary violations, synchronization drift across spec and task pipelines, engine doc structural integrity, Step 5 style doc validation (structure, tokens, boundaries, accessibility, design intent, signal clarity), cross-cutting integrity (decision closure, workflow compliance, staleness), and cross-layer integrity (pipeline deadlock detection, change impact surface, orphan concepts, implementation coherence, semantic overlap).
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob
 argument-hint: [--scope all|design|systems|foundation|roadmap|phases|slices|tasks|specs|refs|engine] [--range SYS-###-SYS-###]
 ---
@@ -836,6 +836,80 @@ These checks span all document types. They enforce decision closure, workflow co
 - Workflow phase sequence → "Complete P#-### before approving P#-### — entry criteria require it"
 - Workflow phase revision missing → "Run `/scaffold-revise-roadmap` to record the completed phase"
 - Upstream staleness → "[upstream doc] was modified after [downstream doc] was stabilized. Review whether [downstream doc] needs updating. Run the appropriate fix/iterate skill to restabilize"
+
+### 2n. Cross-Layer Integrity Checks (scope: `all`)
+
+These checks span multiple document layers. They detect structural problems that only appear when docs from different steps are combined. Run on `--scope all` only.
+
+**Pipeline Deadlock Detection:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `pipeline-circular-dependency` | No circular dependency chains across phases → slices → specs → tasks → systems. Build a directed dependency graph: slice `Depends on` links, spec `System` references, task `Implements` references, phase entry criteria. Run cycle detection. A cycle means the pipeline cannot execute in any valid order. | FAIL per cycle found |
+| `pipeline-cross-layer-deadlock` | No cross-layer blocking where Layer A depends on Layer B which depends back on Layer A through a different path. Example: SLICE-002 depends on SYS-005 which is only scoped in SLICE-002 — the slice can't start until the system exists, but the system won't be built until the slice starts. | FAIL per deadlock |
+
+**Change Impact Surface:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `change-impact-surface` | For each system design (SYS-###), compute the downstream impact radius: count of specs that reference it, slices that scope it, tasks that implement its specs, engine docs that conform to its architecture, and Step 5 docs that display its state. Report as an impact table. This is informational, not pass/fail — but systems with high impact radius (>20 downstream docs) get a WARN as maintenance risk. | WARN if impact > 20 |
+
+**Orphan Concept Detection:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `orphan-signals` | Signals defined in signal-registry.md that are not referenced by any interface contract, engine doc, spec, or task. Extends existing `signals-systems` check to cover downstream layers. | WARN per orphan |
+| `orphan-enums` | Enums defined in enums-and-statuses.md with `Used By` listing systems that no longer exist, or enums not referenced by any spec, task, or engine doc. | WARN per orphan |
+| `orphan-resources` | Resources defined in resource-definitions.md not referenced by any spec, task, system design, or balance parameter. | WARN per orphan |
+| `orphan-balance-params` | Balance parameters not referenced by any spec, task, or engine doc. Parameters defined but never consumed downstream. | WARN per orphan |
+
+**Implementation Coherence (advisory):**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `implementation-data-availability` | For each spec that references system data (entity fields, signals, resources), verify that the data source is actually defined upstream (entity-components has the field, signal-registry has the signal, resource-definitions has the resource). A spec that depends on data that doesn't exist is unimplementable. | FAIL per missing data source |
+| `implementation-timing-coherence` | For specs and tasks that describe timing-sensitive behavior ("on tick", "immediately", "next frame"), check that the referenced timing model is consistent with architecture.md Simulation Update Semantics and simulation-runtime tick orchestration. Flag specs that assume timing not guaranteed by the architecture. | WARN [ADVISORY] per inconsistency |
+
+**Semantic Overlap (advisory):**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `semantic-system-overlap` | Two or more system designs whose Purpose sections describe substantially overlapping responsibilities. Extract the first 2 sentences of each Purpose and flag pairs with high keyword overlap. Lightweight string check, not semantic analysis. | WARN [ADVISORY] per overlap |
+| `semantic-spec-overlap` | Two or more specs within the same slice whose descriptions or acceptance criteria describe substantially the same behavior. Flag pairs where >50% of acceptance criteria keywords match. | WARN [ADVISORY] per overlap |
+
+**How to run these checks:**
+
+1. For `pipeline-circular-dependency`: Build a directed graph. Nodes = all phases, slices, specs, tasks, systems. Edges from: slice `Depends on` → target slice; spec `System` → system; task `Implements` → spec; phase entry criteria → prerequisite phase. Run standard cycle detection (DFS with back-edge detection). Report each cycle as a chain.
+2. For `pipeline-cross-layer-deadlock`: For each slice, extract scoped systems from `Systems in Scope`. For each scoped system, check if that system's design doc is only reachable through this slice's specs/tasks. If yes and the slice has a `Depends on` chain that requires the system to already exist → deadlock.
+3. For `change-impact-surface`: For each SYS-### file, grep all specs for `System: SYS-###`, all slices for the system in `Systems in Scope`, all tasks for specs that reference the system, all engine docs for the system name, all Step 5 docs for the system name. Count and tabulate.
+4. For `orphan-signals`: Collect all signal names from signal-registry.md. Grep interfaces.md, all engine docs, all specs, and all tasks for each signal name. Report signals with zero downstream references.
+5. For `orphan-enums`: Read enums-and-statuses.md `Used By` column. Verify each listed system exists. Also grep specs, tasks, and engine docs for each enum value. Report enums with broken `Used By` or zero downstream references.
+6. For `orphan-resources`: Collect all resource names from resource-definitions.md. Grep specs, tasks, system designs, and balance-params for each. Report resources with zero references.
+7. For `orphan-balance-params`: Collect all parameter names from balance-params.md. Grep specs, tasks, and engine docs for each. Report params with zero downstream references.
+8. For `implementation-data-availability`: For each spec, extract referenced entity fields, signals, and resources from description and acceptance criteria. Verify each exists in entity-components, signal-registry, or resource-definitions. Report missing sources.
+9. For `implementation-timing-coherence`: For each spec/task mentioning timing keywords ("per tick", "immediately", "queued", "next frame", "end of tick"), cross-reference architecture.md Simulation Update Semantics. Flag if the timing assumption is not explicitly supported. Label `[ADVISORY]`.
+10. For `semantic-system-overlap`: Extract first 2 sentences of each system Purpose. Tokenize, remove stop words. Compare all pairs for >60% keyword overlap. Report overlapping pairs. Label `[ADVISORY]`.
+11. For `semantic-spec-overlap`: Within each slice, extract spec descriptions and acceptance criteria. Tokenize. Compare pairs within the same slice for >50% keyword overlap. Report overlapping pairs. Label `[ADVISORY]`.
+
+**Maturity-aware activation:**
+- Pipeline deadlock detection → requires at least 1 phase, 1 slice, and 1 spec to exist. SKIP otherwise.
+- Change impact surface → requires at least 3 system designs and 3 specs to be meaningful. SKIP otherwise.
+- Orphan detection → each check requires its source doc to exist. SKIP individually if missing.
+- Implementation coherence → requires at least 3 specs with data references. SKIP otherwise.
+- Semantic overlap → system overlap requires 3+ systems. Spec overlap requires 2+ specs in at least one slice. SKIP otherwise.
+
+**Suggested fixes:**
+- Pipeline circular dependency → "Break the cycle by removing one dependency. Review the chain: [A → B → C → A] and determine which link is weakest"
+- Pipeline cross-layer deadlock → "SLICE-### depends on SYS-### which is only scoped in SLICE-###. Either scope the system in an earlier slice or remove the dependency"
+- Change impact high → "SYS-### has [N] downstream dependents. Changes to this system require reviewing all affected docs. Consider running `/scaffold-validate --scope all` after any modification"
+- Orphan signal → "Signal [name] has no downstream consumers. Remove from signal-registry or add consumer references in specs/tasks/engine docs"
+- Orphan enum → "Enum [value] Used By references nonexistent system, or has no downstream references. Update or remove"
+- Orphan resource → "Resource [name] is defined but unused. Remove or add references in specs/tasks"
+- Orphan balance param → "Parameter [name] is defined but unused downstream. Remove or add references"
+- Implementation data missing → "SPEC-### references [field/signal/resource] that doesn't exist in Step 3 docs. Create the missing entry or update the spec"
+- Implementation timing inconsistency → "SPEC-### assumes [timing] but architecture.md doesn't guarantee it. Align timing or file an ADR"
+- Semantic system overlap → "SYS-### and SYS-### have overlapping Purpose descriptions. Clarify boundaries or merge"
+- Semantic spec overlap → "SPEC-### and SPEC-### in SLICE-### describe similar behavior. Merge or differentiate"
 
 ### 3. Report
 
