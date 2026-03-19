@@ -412,7 +412,9 @@ Include these detection patterns in the reviewer's system prompt. They represent
 
 ## Per-Doc Mandatory Interrogation
 
-For every engine doc in scope, the reviewer must run the doc's specialized failure-mode check **in addition to** the topic questions. This is not optional flavor — it is mandatory. Each doc has its own attack surface.
+For every engine doc in scope, the reviewer must run the doc's specialized failure-mode check **in addition to** the topic questions. This is not optional — it is mandatory and high-priority. If iteration budget is constrained, run per-doc interrogation even if some topics are skipped. Topics find structured correctness issues; per-doc interrogation finds real implementation failures.
+
+Each doc section ends with a **First Failure Scenario** (required) and a **Top Risk** (required).
 
 ### simulation-runtime
 
@@ -432,6 +434,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. If two systems both write and read shared state, does the tick model prevent stale reads?
 3. What happens to in-flight work when the entity it targets is destroyed mid-tick?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### scene-architecture
@@ -451,6 +457,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. Can a signal fire before its consumer exists during boot?
 3. Does load-from-save use the same init path or a different one?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### coding-best-practices
@@ -470,6 +480,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. Are the error handling rules testable in code review?
 3. Does the cross-language boundary actually match what the project builds?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### save-load-architecture
@@ -488,6 +502,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. What happens to a colonist mid-task when the game is saved and reloaded?
 3. Can a save from version N be loaded in version N+1?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### ai-task-execution
@@ -507,6 +525,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. What happens if the reserved resource is consumed by another actor before this one arrives?
 3. Can the task system put an actor in a state that state-transitions.md says is illegal?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### ui-best-practices
@@ -526,6 +548,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. What happens to a panel when the entity it displays is destroyed?
 3. Does translated text break any layouts?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### input-system
@@ -545,6 +571,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. What happens when the player clicks a UI element that overlaps a selectable game entity?
 3. Is rebinding persistent across sessions?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### performance-budget
@@ -564,6 +594,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. What's the first thing that breaks when the colony reaches maximum size?
 3. Is there headroom for future systems, or is the budget already tight?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### debugging-and-observability
@@ -583,6 +617,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. Can you trace a single gameplay event through all systems it touches?
 3. Are diagnostic warnings actionable or just noise?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### localization
@@ -601,6 +639,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. What happens to a tooltip when the translated text is twice as long?
 3. Are dynamically generated strings (e.g., "Colonist is Hungry (3/10)") translatable?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### asset-import-pipeline
@@ -619,6 +661,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. If an import preset changes, what breaks?
 3. Are data table imports validated before runtime?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### build-and-test-workflow
@@ -637,6 +683,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. Do headless tests reliably catch the same bugs as interactive testing?
 3. What's the most important thing that's NOT tested?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### implementation-patterns
@@ -655,6 +705,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. Do any recorded patterns contradict coding-best-practices?
 3. Is the boundary between conventions (coding) and patterns (here) clear?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### post-processing
@@ -673,6 +727,10 @@ For every engine doc in scope, the reviewer must run the doc's specialized failu
 2. Do visual effects for crisis states help or hurt decision-making?
 3. What's the total frame-time cost of all post-processing?
 
+
+**First Failure Scenario (required):** Describe the most likely real implementation failure this doc would allow — what gets built, what goes wrong, and why the doc permitted it.
+
+**Top Risk (required):** The single most dangerous issue in this doc and why.
 ---
 
 ### data-and-content-pipeline
@@ -960,7 +1018,8 @@ One of:
 - **Sleep between API calls.** Add `sleep 10` between topic transitions.
 - **Clean up temporary files** after use.
 - **If the Python script fails, report the error and stop.**
-- **Topics 4 and 5 are always high-value.** If time or iteration budget is limited, prioritize Topics 4 (Cross-Engine Consistency) and 5 (Implementation Sufficiency) over per-doc topics.
+- **Per-doc interrogation is highest priority.** If iteration budget is constrained, run per-doc mandatory interrogation even if some topics are skipped. Topics find structured correctness; per-doc interrogation finds real implementation failures.
+- **Topics 4 and 5 are highest among topics.** If time or iteration budget is limited within the topic pass, prioritize Topics 4 (Cross-Engine Consistency) and 5 (Implementation Sufficiency) over per-doc topics.
 - **Constrained TODOs are correct, not gaps.** An engine doc that honestly marks a section as Constrained TODO because Step 3 hasn't decided yet is better than one that guesses. Do not penalize constrained sections; penalize sections that guess when they should be constrained. A high-quality doc may have many constrained sections if Step 3 is incomplete — that honesty should improve the rating, not lower it.
 - **Design for the final product, implement incrementally.** Engine docs must implement the final architecture defined in Step 3. An engine doc that implements half the ownership model correctly is incremental. An engine doc that implements the wrong ownership model because "the real one isn't built yet" is temporary design. Never accept temporary designs that require rework — use Constrained TODO instead.
 - **Practicality check before finalizing changes.** Before accepting any reviewer-proposed change, ask: (a) would this change make the doc harder to use in real development? (b) does this improve clarity for a developer, or does it just enforce internal consistency for the review system's benefit? Reject changes that increase rigidity without improving implementability, optimize for review criteria over developer usability, or reduce readability to satisfy a formal check. Over iterations, the review system can overfit — producing docs that are hyper-consistent but less practical, readable, or flexible. The goal is docs a developer can build from, not docs that score perfectly on an internal consistency audit.
