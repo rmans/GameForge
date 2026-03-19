@@ -1,6 +1,6 @@
 # Skills Reference
 
-> Man-page reference for all 72 scaffold slash commands. Each entry shows synopsis, description, arguments, examples, and related skills.
+> Man-page reference for all 75 scaffold slash commands. Each entry shows synopsis, description, arguments, examples, and related skills.
 >
 > **When to use each skill** — see [WORKFLOW.md](WORKFLOW.md) for the step-by-step pipeline order.
 
@@ -16,6 +16,7 @@
 | `/scaffold-new-roadmap` | — | Create the project roadmap |
 | `/scaffold-new-phase` | `[phase-name]` | Create a phase scope gate with auto P#-### ID |
 | `/scaffold-new-slice` | `[slice-name]` | Create a vertical slice with auto SLICE-### ID |
+| `/scaffold-new-system` | `[system-name] [--split-from SYS-###] [--trigger ADR-###\|KI:keyword]` | Create a single system design with overlap/authority audit |
 | `/scaffold-new-spec` | `[spec-name]` | Create a behavior spec with auto SPEC-### ID |
 | `/scaffold-new-task` | `[task-name]` | Create an implementation task with auto TASK-### ID |
 | **Bulk Seed** | | |
@@ -80,6 +81,7 @@
 | `/scaffold-complete` | `[document-path\|ID]` | Mark a planning doc as Complete; ripples up through parents |
 | **Edit** | | |
 | `/scaffold-update-doc` | `[doc-name\|path]` | Add, remove, or modify entries in any scaffold doc |
+| `/scaffold-sync-glossary` | `[--scope all\|design\|systems\|references\|style\|input] [--dry-run]` | Scan docs for glossary-worthy terms with worthiness gate and ambiguity detection |
 | `/scaffold-sync-reference-docs` | — | Sync reference docs after upstream changes |
 | **Validate** | | |
 | `/scaffold-validate` | `[--scope refs\|design\|systems\|foundation\|roadmap\|phases\|slices\|specs\|tasks\|engine\|style\|all]` | Run cross-reference validation across scaffold docs |
@@ -186,6 +188,39 @@ Creates a vertical slice at `slices/SLICE-###-<name>.md` with automatic sequenti
 **See Also**
 
 `/scaffold-bulk-seed-slices`, `/scaffold-new-spec`
+
+---
+
+### /scaffold-new-system
+
+Create a single system design document with automatic ID assignment.
+
+**Synopsis**
+
+    /scaffold-new-system [system-name] [--split-from SYS-###] [--trigger ADR-###|KI:keyword]
+
+**Description**
+
+Creates a single system design at `design/systems/SYS-###-<name>_draft.md` with automatic sequential ID assignment. Reads the design doc (invariants, simulation depth, system domains), all existing systems, authority table, and ADRs. Audits for overlap, authority conflicts, invariant violations, simulation depth compliance, authority flow, and necessity (required vs premature vs redundant) before defining the system. Walks through all 18 template sections interactively (including observability and performance characteristics), pre-filling from context. Runs an identity check after definition (one-sentence, absorption, core-concept tests). Enforces authority registration as a gate when owned state is defined. Registers in both `design/systems/_index.md` and the design doc System Design Index. When `--split-from` is provided, also updates the parent system's Non-Responsibilities and dependency tables.
+
+**Arguments**
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `system-name` | No | Name for the system. If omitted, asks interactively. |
+| `--split-from` | No | SYS-### ID of a parent system being split. Pre-fills context from parent. |
+| `--trigger` | No | ADR-### or KI:keyword that motivated the new system. Reads the trigger for context. |
+
+**Examples**
+
+    /scaffold-new-system mood-resolution
+    /scaffold-new-system task-scheduling --split-from SYS-005
+    /scaffold-new-system zone-management --trigger ADR-018
+    /scaffold-new-system
+
+**See Also**
+
+`/scaffold-bulk-seed-systems`, `/scaffold-fix-systems`, `/scaffold-iterate-systems`
 
 ---
 
@@ -563,6 +598,38 @@ Updates cross-references automatically: glossary term renames propagate, system 
     /scaffold-update-doc SYS-001
     /scaffold-update-doc reference/signal-registry.md
     /scaffold-update-doc
+
+---
+
+### /scaffold-sync-glossary
+
+Scan scaffold docs for domain terms missing from the glossary.
+
+**Synopsis**
+
+    /scaffold-sync-glossary [--scope all|design|systems|references|style|input] [--dry-run]
+
+**Description**
+
+Scans scaffold docs for domain terms that should be in the glossary but aren't. Extracts candidates from structured doc fields with source weighting (Strong vs Advisory). Normalizes variants (case, hyphens, plurals) and deduplicates. Applies a glossary worthiness gate (cross-layer usage, player-facing, authority-significant, disambiguating). Checks for ambiguity with existing terms (near-equivalents, prefix variants, cross-layer confusion). Assigns confidence tiers (High/Medium/Low). Presents candidates with per-term decisions: Canonical (new term), Alias (redirect to existing), NOT (discouraged synonym), or Reject. Also detects stale glossary terms no longer referenced in current docs. Blocks Draft-only provisional terms until upstream stabilizes.
+
+**Arguments**
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `--scope` | No | Which doc layers to scan. Default: `all`. Options: `design`, `systems`, `references`, `style`, `input`. Comma-separated for multiple. |
+| `--dry-run` | No | Report candidate terms without writing anything. |
+
+**Examples**
+
+    /scaffold-sync-glossary
+    /scaffold-sync-glossary --scope references
+    /scaffold-sync-glossary --scope style,input
+    /scaffold-sync-glossary --dry-run
+
+**See Also**
+
+`/scaffold-bulk-seed-systems` (initial glossary seeding), `/scaffold-validate` (glossary coverage check), `/scaffold-update-doc glossary` (manual edits)
 
 ---
 

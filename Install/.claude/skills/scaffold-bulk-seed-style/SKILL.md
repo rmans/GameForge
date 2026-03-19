@@ -223,6 +223,7 @@ Include which doc would need to be filled in to resolve it.]
 Include back-propagation needs (e.g., "interaction-model implies a context menu component not defined in ui-kit").]
 
 ### Recommended Next Steps
+- Run `/scaffold-sync-glossary --scope style` to register new domain terms (color tokens, UI component names, interaction patterns) in the glossary
 - Review Medium-confidence sections (listed above) — these are reasonable but unverified
 - Fill remaining TODOs where upstream docs are missing information
 - Run `/scaffold-fix-systems` or `/scaffold-fix-references` if tensions reveal upstream gaps

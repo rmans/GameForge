@@ -17,7 +17,7 @@ Make targeted edits to a scaffold document: **$ARGUMENTS**
 | `style-guide` | `scaffold/design/style-guide.md` | Sections with content |
 | `color-system` | `scaffold/design/color-system.md` | Sections with content |
 | `ui-kit` | `scaffold/design/ui-kit.md` | Sections with content |
-| `glossary` | `scaffold/design/glossary.md` | Table rows (Term, Definition, NOT) |
+| `glossary` | `scaffold/design/glossary.md` | Table rows (Term, Definition, NOT, Authority, Criticality). Also: Deprecated Terms table, Term Hierarchy table. |
 | `interfaces` | `scaffold/design/interfaces.md` | Interface contracts |
 | `authority` | `scaffold/design/authority.md` | Table rows (Variable, Owning System, Readers, Cadence) |
 | `state-transitions` | `scaffold/design/state-transitions.md` | State machine blocks |

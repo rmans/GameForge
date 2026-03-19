@@ -414,6 +414,7 @@ These were safely deferred as TBD placeholders. Seeding continued.
 ```
 
 ### Next Steps
+- Run `/scaffold-sync-glossary --scope references` to register new domain terms (entity names, resource names, signal names, state names) in the glossary
 - Resolve Decision Queue items (user decisions or defer to Step 7)
 - Run `/scaffold-fix-foundation` to auto-fix cross-doc inconsistencies
 - Run `/scaffold-iterate-references` for adversarial architecture review

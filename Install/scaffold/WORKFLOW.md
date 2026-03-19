@@ -167,7 +167,7 @@ Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode
 
 ## Step 2 — System Definition
 
-> **Output:** All `design/systems/SYS-###-*.md` files filled with purpose, ownership, dependencies, interfaces, state transitions. **Proceed when:** fix + iterate + validate --scope systems passes. **Surfaces for Step 7:** ownership conflicts, dependency patterns, persistence implications.
+> **Output:** `design/glossary.md` seeded with key terms; all `design/systems/SYS-###-*.md` files filled with purpose, ownership, dependencies, interfaces, state transitions, observability, and performance characteristics. **Proceed when:** fix + iterate + validate --scope systems passes. **Surfaces for Step 7:** ownership conflicts, dependency patterns, persistence implications.
 
 ### 2a — Create
 
@@ -176,6 +176,14 @@ Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode
 ```
 
 Proposes systems from simulation responsibilities and owned player-facing concerns — not raw verbs. Reads Design Invariants, Player Control Model, Major System Domains, and Simulation Depth Target to shape proposals. Audits for overlap, missing coverage, invariant conflicts, and system category coverage before creation. Seeds glossary terms and creates system stubs with pre-filled purpose, simulation responsibility, design constraints, owned state, and dependencies.
+
+To add a single system after initial seeding (e.g., when `revise-systems` detects emergent subsystem pressure, `validate` finds a design-to-systems gap, or a split is needed), use:
+
+```
+/scaffold-new-system [name] [--split-from SYS-###] [--trigger ADR-###|KI:keyword]
+```
+
+Performs the same overlap/authority/invariant audit as bulk-seed but for one system. When `--split-from` is provided, also updates the parent system's Non-Responsibilities and dependency tables.
 
 ### 2b — Fix (mechanical cleanup)
 
@@ -411,7 +419,7 @@ Detect Step 5 doc drift from implementation feedback. Reads ADRs, known issues, 
 
 ## Step 6 — Input Model
 
-> **Output:** Action map, bindings (KBM + gamepad), UI navigation, input philosophy — all populated and reviewed. **Proceed when:** fix pass clean. **Surfaces for Step 7:** input architecture constraints.
+> **Output:** `inputs/action-map.md`, `inputs/input-philosophy.md`, `inputs/default-bindings-kbm.md`, `inputs/default-bindings-gamepad.md`, `inputs/ui-navigation.md` — all populated and reviewed. **Proceed when:** fix pass clean. **Surfaces for Step 7:** input architecture constraints.
 
 ### 6a — Create
 
@@ -1015,6 +1023,7 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 | Skill | What | Why | How |
 |-------|------|-----|-----|
 | `bulk-seed-systems` | Propose and create system stubs | Define simulation layer from design intent | Proposes systems by ownership (not verbs). 9 category coverage audit, overlap/gap/invariant checks. Batch confirmation |
+| `new-system` | Create a single system | Add a system after initial seeding | Overlap/authority/invariant audit for one system. Supports `--split-from` (split context) and `--trigger` (ADR/KI context). Pre-fills from parent or trigger |
 | `fix-systems` | Mechanical cleanup | Normalize before adversarial review | Formatter + linter. Auto-fixes structure/terminology/registration. Detects design signals for iterate-systems. All loops parallel |
 | `iterate-systems` | Adversarial review | Challenge system design quality | 5 topics (ownership, behavior, governance, cross-system, fitness) + System Identity Check + Reviewer Bias Pack. External LLM |
 | `validate --scope systems` | Structural gate | Confirm systems are structurally ready | 16 deterministic checks: index sync, structure, health, owned-state overlap, dependency cycles, template drift |
@@ -1124,6 +1133,7 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 | Skill | What | Why | How |
 |-------|------|-----|-----|
 | `update-doc` | General editor | Add/remove/modify any scaffold doc | Updates cross-references and indexes automatically |
+| `sync-glossary` | Glossary maintenance | Keep glossary current with project vocabulary | Scans structured doc fields for unregistered domain terms. Use after any bulk-seed step or when validate flags glossary gaps |
 | `validate --scope all` | Full validation | Everything at once | Runs all scope checks: design, systems, foundation, roadmap, phases, slices, specs, tasks, refs, engine + cross-cutting integrity (decision closure, workflow, staleness). Writes findings to cross-cutting-findings.md |
 | `fix-cross-cutting` | Resolve cross-cutting findings | Fix decision closure, workflow, staleness | Reads cross-cutting-findings.md. Auto-fixes safe items, dispatches missing pipeline steps, escalates judgment calls |
 | `playtest-log` | Capture feedback | Record playtester observations | Detects duplicates, promotes patterns at 3+ reports |

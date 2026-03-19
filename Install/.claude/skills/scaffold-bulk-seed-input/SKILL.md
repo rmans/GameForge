@@ -72,7 +72,9 @@ Summarize what was seeded:
 - Number of actions registered in action-map
 - Number of sections filled in each doc
 - Number of sections left as TODO
-- Remind the user of next steps: review each doc with `/scaffold-review-input`, then fill in remaining TODOs with `/scaffold-new-input`
+- Remind the user of next steps:
+  - Run `/scaffold-sync-glossary --scope input` to register new domain terms (action names, input concepts) in the glossary
+  - Review each doc, then fill in remaining TODOs
 
 ## Rules
 

@@ -111,6 +111,25 @@ Example: Idle → Triggered → Recovering → Resolved -->
 
 - ...
 
+## Observability & Debug Surface
+
+<!-- What must be inspectable at runtime to diagnose problems with this system? What events should be logged? What debug overlays or UI indicators would help? Frame as design-level visibility requirements — what needs to be observable — not implementation details.
+
+| Observable | Why | Visibility |
+|-----------|-----|-----------|
+| ... | ... | Debug overlay / Log / UI indicator / Inspector | -->
+
+## Performance Characteristics
+
+<!-- High-level constraints that inform implementation. Not implementation prescriptions — design-level awareness of scaling behavior.
+
+| Characteristic | Value |
+|---------------|-------|
+| Update frequency | Every tick / Periodic / Event-driven |
+| Scope | Per entity / Per region / Global |
+| Scaling risks | [Any obvious O(n²) comparisons, large aggregations, or bottlenecks] |
+| Expected entity count | [Rough order of magnitude this system operates over] | -->
+
 ## Open Questions
 
 <!-- Unresolved design questions. Remove entries as they are resolved. -->

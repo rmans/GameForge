@@ -69,20 +69,23 @@ Systems are the simulation layer — they own player-visible state and behavior.
    - Terms that appear multiple times with a consistent meaning
    - Terms that could be confused with synonyms (these need a NOT column entry)
    - Terms from Design Invariants (invariant ShortNames should be glossary-referenceable)
-3. **Present proposed terms as a batch confirmation:**
+3. **Present proposed terms as a batch confirmation.** Include the Authority and Criticality columns introduced in the glossary format:
 
    ```
    ## Proposed Glossary Terms
 
-   | # | Term | Proposed Definition | NOT (suggested) | Source Section |
-   |---|------|--------------------|-----------------|-—-------------|
-   | 1 | Colonist | An autonomous agent in the colony | Settler, Worker, Unit | Core Fantasy |
-   | 2 | Blueprint | A placed but unbuilt structure | Plan, Ghost | Core Loop |
+   | # | Term | Definition | NOT (suggested) | Authority | Criticality | Source Section |
+   |---|------|-----------|-----------------|-----------|-------------|---------------|
+   | 1 | Colonist | An autonomous agent in the colony | Settler, Worker, Unit | design-doc | Core | Core Fantasy |
+   | 2 | Blueprint | A placed but unbuilt structure | Plan, Ghost | design-doc | Shared | Core Loop |
 
    **Options:** Confirm all / Edit specific rows by # / Reject specific rows by # / Add missing terms
    ```
 
-4. **Write confirmed terms** into the glossary table, preserving alphabetical order.
+   - **Authority** at this stage is always `design-doc` (the only source). Later steps may shift authority to system docs or reference docs via `/scaffold-sync-glossary`.
+   - **Criticality**: Core for terms referenced by Design Invariants or cross-system mechanics; Shared for terms used across multiple system domains; Local for single-domain terms.
+
+4. **Write confirmed terms** into the glossary table with all five columns (Term, Definition, NOT, Authority, Criticality), preserving alphabetical order.
 
 ## Phase 2 — Propose System Domains
 

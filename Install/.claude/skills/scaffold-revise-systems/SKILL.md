@@ -188,11 +188,19 @@ c) Defer — log in known-issues.md for future resolution
 **Likely follow-up:** [iterate-systems Topics N,N / revise-design / revise-foundation / none]
 ```
 
-**For ownership shifts:** present both affected systems side by side so the user can see the full ownership transfer. Likely follow-up: iterate-systems Topics 1,4 on both systems.
+**For emergent subsystem detection, ownership shift, or identity drift:** include option (d):
+
+```
+d) Create a new system to absorb the drifted responsibility — `/scaffold-new-system [name] --split-from SYS-### --trigger [signal]`
+```
+
+This routes to the single-system creation skill with full split context. The new system goes through its own overlap/authority audit and interactive definition, then the parent system's Non-Responsibilities and dependency tables are updated automatically.
+
+**For ownership shifts:** present both affected systems side by side so the user can see the full ownership transfer. Likely follow-up: iterate-systems Topics 1,4 on both systems, or option (d) if the shift implies a new system.
 
 **For design constraint changes:** note that this may cascade to `revise-design` if the constraint originates from a Design Invariant. Likely follow-up: revise-design.
 
-**For identity drift:** likely follow-up: iterate-systems Topic 1 (ownership) + Topic 5 (fitness) to evaluate whether the system needs a purpose rewrite or a split.
+**For identity drift:** likely follow-up: iterate-systems Topic 1 (ownership) + Topic 5 (fitness) to evaluate whether the system needs a purpose rewrite or a split via option (d).
 
 ## Step 5 — Cross-System Consistency Check
 

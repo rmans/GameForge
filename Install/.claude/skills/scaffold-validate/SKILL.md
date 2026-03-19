@@ -932,6 +932,29 @@ These checks span multiple document layers. They detect structural problems that
 | `pipeline-specs-to-tasks` | Every Approved/Complete spec has at least one task that implements it. Specs with no tasks have no execution path. | FAIL per unimplemented spec |
 | `pipeline-tasks-to-engine` | Every task whose implementation touches engine-level concerns (references engine patterns, node types, signal wiring, or tick behavior) has a corresponding engine doc that covers the relevant topic. Tasks assuming engine conventions not documented anywhere are fragile. | WARN [ADVISORY] per uncovered task |
 
+**Glossary Coverage and Enforcement:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `glossary-coverage` | Domain terms defined in structured doc fields (entity names in entity-components, resource names in resource-definitions, state names in state-transitions, signal names in signal-registry, enum values in enums-and-statuses, system names in system designs, color token names in color-system, action names in action-map, UI component names in ui-kit) are registered in `design/glossary.md`. Terms in structured fields are authoritative domain vocabulary — if they're not in the glossary, terminology drift can go undetected. | WARN per unregistered term |
+| `glossary-spec-enforcement` | Approved/Complete specs do not use domain terms (capitalized multi-word project terms appearing in system designs or reference docs) that are absent from the glossary. Specs are behavioral contracts — they must use canonical vocabulary. | Draft: INFO, Approved/Complete: WARN |
+| `glossary-task-enforcement` | Approved/Complete tasks do not use domain terms absent from the glossary. Tasks are implementation contracts — ambiguous terminology here causes code-level drift. | Draft: INFO, Approved/Complete: WARN |
+| `glossary-authority-completeness` | Every canonical term in the glossary has a non-empty Authority column. Terms without an authority source have no single owner for their definition — definitions will drift. | WARN per term missing Authority |
+| `glossary-not-term-usage` | Expanded from existing `glossary-not-terms` check: NOT-column terms used in Approved/Complete specs or tasks are FAIL (not just WARN). The glossary is law in the execution layer. | Approved/Complete specs/tasks: FAIL |
+
+**How to run:**
+- For `glossary-coverage`: Collect term names from structured table fields in each source doc (same extraction logic as `/scaffold-sync-glossary` Step 2). Compare against the glossary's canonical terms and NOT-column entries. Report terms that appear in 2+ docs but aren't in the glossary. Single-doc-only terms are INFO, not WARN — they may be doc-internal. Requires glossary to exist (SKIP otherwise). Requires at least one source doc to exist (SKIP otherwise).
+- For `glossary-spec-enforcement` and `glossary-task-enforcement`: Build a set of "domain terms" from system designs (owned state names, system names) and reference docs (entity names, resource names, signal names). For each Approved/Complete spec/task, grep for these terms. Any match that isn't in the glossary's canonical or NOT columns is flagged. Exclude terms in quotes, code blocks, and file paths.
+- For `glossary-authority-completeness`: Read the glossary Terms table. Check each row for an empty or missing Authority column.
+- For `glossary-not-term-usage`: Read glossary NOT column entries. Grep Approved/Complete specs and tasks for each NOT term (case-insensitive, word-boundary). FAIL per match.
+
+**Suggested fixes:**
+- `glossary-coverage`: "N domain terms found across scaffold docs that aren't in the glossary. Run `/scaffold-sync-glossary` to review and register them."
+- `glossary-spec-enforcement`: "SPEC-### uses unregistered term '[term]'. Run `/scaffold-sync-glossary` to register it, or replace with the canonical term if one exists."
+- `glossary-task-enforcement`: "TASK-### uses unregistered term '[term]'. Run `/scaffold-sync-glossary` to register it, or replace with the canonical term."
+- `glossary-authority-completeness`: "Glossary term '[term]' has no Authority source. Run `/scaffold-sync-glossary` or `/scaffold-update-doc glossary` to assign one."
+- `glossary-not-term-usage`: "SPEC/TASK-### uses NOT-column term '[term]' — replace with canonical term '[canonical]' from glossary."
+
 **Semantic Overlap (advisory):**
 
 | Check | What It Validates | Severity |
