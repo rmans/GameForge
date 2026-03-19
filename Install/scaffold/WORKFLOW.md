@@ -387,7 +387,7 @@ Mechanical cleanup pass for all 6 Step 5 docs. Auto-fixes template text, termino
 /scaffold-iterate-style
 ```
 
-Adversarial per-topic review of all 6 Step 5 docs using an external LLM. Reviews across 5 topics: visual coherence (style-guide + color-system), component & layout model (ui-kit), interaction & feedback model (interaction-model + feedback-system), audio integration (audio-direction + feedback-system), and cross-doc consistency & player experience readiness (all 6 docs). Supports `--target` for single-doc focus and `--topics` for scoped review. A passing review sets the document's status to `Approved`.
+Adversarial review of all 6 Step 5 docs using an external LLM. Each doc gets its own specialized review lens targeting its unique failure modes: (1) visual identity & readability, (2) color semantics & accessibility, (3) UI component model, (4) input clarity & command structure, (5) response coverage & priority logic, (6) audio tone & boundary discipline. Then Topic 7 checks the cross-doc seams — whether the 6 docs work together as one system. Topic 7 runs first when budget is tight. Supports `--target` for single-doc focus and `--topics` for scoped review. A passing review sets the document's status to `Approved`.
 
 > **Art & Audio:** With style docs in place, you can now generate visual and audio assets at any point. See the Quick Reference table for all art and audio skills.
 

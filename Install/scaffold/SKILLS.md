@@ -31,7 +31,7 @@
 | **Fix** | | |
 | `/scaffold-fix-design` | `[--iterate N]` | Mechanical cleanup for design doc |
 | `/scaffold-fix-style` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for all 6 Step 5 visual/UX docs |
-| `/scaffold-iterate-style` | `[--target doc.md] [--topics "1,2,5"] [--focus "..."]` | Adversarial per-topic review of Step 5 visual/UX docs |
+| `/scaffold-iterate-style` | `[--target doc.md] [--topics "1,4,7"] [--focus "..."]` | Adversarial per-doc review of Step 5 visual/UX docs (7 topics) |
 | `/scaffold-fix-systems` | `[--target SYS-###] [--iterate N]` | Mechanical cleanup for system designs |
 | `/scaffold-fix-references` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for Step 3 reference/architecture docs |
 | `/scaffold-fix-engine` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for engine docs |
@@ -313,7 +313,7 @@ Adversarial per-topic review of all 6 Step 5 visual/UX docs.
 
 **Description**
 
-Reviews style-guide, color-system, ui-kit, interaction-model, feedback-system, and audio-direction across 5 topics using an external LLM: (1) visual coherence, (2) component & layout model, (3) interaction & feedback model, (4) audio integration, (5) cross-doc consistency & player experience readiness. Consumes design signals from fix-style. Enforces boundary discipline (interaction owns input, feedback owns response, audio owns philosophy not timing, ui-kit stays at component level). Review consistency lock prevents re-litigation of resolved issues. Scope collapse guard prevents leakage into system design, engine implementation, or lateral Step 5 doc territory. Supports `--target` for single-doc focus (cross-doc topic 5 always included). Reports per-topic and per-doc issue counts, cross-doc consistency findings, blocker classification, and a 1-5 strength rating.
+Each of the 6 Step 5 docs gets its own specialized review lens targeting its unique failure modes, then Topic 7 checks the seams between them. Topics: (1) visual identity & readability (style-guide), (2) color semantics & accessibility (color-system), (3) UI component model (ui-kit), (4) input clarity & command structure (interaction-model), (5) response coverage & priority logic (feedback-system), (6) audio tone & boundary discipline (audio-direction), (7) cross-doc integration (all). Consumes design signals from fix-style. Topic 7 runs first when budget is tight. Review consistency lock, scope collapse guard (upward/downward/lateral leakage), per-doc specialized question sets. Reports per-topic and per-doc issues, blocker classification, and a 1-5 strength rating.
 
 **Arguments**
 
@@ -329,7 +329,7 @@ Reviews style-guide, color-system, ui-kit, interaction-model, feedback-system, a
 
     /scaffold-iterate-style
     /scaffold-iterate-style --target feedback-system.md
-    /scaffold-iterate-style --topics "3,5" --focus "priority hierarchy"
+    /scaffold-iterate-style --topics "5,7" --focus "priority hierarchy"
     /scaffold-iterate-style --signals "tone mismatch, component gap"
 
 **See Also**
