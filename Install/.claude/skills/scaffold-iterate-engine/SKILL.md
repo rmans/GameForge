@@ -410,92 +410,286 @@ Include these detection patterns in the reviewer's system prompt. They represent
 
 14. **Over-abstraction bias** — engine doc introduces layers, wrappers, or abstractions that increase indirection, hide data flow, and make debugging harder. Common in "clean architecture" overuse. A colony sim needs transparent data flow for debugging emergent behavior — every layer of indirection makes "why did this colonist starve?" harder to answer. If an abstraction doesn't enable a concrete gameplay requirement, it's overhead.
 
-## Doc-Specific Review Criteria
+## Per-Doc Mandatory Interrogation
 
-### coding-best-practices
-- File/class/method naming conventions are engine-appropriate and consistent
-- Signal wiring pattern is clear, singular, and matches scene-architecture
-- Handle/reference patterns match architecture.md identity model
-- Error handling patterns are concrete and enforceable
-- GDExtension C++ / GDScript boundary is clear (which language for what)
-
-### ui-best-practices
-- UI framework usage matches engine's actual capabilities
-- Resolution scaling approach works across target resolutions
-- Panel architecture supports the information density colony sims require
-- Dynamic content (lists, inventories, status updates) handled correctly
-- Localization interaction documented (tr() usage, text overflow, layout shift)
-
-### input-system
-- Engine input framework used correctly (InputMap, action names, event propagation)
-- Rebinding architecture is engine-native
-- Camera control, selection, placement, context menus all covered
-- Mouse/keyboard/gamepad abstraction level appropriate
-
-### scene-architecture
-- Scene tree layout matches architecture.md's Scene Tree Layout
-- Lifecycle (_ready, _process, _physics_process) correctly assigned
-- Autoload vs instanced node decisions are sound
-- Signal wiring location matches project conventions
-
-### performance-budget
-- Frame budget math adds up (total system time + rendering + GC + input < 1/target_fps)
-- Per-system budgets are realistic for the engine and platform
-- Profiling tools are correct for the engine version
-- Growth accommodation exists (what happens when systems are added)
+For every engine doc in scope, the reviewer must run the doc's specialized failure-mode check **in addition to** the topic questions. This is not optional flavor — it is mandatory. Each doc has its own attack surface.
 
 ### simulation-runtime
-- Tick orchestration matches architecture.md exactly
-- Fixed/variable step distinction is clear and correct
-- Queued work draining pattern handles interruption
-- Cleanup phase handles stale references, expired reservations
+
+**Unique responsibility:** How the simulation tick actually executes — ordering, timing, queuing, draining, cleanup.
+
+**Attack surface:**
+- **Tick semantics** — is the tick model precisely defined? Fixed-step vs variable-step, delta accumulation, tick rate — all unambiguous?
+- **Order guarantees** — could a developer predict exactly when each system runs, what state it sees, and what it can assume about prior systems' output?
+- **Queue draining** — when queued work (deferred signals, intent responses, state transitions) drains, what order? What happens to work queued during draining?
+- **Interruption cascades** — when one system's tick causes a state change that invalidates another system's in-progress work, how does the tick handle it? Is this explicit or assumed?
+- **Determinism** — given the same initial state, does the tick model produce the same result every time? If not, where does non-determinism enter?
+- **Stale work cleanup** — at end-of-tick, what happens to expired reservations, invalidated intents, destroyed entity references?
+- **Same-tick vs next-tick** — for each cross-system interaction, is it crystal clear whether the consumer sees this tick's value or last tick's?
+
+**Questions the reviewer must answer:**
+1. Could a developer add a new system to the tick without reading any other engine doc?
+2. If two systems both write and read shared state, does the tick model prevent stale reads?
+3. What happens to in-flight work when the entity it targets is destroyed mid-tick?
+
+---
+
+### scene-architecture
+
+**Unique responsibility:** How the engine's scene tree is structured, nodes are owned, and lifecycle events fire.
+
+**Attack surface:**
+- **Boot sequencing** — is cold-boot init order explicit? Are there startup races where one node's `_ready()` depends on another that hasn't initialized?
+- **Cold boot vs load boot** — are they the same path or different? If different, both documented? If same, is that actually safe for load-from-save?
+- **Node ownership/lifecycle** — who creates, who reparents, who frees each node type? Are there nodes with ambiguous ownership?
+- **Signal wiring location** — where are signals connected? In `_ready()`? Via autoload? Via scene tree? Is this consistent with coding-best-practices?
+- **Race-condition risk** — can signals fire before all nodes exist? Can a node receive a callback before its dependencies are ready?
+- **Autoload vs instanced boundary** — which things are autoloads and why? Is the autoload list minimal? Could any autoload be an instanced node instead?
+
+**Questions the reviewer must answer:**
+1. If you added a new system node, where does it go in the tree, and what lifecycle guarantees does it get?
+2. Can a signal fire before its consumer exists during boot?
+3. Does load-from-save use the same init path or a different one?
+
+---
+
+### coding-best-practices
+
+**Unique responsibility:** Naming conventions, code patterns, error handling, and cross-language boundaries.
+
+**Attack surface:**
+- **Naming conventions** — are naming rules concrete enough that two developers would name the same thing identically?
+- **Handle/reference safety** — do the handle patterns match architecture.md's identity model? Is validation enforced or suggested?
+- **Cross-language boundary** — if using multiple languages (C++/GDScript), is the boundary explicit? What goes where and why?
+- **Signal conventions** — naming, payload rules, wiring patterns — all consistent with signal-registry.md conventions?
+- **Error handling enforceability** — could a code reviewer accept or reject a PR using these rules? Or are they aspirational?
+- **Anti-pattern prevention** — are the forbidden patterns from architecture.md translated into concrete "don't do this in code" rules?
+
+**Questions the reviewer must answer:**
+1. Would two developers writing the same system produce code that looks structurally similar?
+2. Are the error handling rules testable in code review?
+3. Does the cross-language boundary actually match what the project builds?
+
+---
 
 ### save-load-architecture
-- Serialization boundary matches authority.md Persistence Owner
-- Entity restoration handles handle rebinding per identity model
-- In-flight state (tasks, reservations, queued intents) handled
-- Version migration strategy exists
+
+**Unique responsibility:** How game state is serialized, restored, and migrated across versions.
+
+**Attack surface:**
+- **Persistence ownership fidelity** — does the serialization boundary match authority.md's Persistence Owner column exactly? No "convenient" reassignments?
+- **Handle rebinding correctness** — after load, are all entity references revalidated? What happens to references pointing at destroyed or reused slots?
+- **In-flight simulation restoration** — are tasks, reservations, queued intents, and pending state transitions preserved or cleanly abandoned on load? Which is it, and is it explicit?
+- **Migration/versioning** — what happens when the save format changes? Is there a migration path, or do old saves break?
+- **Partial world state safety** — what if a save is corrupted or incomplete? Does the system detect and handle it, or silently load garbage?
+
+**Questions the reviewer must answer:**
+1. After save/load, does the simulation reach the same state it would have without the save?
+2. What happens to a colonist mid-task when the game is saved and reloaded?
+3. Can a save from version N be loaded in version N+1?
+
+---
 
 ### ai-task-execution
-- Task lifecycle matches state-transitions.md task states
-- Reservation lifecycle matches authority.md ownership
-- Interruption is a primary path, not error path
-- Stale-handle cleanup on every relevant code path
 
-### data-and-content-pipeline
-- Content vs runtime boundary clear
-- ID mapping matches architecture.md Content Identity Convention
-- Validation catches errors before runtime
+**Unique responsibility:** How AI actors discover, claim, execute, and recover from tasks.
 
-### localization
-- Key naming convention is consistent and scalable
-- tr() usage rules are complete and enforceable
-- CSV pipeline handles the project's needs
+**Attack surface:**
+- **Interruption-first logic** — is interruption the primary design path, not an error path? Tasks are interrupted more than they complete in colony sims.
+- **Reservation lifecycle** — who creates reservations, who validates them, who cleans them up? What invalidates a reservation (target destroyed, actor reassigned, timeout)?
+- **Stale target cleanup** — when the target of an in-progress task is destroyed, consumed, or moved, what happens to the actor? Every code path must handle this.
+- **Legal transition fidelity** — do task state transitions match state-transitions.md exactly? No extra states, no skipped states?
+- **Rollback/recovery behavior** — when a task fails mid-execution, what state does the actor return to? Is it always legal per state-transitions.md?
+- **Cross-system write discipline** — does task execution ever write to state owned by other systems (mood, needs, position)? That's an authority violation.
 
-### post-processing
-- Effects match style-guide rendering approach (if resolved)
-- Performance cost within budget
-- Readability preserved (colony sims need clear visual information)
+**Questions the reviewer must answer:**
+1. Trace a task from discovery to interruption to recovery — is every step handled?
+2. What happens if the reserved resource is consumed by another actor before this one arrives?
+3. Can the task system put an actor in a state that state-transitions.md says is illegal?
 
-### implementation-patterns
-- Structure-only — no pre-filled patterns (patterns grow from implementation)
-- Template is usable for recording real patterns
-- No patterns that contradict higher-ranked engine docs
+---
 
-### asset-import-pipeline
-- Import presets match engine's actual import system
-- Source vs runtime boundary is clear
-- Data table import feeds into content pipeline correctly
+### ui-best-practices
+
+**Unique responsibility:** How the engine's UI framework is used to build panels, handle dynamic content, and scale across resolutions.
+
+**Attack surface:**
+- **Panel architecture** — how are panels created, managed, stacked, and destroyed? Does this align with ui-kit.md's component model?
+- **Dynamic list handling** — colony sims have long, changing lists (colonists, tasks, inventory). Does the engine approach handle efficient updates, scrolling, and selection?
+- **High-density info support** — can the UI approach display the information density the game requires? 20+ stats, multiple overlapping panels, live-updating values?
+- **Scaling/localization resilience** — do UI layouts survive resolution changes, text expansion from translation, and different font metrics?
+- **Engine-native UI usage** — does the doc use the engine's actual UI system correctly, or fight it with custom workarounds?
+- **Update strategy for live sim state** — how does the UI reflect constantly-changing simulation data without polling every frame or missing updates?
+
+**Questions the reviewer must answer:**
+1. Can the UI approach handle the densest panel in the game without performance or layout issues?
+2. What happens to a panel when the entity it displays is destroyed?
+3. Does translated text break any layouts?
+
+---
+
+### input-system
+
+**Unique responsibility:** How player input is captured, mapped to actions, and routed to the correct handler.
+
+**Attack surface:**
+- **Action map structure** — does the action map use the engine's input framework correctly? Are action names consistent with interaction-model.md?
+- **Mouse/keyboard/gamepad parity** — can the same actions be performed on all supported devices? Are there device-specific gaps?
+- **Placement/selection/context-menu coverage** — does the input system handle all interaction patterns from interaction-model.md?
+- **Rebinding feasibility** — is the rebinding architecture engine-native and actually implementable?
+- **Event propagation correctness** — does input correctly stop propagating when consumed by UI? Can camera controls fire while a modal is open?
+- **Camera/input conflict handling** — when camera movement, entity selection, and UI interaction overlap, who wins?
+
+**Questions the reviewer must answer:**
+1. Can a player complete every interaction pattern from interaction-model.md using only keyboard+mouse? Only gamepad?
+2. What happens when the player clicks a UI element that overlaps a selectable game entity?
+3. Is rebinding persistent across sessions?
+
+---
+
+### performance-budget
+
+**Unique responsibility:** Frame budget allocation, profiling strategy, and growth margin.
+
+**Attack surface:**
+- **Budget math sanity** — does total system time + rendering + GC/allocation + input + audio < 1/target_fps? Actually add it up.
+- **Profiling realism** — are profiling tools correct for the engine version? Are the profiling instructions actionable?
+- **Growth margin** — what happens when 5 more systems are added? Does the budget accommodate growth or is it already maxed?
+- **Worst-case colony load** — what's the target colony size? Does the budget account for worst-case (max colonists, max structures, max active tasks)?
+- **GC/allocation risks** — does the engine approach create per-frame allocations in hot paths? Are GC pauses accounted for?
+- **Frame-time tradeoff discipline** — when the budget is exceeded, what gets cut first? Is there a priority ordering?
+
+**Questions the reviewer must answer:**
+1. Does the budget math actually add up for the target frame rate?
+2. What's the first thing that breaks when the colony reaches maximum size?
+3. Is there headroom for future systems, or is the budget already tight?
+
+---
 
 ### debugging-and-observability
-- Overlays, event tracing, and state inspection support 15+ system debugging
-- [DIAG] warning pattern documented and consistent with coding-best-practices
-- Cross-system causal tracing is possible
+
+**Unique responsibility:** How developers trace causality, inspect state, and diagnose emergent behavior across 15+ systems.
+
+**Attack surface:**
+- **Causal tracing** — can a developer answer "why did this colonist starve?" by tracing events across systems? Or is causality opaque?
+- **State inspection** — can live simulation state be inspected without pausing? Are there in-game overlays or debug panels?
+- **Sim replay/log usefulness** — is event logging structured enough to reconstruct what happened? Or is it noise?
+- **Multi-system debugging** — when a bug involves 3+ systems, can the developer correlate events across system boundaries?
+- **Diagnostic noise vs signal** — are [DIAG] warnings specific enough to be actionable? Or do they fire so often they're ignored?
+- **"Why did this colonist do this?" traceability** — the single most important debugging question in a colony sim. Can the tools answer it?
+
+**Questions the reviewer must answer:**
+1. A colonist is standing idle while hungry with food available. How do you diagnose why?
+2. Can you trace a single gameplay event through all systems it touches?
+3. Are diagnostic warnings actionable or just noise?
+
+---
+
+### localization
+
+**Unique responsibility:** How translatable strings are managed, formatted, and maintained.
+
+**Attack surface:**
+- **Key namespace scalability** — as the game grows to thousands of strings, does the key naming convention remain navigable?
+- **Dynamic string rules** — how are strings with variables handled? Pluralization? Gender? Number formatting? Are these rules engine-native?
+- **Layout breakage handling** — German text is 30% longer than English. Does the UI survive? Are overflow rules defined?
+- **Pluralization/formatting support** — does the localization approach handle plural forms, date formats, and number formats for target languages?
+- **Tooltip/status text discipline** — are generated strings (tooltips with stats, status messages with entity names) translatable? Or are they concatenated in code?
+
+**Questions the reviewer must answer:**
+1. Can a translator work from the CSV/files alone without reading code?
+2. What happens to a tooltip when the translated text is twice as long?
+3. Are dynamically generated strings (e.g., "Colonist is Hungry (3/10)") translatable?
+
+---
+
+### asset-import-pipeline
+
+**Unique responsibility:** How art, audio, and data assets flow from source files into the engine.
+
+**Attack surface:**
+- **Source/runtime boundary** — is it clear which files are source (edited by humans) and which are runtime (generated by the engine)?
+- **Preset correctness** — do import presets match the engine's actual import system? Are they tested?
+- **Repeatability** — does reimporting produce identical results? Are there import settings that drift?
+- **Content pipeline coupling** — does asset import feed correctly into data-and-content-pipeline? Are IDs stable?
+- **Import drift prevention** — can an artist accidentally change import settings and break the game?
+
+**Questions the reviewer must answer:**
+1. Can an artist add a new sprite and have it appear in-game without developer intervention?
+2. If an import preset changes, what breaks?
+3. Are data table imports validated before runtime?
+
+---
 
 ### build-and-test-workflow
-- Build configurations correct for engine
-- Test framework matches project choices (GUT for Godot)
-- CI/headless testing addressed
+
+**Unique responsibility:** How the project builds, tests, and validates correctness.
+
+**Attack surface:**
+- **Actual engine build correctness** — are build configurations correct for the engine and platform? Debug/release/export builds all work?
+- **Headless test realism** — can tests run headless for CI? Do headless runs produce reliable results?
+- **CI practicality** — is the CI configuration complete enough to actually set up? Are engine downloads, dependencies, and environment variables documented?
+- **Environment setup reproducibility** — can a new developer build and test the project from these docs alone?
+- **Smoke-test coverage** — does the test suite cover enough to catch regressions? What's not tested?
+
+**Questions the reviewer must answer:**
+1. Can a new developer build the project from scratch using only this doc?
+2. Do headless tests reliably catch the same bugs as interactive testing?
+3. What's the most important thing that's NOT tested?
+
+---
+
+### implementation-patterns
+
+**Unique responsibility:** Recording recurring code patterns that emerge during implementation.
+
+**Attack surface:**
+- **Template usefulness** — is the template structure usable for recording real patterns as they're discovered?
+- **Duplication control** — are recorded patterns cross-referenced with coding-best-practices to avoid duplication?
+- **Pattern admission standards** — what qualifies a pattern for inclusion? Is there a threshold (used 3+ times)?
+- **Relationship to coding-best-practices** — is the boundary clear? (coding-best-practices = conventions; implementation-patterns = recurring solutions)
+- **Anti-pattern prevention** — are anti-patterns recorded alongside patterns?
+
+**Questions the reviewer must answer:**
+1. Is this doc actually being used, or is it empty?
+2. Do any recorded patterns contradict coding-best-practices?
+3. Is the boundary between conventions (coding) and patterns (here) clear?
+
+---
+
+### post-processing
+
+**Unique responsibility:** Visual effects, shaders, and rendering post-processing.
+
+**Attack surface:**
+- **Readability preservation** — colony sims need clear visual information. Do post-processing effects preserve entity readability, status visibility, and UI clarity?
+- **Performance cost** — are post-processing effects within the frame budget? Are costs measured?
+- **Style-guide fidelity** — do effects match the style-guide's rendering approach and tone registers?
+- **Crisis-state usability** — during crisis/alert states, do visual effects help or hinder the player's ability to see what's happening?
+- **Information clarity under effects** — can the player still read health bars, status icons, and text overlays with all effects active?
+
+**Questions the reviewer must answer:**
+1. Can the player read a health bar with all post-processing effects active?
+2. Do visual effects for crisis states help or hurt decision-making?
+3. What's the total frame-time cost of all post-processing?
+
+---
+
+### data-and-content-pipeline
+
+**Unique responsibility:** How game content (items, structures, recipes, traits) flows from authored files to runtime systems.
+
+**Attack surface:**
+- **Content/runtime separation** — is it clear what's authored content vs generated runtime data? Can content be modified without touching code?
+- **ID stability** — are content IDs stable across saves, loads, and version updates? Can a content ID be reused or change meaning?
+- **Validation depth** — are content definitions validated before runtime? Are missing references, invalid types, and broken chains caught early?
+- **Tooling scalability** — as content grows to hundreds of items/structures/recipes, does the pipeline remain manageable?
+- **Error surfacing before runtime** — does the pipeline fail loudly at import/load time, or silently at runtime?
+
+**Questions the reviewer must answer:**
+1. Can a content designer add a new item type without writing code?
+2. What happens if a content definition references an ID that doesn't exist?
+3. Are content IDs safe across save/load boundaries?
 
 ## Arguments
 
@@ -569,7 +763,7 @@ Read and pass as `--context-files` to the Python script:
 | `scaffold/doc-authority.md` | Document authority ranking, same-rank conflict resolution rules, deprecation protocol |
 | `design/style-guide.md` | Rendering approach (for UI, post-processing docs) |
 | `scaffold/engine/_index.md` | Engine doc registration |
-| `decisions/known-issues.md` | Known gaps and constraints |
+| `decisions/known-issues/_index.md` | Known gaps and constraints |
 | ADRs with status `Accepted` | Decision compliance |
 | Alignment signals from fix-engine (if `--signals` provided) | Focus areas |
 
@@ -577,7 +771,28 @@ Only include context files that exist — skip missing ones silently.
 
 ## Execution
 
-Follow the same topic loop, inner loop (exchanges), consensus, and apply-changes pattern as `/scaffold-iterate-systems`.
+### Loop Structure
+
+```
+Outer Loop (iterations — fresh review of updated docs)
+├── Per Topic (6 topic questions):
+│   └── Inner Loop (exchanges — back-and-forth conversation)
+│       ├── Reviewer raises issues (structured JSON via doc-review.py)
+│       ├── Claude evaluates each: AGREE / PUSHBACK / PARTIAL
+│       ├── Reviewer counter-responds
+│       └── ... until consensus or max-exchanges
+│   └── Consensus: reviewer summarizes final position
+│   └── Apply changes: accepted issues applied to engine docs
+│
+├── Per Doc in scope (mandatory interrogation):
+│   └── Reviewer answers doc-specific failure-mode questions
+│   └── Claude evaluates findings against existing topic results
+│   └── Deduplicate: merge with topic findings by root cause
+│
+└── Cross-topic consistency check → resolve contradictions
+```
+
+Each topic gets its own review → respond → consensus cycle via the Python `doc-review.py` script. After topics complete, the per-doc mandatory interrogation runs for each doc in scope. Findings are deduplicated against topic results. After all topics and per-doc checks in one outer iteration, re-read updated docs and start the next outer iteration if issues remain.
 
 **Stop conditions** (any one stops iteration):
 - **Clean** — a complete topic pass produces no new issues.
@@ -658,7 +873,7 @@ These tests apply to both reviewer-proposed changes AND existing engine doc cont
 ### Review Log
 
 Create review log in `scaffold/decisions/review/`:
-- Name: `ITERATE-engine-[target-or-all]-<YYYY-MM-DD>.md`
+- Name: `ITERATE-engine-[target-or-all]-<YYYY-MM-DD-HHMMSS>.md`
 - Use the template at `scaffold/templates/review-template.md`.
 - Update `scaffold/decisions/review/_index.md` with a new row.
 
@@ -711,7 +926,7 @@ Create review log in `scaffold/decisions/review/`:
 **Iterations:** N completed / M max [early stop: yes/no]
 **Changes applied:** N
 **Cross-topic contradictions:** N found, N resolved
-**Review log:** scaffold/decisions/review/ITERATE-engine-[target]-YYYY-MM-DD.md
+**Review log:** scaffold/decisions/review/ITERATE-engine-[target]-YYYY-MM-DD-HHMMSS.md
 
 ### Recommended Next Action
 One of:
