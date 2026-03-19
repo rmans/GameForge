@@ -21,11 +21,25 @@ The real question this review answers: **do these 6 docs, taken together, give a
 |---|-------|-----|---------------|
 | 1 | Visual Identity & Readability | style-guide | Can this world be seen clearly and consistently? |
 | 2 | Color Semantics & Accessibility | color-system | Does color carry stable meaning without breaking accessibility? |
-| 3 | UI Component Model | ui-kit | Are the UI building blocks sufficient and properly bounded? |
+| 3 | UI Component Model & Composition Discipline | ui-kit | Are the UI building blocks sufficient and properly bounded? |
 | 4 | Input Clarity & Command Structure | interaction-model | Can the player act clearly and consistently? |
 | 5 | Response Coverage & Priority Logic | feedback-system | Does the game answer every action and event correctly? |
 | 6 | Audio Tone & Boundary Discipline | audio-direction | Does sound reinforce tone and information without overstepping? |
 | 7 | Cross-Doc Integration | All 6 docs | Do these six docs work as one usable system? |
+
+### Per-Doc Failure Probe (mandatory after each topic)
+
+After each topic's review cycle completes, the reviewer must answer these 5 questions for the doc(s) that topic covers. This shifts the review from "is this good?" to "where does this fail in reality?"
+
+| # | Question |
+|---|----------|
+| 1 | **What breaks if this doc is wrong?** Be concrete: player confusion, unreadable states, inconsistent UI, silent audio conflicts, impossible interactions. |
+| 2 | **What will developers guess here?** List 1–3 implicit decisions not explicitly defined that a developer would have to infer. |
+| 3 | **Where will two developers diverge?** Same spec, different implementation — identify the exact ambiguity. |
+| 4 | **What is most likely to drift over time?** Where future changes will silently break consistency with other Step 5 docs. |
+| 5 | **What is the hardest edge case this doc must define — but currently doesn't?** The scenario that exposes the biggest gap. |
+
+Failure probe findings are deduplicated against topic findings by root cause. New issues discovered via the probe are added to the topic's issue list and adjudicated normally.
 
 **Budget priority:** When `--topics` is omitted and `--iterations` is low (≤ 3), run Topic 7 first instead of last. Topic 7 is the highest-value topic — it catches seam failures that per-doc reviews miss. With tight budgets, per-doc topics can be truncated but Topic 7 must run.
 
@@ -79,7 +93,7 @@ This doc gets attacked on whether color carries stable, learnable meaning — no
 
 ---
 
-### Topic 3 — UI Component Model
+### Topic 3 — UI Component Model & Composition Discipline
 
 **Doc:** ui-kit.md
 **Attacks:** component completeness, composition discipline, boundary control
@@ -217,6 +231,22 @@ This is the integration test. It evaluates whether the 6 docs work together as o
 - **Gap detection** — what's the biggest thing missing? Not "this could be improved" but "a developer would get stuck here."
 - **Ambiguity detection** — where could two developers legitimately build incompatible presentations?
 - **Multi-developer divergence test** — if two UI developers independently built the same panel, where would they diverge?
+
+**End-to-end scenario test (mandatory):**
+
+The reviewer must walk at least one real interaction through all 6 docs and verify every step is covered. Pick a representative scenario — ideally one that involves error handling, not just happy path.
+
+Example: *"Player selects colonist → issues build command → invalid location → error feedback → player corrects → success feedback"*
+
+Trace through:
+1. **interaction-model** — is the input sequence (select, command, error, retry) defined?
+2. **ui-kit** — are the components involved (selection indicator, build ghost, error highlight, success flash) defined with correct states?
+3. **color-system** — are the tokens used (selection color, error color, success color) defined and semantically correct?
+4. **feedback-system** — are the responses (invalid placement error, successful placement confirmation) defined with visual + audio + UI channels?
+5. **audio-direction** — are the sounds (error tone, placement sound) covered by a defined category?
+6. **style-guide** — does the visual treatment (animation timing, tone register) match?
+
+If any step is unclear, undefined, or contradictory → **fail**. Report which doc and which step broke. This is the highest-signal check in the entire review.
 
 **Questions the reviewer must answer:**
 1. Does style-guide mood actually map into color-system and audio-direction?
@@ -435,7 +465,7 @@ Create review log in `scaffold/decisions/review/`:
 |-------|--------|----------|----------|
 | 1. Visual Identity & Readability | N | N | N |
 | 2. Color Semantics & Accessibility | N | N | N |
-| 3. UI Component Model | N | N | N |
+| 3. UI Component Model & Composition | N | N | N |
 | 4. Input Clarity & Command Structure | N | N | N |
 | 5. Response Coverage & Priority Logic | N | N | N |
 | 6. Audio Tone & Boundary Discipline | N | N | N |

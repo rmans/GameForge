@@ -313,7 +313,7 @@ Adversarial per-topic review of all 6 Step 5 visual/UX docs.
 
 **Description**
 
-Each of the 6 Step 5 docs gets its own specialized review lens targeting its unique failure modes, then Topic 7 checks the seams between them. Topics: (1) visual identity & readability (style-guide), (2) color semantics & accessibility (color-system), (3) UI component model (ui-kit), (4) input clarity & command structure (interaction-model), (5) response coverage & priority logic (feedback-system), (6) audio tone & boundary discipline (audio-direction), (7) cross-doc integration (all). Consumes design signals from fix-style. Topic 7 runs first when budget is tight. Review consistency lock, scope collapse guard (upward/downward/lateral leakage), per-doc specialized question sets. Reports per-topic and per-doc issues, blocker classification, and a 1-5 strength rating.
+Each of the 6 Step 5 docs gets its own specialized review lens targeting its unique failure modes, then Topic 7 checks the seams with a mandatory end-to-end scenario test. Topics: (1) visual identity & readability, (2) color semantics & accessibility, (3) UI component model & composition discipline, (4) input clarity & command structure, (5) response coverage & priority logic, (6) audio tone & boundary discipline, (7) cross-doc integration. Each topic concludes with a per-doc failure probe (what breaks, what developers guess, where two devs diverge, what drifts, hardest missing edge case). Topic 7 runs first when budget is tight. Review consistency lock, scope collapse guard, end-to-end scenario trace through all 6 docs.
 
 **Arguments**
 
