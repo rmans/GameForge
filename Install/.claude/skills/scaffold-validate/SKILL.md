@@ -13,7 +13,7 @@ Run cross-reference and planning-pipeline validation, then report issues.
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `--scope` | No | `all` | Which checks to run: `all` (everything), `design` (design doc structure, governance, and cross-references), `systems` (system design structural checks), `foundation` (foundation architecture completeness), `roadmap` (roadmap structure and coverage), `phases` (phase pipeline checks only), `slices` (slice pipeline checks only), `tasks` (task/slice/triage pipeline checks only), `specs` (spec/slice pipeline checks only), `refs` (reference-layer validation — scripted ID/glossary checks plus expanded Step 3 doc structure, value validity, and cross-doc consistency checks), `engine` (engine doc structure, content health, Step 3 alignment, cross-engine consistency, and layer boundary compliance) |
+| `--scope` | No | `all` | Which checks to run: `all` (everything), `design` (design doc structure, governance, and cross-references), `systems` (system design structural checks), `foundation` (foundation architecture completeness), `roadmap` (roadmap structure and coverage), `phases` (phase pipeline checks only), `slices` (slice pipeline checks only), `tasks` (task/slice/triage pipeline checks only), `specs` (spec/slice pipeline checks only), `refs` (reference-layer validation — scripted ID/glossary checks plus expanded Step 3 doc structure, value validity, and cross-doc consistency checks), `engine` (engine doc structure, content health, Step 3 alignment, cross-engine consistency, and layer boundary compliance), `style` (Step 5 visual/UX doc structure, content health, cross-doc consistency, authority flow, boundary compliance, and accessibility coherence) |
 | `--range` | No | all | For `--scope systems`: `SYS-###` or `SYS-###-SYS-###` to validate a specific system or range. If omitted, validates all systems. |
 
 ## Steps
@@ -31,6 +31,7 @@ Parse the `--scope` argument from `$ARGUMENTS`:
 - `--scope specs` → run only Step 2c (spec-pipeline checks). Skip all other steps.
 - `--scope refs` → run Step 1 (Python script) AND Step 2j (expanded reference checks). Skip all other steps.
 - `--scope engine` → run only Step 2k (engine-pipeline checks). Skip all other steps.
+- `--scope style` → run only Step 2m (style-pipeline checks). Skip all other steps.
 - `--scope all` or no argument → run all steps.
 
 ### 1. Run the Validator (scope: `all` or `refs`)
@@ -560,6 +561,177 @@ These checks are labeled `[ADVISORY]` in the report. They compare code examples 
 - Template-based checks → SKIP for engine docs with no matching template (explicit or inferred).
 - Review freshness → see status matrix. SKIP for Deprecated and Complete docs.
 
+### 2m. Style-Pipeline Checks (scope: `all` or `style`)
+
+Run these checks to validate Step 5 visual/UX doc structural integrity, content health, cross-doc consistency, authority flow, boundary compliance, and accessibility coherence.
+
+**Target docs:**
+
+| Doc | Path | Template |
+|-----|------|----------|
+| style-guide.md | `design/style-guide.md` | `templates/style-guide-template.md` |
+| color-system.md | `design/color-system.md` | `templates/color-system-template.md` |
+| ui-kit.md | `design/ui-kit.md` | `templates/ui-kit-template.md` |
+| interaction-model.md | `design/interaction-model.md` | `templates/interaction-model-template.md` |
+| feedback-system.md | `design/feedback-system.md` | `templates/feedback-system-template.md` |
+| audio-direction.md | `design/audio-direction.md` | `templates/audio-direction-template.md` |
+
+**Status-Severity Matrix:**
+
+| Check Category | Draft | Review | Approved | Complete | Deprecated |
+|---------------|-------|--------|----------|----------|------------|
+| Missing required sections | FAIL | FAIL | FAIL | FAIL | WARN |
+| Empty Purpose/intro | FAIL | FAIL | FAIL | FAIL | WARN |
+| Remaining TODOs | INFO | WARN | FAIL | FAIL | SKIP |
+| Rules not populated | WARN | WARN | FAIL | FAIL | SKIP |
+| Section health below threshold | WARN/FAIL | WARN/FAIL | WARN/FAIL | WARN/FAIL | SKIP |
+| Review freshness (stale/missing) | WARN | WARN | FAIL | SKIP | SKIP |
+| Template comments remaining | WARN | WARN | WARN | WARN | SKIP |
+
+---
+
+#### Document-Level Checks
+
+These run independently per Step 5 doc.
+
+**Header & Metadata:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `style-header-fields` | Every Step 5 doc has the blockquote header with required fields: `Authority`, `Layer`, `Conforms to`, `Created`, `Last Updated`, `Status`. | FAIL if missing |
+| `style-authority-rank` | Every Step 5 doc's Authority field is `Rank 2`. | FAIL if not Rank 2 |
+| `style-layer-value` | Every Step 5 doc's Layer field is `Canon`. | FAIL if wrong |
+| `style-status-value` | Every Step 5 doc's Status field is one of: Draft, Review, Approved, Complete, Deprecated. | FAIL if invalid |
+| `style-conforms-to-resolution` | Every document referenced in `Conforms to` resolves to an existing file. Must have at least one link (design-doc.md at minimum). | FAIL if target missing |
+
+**Structure:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `style-template-sections` | Each Step 5 doc contains all `##` section headings from its corresponding template. Uses case-insensitive heading match. | WARN if template section missing |
+| `style-rules-populated` | The Rules section contains at least one authored rule. | See status matrix |
+
+**Content Health:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `style-section-health` | For each Step 5 doc, classify every top-level `##` section as Complete (1.0), Partial (0.5), or Empty (0). Report weighted health per doc. | FAIL below 40%, WARN below 65% (SKIP for Deprecated) |
+| `style-todo-count` | Count remaining `*TODO:` markers in each Step 5 doc. | See status matrix |
+| `style-template-comments` | Remaining HTML template instruction comments in sections classified as Complete or Partial. | See status matrix |
+
+**Per-Doc Structural Checks:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `style-guide-pillars` | style-guide has at least 3 concrete aesthetic pillars (not template text). | WARN if fewer |
+| `style-guide-tone-registers` | style-guide defines at least 2 named tone registers with visual descriptions. | WARN if missing |
+| `color-system-tokens` | color-system has State Tokens and UI Tokens tables with at least 5 entries each. | WARN if fewer |
+| `color-system-hex-valid` | All hex values in color-system are well-formed (#RRGGBB or #RRGGBBAA). | FAIL if malformed |
+| `color-system-no-duplicate-tokens` | No duplicate token names in color-system tables. | FAIL if duplicates |
+| `ui-kit-component-states` | ui-kit has a Component States table with at least 5 states (default, hover, pressed, disabled, error). | WARN if fewer |
+| `ui-kit-scope-guard` | ui-kit does not contain screen maps, scene hierarchies, modal graphs, or HUD layout keywords ("screen region", "scene tree", "node hierarchy", "HUD layout", "screen map"). | FAIL if found |
+| `interaction-model-selection` | interaction-model defines at least one selectable entity type and selection mechanics. | WARN if missing |
+| `interaction-model-commands` | interaction-model defines at least 3 concrete player commands. | WARN if fewer |
+| `feedback-system-priority` | feedback-system defines an explicit priority hierarchy. | WARN if missing |
+| `feedback-system-event-table` | feedback-system has an Event-Response Table with at least 10 entries. | WARN if fewer |
+| `feedback-system-event-columns` | Event-Response Table rows have: Event, Visual, Audio, UI, Timing, Priority columns. | WARN if columns missing |
+| `audio-direction-categories` | audio-direction defines at least 4 sound categories. | WARN if fewer |
+| `audio-direction-hierarchy` | audio-direction defines a feedback priority/hierarchy ordering. | WARN if missing |
+
+---
+
+#### Cross-Doc Consistency Checks
+
+These compare Step 5 docs against each other. Require at least 3 Step 5 docs to be meaningful.
+
+**Authority Flow:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `style-authority-flow` | Authority flows downstream: style-guide → color-system → ui-kit. Interaction-model and feedback-system are peers. Audio-direction derives priority from feedback-system. Check that `Conforms to` links reflect this hierarchy (color-system conforms to style-guide, ui-kit conforms to style-guide + color-system, etc.). | WARN if hierarchy violated |
+
+**Token & Reference Consistency:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `style-token-resolution` | Color tokens referenced in ui-kit Component States table exist in color-system. | FAIL if token missing |
+| `style-no-raw-hex` | ui-kit, interaction-model, feedback-system, and audio-direction do not contain raw hex color values (#RRGGBB) outside of color-system. | WARN if found |
+| `style-state-transitions-coverage` | Entity states from `design/state-transitions.md` have corresponding color tokens in color-system. | WARN per unmapped state |
+| `style-entity-icon-coverage` | Entity types from `reference/entity-components.md` have corresponding icon or visual descriptions across style-guide and ui-kit. | WARN per uncovered entity |
+| `style-resource-coverage` | Resources from `reference/resource-definitions.md` have corresponding UI representation in ui-kit. | WARN per uncovered resource |
+
+**Boundary Compliance:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `style-interaction-no-responses` | interaction-model does not contain event-response coordination content (keywords: "the system responds", "feedback fires", "alert triggers", "audio plays in response"). | WARN [ADVISORY] if found |
+| `style-feedback-no-inputs` | feedback-system does not contain input mapping content (keywords: "the player clicks", "on hover the player", "drag to select", "right-click to"). | WARN [ADVISORY] if found |
+| `style-audio-no-timing` | audio-direction does not contain coordination timing content (keywords: "fires when", "triggers after", "plays at the same time as", "delays until"). | WARN [ADVISORY] if found |
+| `style-ui-kit-no-engine` | ui-kit does not contain engine-specific content (keywords: "scene tree", "Control node", "CanvasLayer", "node hierarchy", "_ready()", "autoload"). | FAIL if found |
+
+**Feedback System Coherence:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `style-interaction-feedback-coverage` | Every player action type defined in interaction-model has a corresponding feedback type in feedback-system. Extract action types from interaction-model (selection, command, cancel, drag, etc.) and check for matching feedback entries. | WARN per uncovered action |
+| `style-feedback-audio-coverage` | Every feedback type in feedback-system that specifies an audio response references a sound category defined in audio-direction. | WARN per unresolved category |
+| `style-priority-hierarchy-alignment` | feedback-system priority hierarchy and audio-direction feedback hierarchy use the same ordering. Extract priority lists from both docs and compare. | WARN if ordering conflicts |
+
+**Accessibility Coherence:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `style-accessibility-contrast` | color-system defines concrete WCAG contrast ratio targets (not just "good contrast" or "accessible"). Check for numeric ratios (e.g., "4.5:1", "3:1"). | WARN if no concrete ratios |
+| `style-accessibility-redundancy` | feedback-system defines at least two channels for every Critical-severity event. Check Event-Response Table: Critical events must have non-empty Visual AND (Audio OR UI) columns. | FAIL per single-channel critical event |
+| `style-accessibility-no-color-only` | No gameplay state is communicated through color alone. Check color-system state tokens and ui-kit component states for cases where color is the only differentiator (no icon, no text, no shape change). | WARN [ADVISORY] if found |
+| `style-accessibility-no-hover-only` | interaction-model does not define interaction cues available only through hover (inaccessible to keyboard/gamepad). Check for hover-dependent information without keyboard alternative. | WARN [ADVISORY] if found |
+
+**Review Freshness:**
+
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| `style-review-freshness` | For each Step 5 doc, check for matching review logs in `scaffold/decisions/review/`. Match by filename pattern (`ITERATE-style-*`, `FIX-style-*`) or log body containing the doc name. | See status matrix |
+
+---
+
+**How to run these checks:**
+
+1. For `style-header-fields`: For each Step 5 doc, read blockquote header. Check presence of Authority, Layer, Conforms to, Created, Last Updated, Status.
+2. For `style-authority-rank`: Parse Authority field. Must be `Rank 2`.
+3. For `style-layer-value`: Parse Layer field. Must be `Canon`.
+4. For `style-status-value`: Parse Status field. Must be Draft/Review/Approved/Complete/Deprecated.
+5. For `style-conforms-to-resolution`: Parse `Conforms to` markdown links. Resolve paths relative to `scaffold/`. Verify targets exist.
+6. For `style-template-sections`: Read the doc's corresponding template. Extract `##` headings. Check each exists in the doc (case-insensitive).
+7. For `style-rules-populated`: Check Rules section has at least one authored rule line.
+8. For `style-section-health`: For each `##` section: Empty if only comments/TODO, Partial if mix, Complete if no markers. Health = sum(weights) / section count.
+9. For `style-todo-count`: Grep for `*TODO:`. Count per doc. Apply status matrix.
+10. For `style-template-comments`: For Complete/Partial sections, check for remaining `<!-- ... -->` HTML comments.
+11. For per-doc structural checks: Read each doc and verify the specific content described (pillar count, token count, table structure, etc.).
+12. For `style-authority-flow`: Read `Conforms to` links in each doc. Verify color-system references style-guide, ui-kit references style-guide + color-system, audio-direction references feedback-system, etc.
+13. For `style-token-resolution`: Extract token names from ui-kit Component States table. Check each exists in color-system token tables.
+14. For `style-no-raw-hex`: Grep ui-kit, interaction-model, feedback-system, audio-direction for `#[0-9a-fA-F]{6}` patterns outside of color-system.
+15. For `style-state-transitions-coverage`: Read state-transitions.md state names. Check color-system has a token for each.
+16. For `style-entity-icon-coverage`: Read entity-components.md entity types. Check style-guide and ui-kit for visual descriptions or icon definitions.
+17. For `style-resource-coverage`: Read resource-definitions.md resources. Check ui-kit for display components.
+18. For boundary checks: Grep target docs for specified keywords. Exempt phrases inside code blocks or blockquotes.
+19. For `style-interaction-feedback-coverage`: Extract action types from interaction-model section headings and content. Check feedback-system for matching entries.
+20. For `style-feedback-audio-coverage`: Extract audio column values from Event-Response Table. Check audio-direction sound categories.
+21. For `style-priority-hierarchy-alignment`: Extract ordered priority lists from both feedback-system and audio-direction. Compare ordering.
+22. For accessibility checks: Run specific pattern checks as described per check.
+23. For `style-review-freshness`: Glob `scaffold/decisions/review/ITERATE-style-*` and `FIX-style-*`. Match to docs. Apply status matrix.
+
+**Maturity-aware activation:**
+- If no Step 5 docs exist → SKIP all style checks.
+- If fewer than 3 Step 5 docs exist → document-level checks run, cross-doc checks SKIP.
+- Boundary compliance checks → SKIP for docs that don't exist.
+- Token resolution → SKIP if color-system doesn't exist.
+- State-transitions coverage → SKIP if state-transitions.md doesn't exist.
+- Entity/resource coverage → SKIP if entity-components.md or resource-definitions.md doesn't exist.
+- Feedback coherence → SKIP if either interaction-model or feedback-system doesn't exist.
+- Priority alignment → SKIP if either feedback-system or audio-direction doesn't exist.
+
+---
+
 ### 2l. Cross-Cutting Integrity Checks (scope: `all`)
 
 These checks span all document types. They enforce decision closure, workflow compliance, and evolution integrity. Run on `--scope all` only — individual scopes skip these.
@@ -739,6 +911,32 @@ For each failing check, suggest the specific edit needed:
 - Engine topic overlap → "Two engine docs have overlapping Purpose scope. Clarify boundaries or merge into one doc. Check `_index.md` Topic column for uniqueness"
 - Engine Conforms-to missing links → "Add at least one `Conforms to` link to a Step 3 or design doc that this engine doc implements"
 - Engine template mapping mismatch → "The `_index.md` Templates table maps this doc to a different template than filename inference suggests. Update the Templates table to match the correct template"
+- Style doc missing header field → "Add `> **<Field>:** <value>` to the Step 5 doc's blockquote header"
+- Style doc wrong Authority Rank → "Change to `Rank 2` in the doc header to match the authority chain"
+- Style doc Conforms-to missing → "Add `Conforms to` link to at least design-doc.md"
+- Style doc missing template section → "Add `## <Section>` from `scaffold/templates/<template>.md`"
+- Style doc health below threshold → "Fill remaining TODO sections. Run `/scaffold-fix-style --target <doc>` to auto-fix structural issues"
+- Style token missing in color-system → "Add the token to `scaffold/design/color-system.md` or update the ui-kit reference"
+- Style raw hex found → "Replace raw hex value with the corresponding color-system token"
+- Style unmapped state → "Add a color token for the entity state in `scaffold/design/color-system.md`"
+- Style uncovered entity → "Add visual description in style-guide or icon definition in ui-kit for the entity type"
+- Style uncovered resource → "Add UI representation in ui-kit for the resource type"
+- Style boundary violation (interaction) → "Move event-response content from interaction-model to feedback-system"
+- Style boundary violation (feedback) → "Move input mapping content from feedback-system to interaction-model"
+- Style boundary violation (audio) → "Move timing coordination content from audio-direction to feedback-system"
+- Style boundary violation (ui-kit engine) → "Move engine-specific content from ui-kit to the engine UI doc"
+- Style action without feedback → "Add feedback entry in feedback-system for the uncovered player action"
+- Style feedback without audio category → "Add the sound category to audio-direction or update the feedback-system audio column"
+- Style priority hierarchy mismatch → "Align priority ordering between feedback-system and audio-direction"
+- Style no contrast ratios → "Add concrete WCAG contrast ratio targets (e.g., '4.5:1') to color-system accessibility section"
+- Style single-channel critical → "Add a second feedback channel (audio or UI) for the critical event in the feedback-system Event-Response Table"
+- Style color-only state → "Add a non-color differentiator (icon, shape, text) for the gameplay state"
+- Style hover-only cue → "Add keyboard/gamepad alternative for the hover-dependent interaction in interaction-model"
+- Style review freshness (stale) → "Step 5 doc was modified after its last review log. Run `/scaffold-fix-style` and `/scaffold-iterate-style`"
+- Style review freshness (missing, Approved) → "No review log exists for this Approved Step 5 doc. Run `/scaffold-iterate-style` before keeping Approved status"
+- Style ui-kit scope guard → "Remove screen map / scene hierarchy / HUD layout content from ui-kit — belongs in engine UI doc"
+- Style duplicate tokens → "Merge duplicate token entries in color-system, keeping the more complete version"
+- Style malformed hex → "Fix hex value to #RRGGBB or #RRGGBBAA format"
 
 ## Rules
 

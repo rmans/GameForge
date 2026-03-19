@@ -389,6 +389,14 @@ Mechanical cleanup pass for all 6 Step 5 docs. Auto-fixes template text, termino
 
 Adversarial review of all 6 Step 5 docs using an external LLM. Each doc gets its own specialized review lens targeting its unique failure modes: (1) visual identity & readability, (2) color semantics & accessibility, (3) UI component model, (4) input clarity & command structure, (5) response coverage & priority logic, (6) audio tone & boundary discipline. Then Topic 7 checks the cross-doc seams — whether the 6 docs work together as one system. Topic 7 runs first when budget is tight. Supports `--target` for single-doc focus and `--topics` for scoped review. A passing review sets the document's status to `Approved`.
 
+### 5d — Validate (gate check)
+
+```
+/scaffold-validate --scope style
+```
+
+Validates Step 5 doc structural integrity, content health, cross-doc consistency, authority flow, boundary compliance, token resolution, and accessibility coherence. Checks that color tokens resolve, no raw hex values leak into downstream docs, interaction actions have feedback coverage, feedback priorities align with audio priorities, and accessibility promises are enforced (no color-only states, no hover-only cues, multi-channel critical events).
+
 > **Art & Audio:** With style docs in place, you can now generate visual and audio assets at any point. See the Quick Reference table for all art and audio skills.
 
 ---

@@ -81,7 +81,7 @@
 | `/scaffold-update-doc` | `[doc-name\|path]` | Add, remove, or modify entries in any scaffold doc |
 | `/scaffold-sync-reference-docs` | — | Sync reference docs after upstream changes |
 | **Validate** | | |
-| `/scaffold-validate` | `[--scope refs\|design\|systems\|foundation\|roadmap\|phases\|slices\|specs\|tasks\|all]` | Run cross-reference validation across scaffold docs |
+| `/scaffold-validate` | `[--scope refs\|design\|systems\|foundation\|roadmap\|phases\|slices\|specs\|tasks\|engine\|style\|all]` | Run cross-reference validation across scaffold docs |
 | **Playtest** | | |
 | `/scaffold-playtest-log` | `[session-type]` | Log playtester observations into the feedback tracker |
 | `/scaffold-playtest-review` | — | Analyze playtest feedback patterns with priority grid |
