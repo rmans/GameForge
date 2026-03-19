@@ -1,6 +1,6 @@
 # Skills Reference
 
-> Man-page reference for all 63 scaffold slash commands. Each entry shows synopsis, description, arguments, examples, and related skills.
+> Man-page reference for all 72 scaffold slash commands. Each entry shows synopsis, description, arguments, examples, and related skills.
 >
 > **When to use each skill** — see [WORKFLOW.md](WORKFLOW.md) for the step-by-step pipeline order.
 
@@ -10,64 +10,93 @@
 
 | Skill | Arguments | What it does |
 |-------|-----------|-------------|
-| `/scaffold-new-design` | `[game-name]` | Fill out the design doc interactively |
-| `/scaffold-new-style` | `[style-guide\|color-system\|ui-kit]` | Fill out one Rank 2 style doc |
-| `/scaffold-new-system` | `[system-name]` | Create a system design with auto SYS-### ID |
-| `/scaffold-new-reference` | `[authority\|interfaces\|states\|entities\|resources\|signals\|balance]` | Populate one reference doc from systems |
-| `/scaffold-new-engine` | `[coding\|ui\|input\|scene-architecture\|performance]` | Fill out one engine doc interactively |
-| `/scaffold-new-input` | `[action-map\|bindings-kbm\|bindings-gamepad\|ui-navigation\|input-philosophy]` | Fill out one input doc interactively |
+| **Init** | | |
+| `/scaffold-init-design` | `[--mode seed\|fill-gaps\|reconcile\|refresh]` | Initialize or update design document |
+| **Create** | | |
 | `/scaffold-new-roadmap` | — | Create the project roadmap |
 | `/scaffold-new-phase` | `[phase-name]` | Create a phase scope gate with auto P#-### ID |
 | `/scaffold-new-slice` | `[slice-name]` | Create a vertical slice with auto SLICE-### ID |
 | `/scaffold-new-spec` | `[spec-name]` | Create a behavior spec with auto SPEC-### ID |
 | `/scaffold-new-task` | `[task-name]` | Create an implementation task with auto TASK-### ID |
-| `/scaffold-bulk-seed-style` | — | Seed all style docs from design doc |
+| **Bulk Seed** | | |
+| `/scaffold-bulk-seed-style` | — | Seed all 6 Step 5 visual/UX docs from upstream context |
 | `/scaffold-bulk-seed-systems` | — | Seed glossary + system stubs from design doc |
-| `/scaffold-bulk-seed-references` | — | Seed all 7 reference docs from systems |
-| `/scaffold-bulk-seed-engine` | — | Select engine, then seed all 5 engine docs (Godot 4, Unity, Unreal 5, or custom) |
+| `/scaffold-bulk-seed-references` | — | Seed all 9 reference/architecture docs from systems |
+| `/scaffold-bulk-seed-engine` | `[--engine godot4\|unity\|unreal5\|other]` | Select engine, then seed all engine docs |
 | `/scaffold-bulk-seed-input` | — | Seed all 5 input docs from design doc |
+| `/scaffold-bulk-seed-phases` | — | Seed phase stubs from roadmap |
 | `/scaffold-bulk-seed-slices` | — | Seed slice stubs from phases + systems + interfaces |
 | `/scaffold-bulk-seed-specs` | — | Seed spec stubs from slices + systems + states |
 | `/scaffold-bulk-seed-tasks` | — | Seed task stubs from specs + engine docs + signals |
-| `/scaffold-review-design` | — | Audit design doc completeness and system index sync |
-| `/scaffold-review-style` | `[style-guide\|color-system\|ui-kit\|glossary]` | Audit one Rank 2 doc for quality and design alignment |
-| `/scaffold-review-system` | `[SYS-ID\|system-name]` | Audit one system's completeness and registration |
-| `/scaffold-review-reference` | `[authority\|interfaces\|states\|entities\|resources\|signals\|balance]` | Audit one reference doc for coverage and traceability |
-| `/scaffold-review-engine` | `[coding\|ui\|input\|scene-architecture\|performance]` | Audit one engine doc for quality and design consistency |
-| `/scaffold-review-input` | `[action-map\|bindings-kbm\|bindings-gamepad\|ui-navigation\|input-philosophy]` | Audit one input doc for completeness and consistency |
-| `/scaffold-review-roadmap` | — | Audit roadmap for phase coverage, ADR currency, vision alignment |
-| `/scaffold-review-phase` | `[P#-###\|phase-name]` | Audit one phase's clarity, system alignment, ADR impact |
-| `/scaffold-review-slice` | `[SLICE-###\|slice-name]` | Audit one slice's vertical coverage and spec completeness |
-| `/scaffold-review-spec` | `[SPEC-###\|spec-name]` | Audit one spec's behavioral clarity and system alignment |
-| `/scaffold-review-task` | `[TASK-###\|task-name]` | Audit one task's completeness, engine compliance, sizing |
-| `/scaffold-bulk-review-style` | — | Audit all Rank 2 docs + cross-doc consistency |
-| `/scaffold-bulk-review-systems` | — | Audit all systems + cross-system consistency |
-| `/scaffold-bulk-review-references` | — | Audit all reference docs + cross-doc consistency |
-| `/scaffold-bulk-review-engine` | — | Audit all engine docs + cross-doc consistency |
-| `/scaffold-bulk-review-input` | — | Audit all input docs + cross-doc consistency |
-| `/scaffold-bulk-review-phases` | — | Audit all phases + entry/exit chains + scope coverage |
-| `/scaffold-bulk-review-slices` | — | Audit all slices + phase coverage + interface coverage |
-| `/scaffold-bulk-review-specs` | — | Audit all specs + system coverage + state machine alignment |
-| `/scaffold-bulk-review-tasks` | — | Audit all tasks + file conflicts + ordering sanity |
-| `/scaffold-iterate` | `[document-path] [--focus "..."] [--iterations N]` | Adversarial two-loop review via external LLM |
+| **Fix** | | |
+| `/scaffold-fix-design` | `[--iterate N]` | Mechanical cleanup for design doc |
+| `/scaffold-fix-style` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for all 6 Step 5 visual/UX docs |
+| `/scaffold-fix-systems` | `[--target SYS-###] [--iterate N]` | Mechanical cleanup for system designs |
+| `/scaffold-fix-references` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for Step 3 reference/architecture docs |
+| `/scaffold-fix-engine` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for engine docs |
+| `/scaffold-fix-roadmap` | `[--iterate N]` | Mechanical cleanup for roadmap |
+| `/scaffold-fix-phase` | `[--target P#-###] [--iterate N]` | Mechanical cleanup for phase docs |
+| `/scaffold-fix-slice` | `[--target SLICE-###] [--iterate N]` | Mechanical cleanup for slice docs |
+| `/scaffold-fix-spec` | `[--target SPEC-###] [--iterate N]` | Mechanical cleanup for spec docs |
+| `/scaffold-fix-task` | `[--target TASK-###] [--iterate N]` | Mechanical cleanup for task docs |
+| `/scaffold-fix-foundation` | `[--iterate N]` | Cross-doc integration check for Steps 1–6 |
+| `/scaffold-fix-cross-cutting` | — | Resolve cross-document integrity findings |
+| **Iterate** | | |
+| `/scaffold-iterate-design` | `[--topic N] [--iterations N]` | Adversarial per-topic design doc review |
+| `/scaffold-iterate-systems` | `[SYS-### or SYS-###-SYS-###]` | Adversarial per-topic system design review |
+| `/scaffold-iterate-references` | `[--target doc.md] [--topic N]` | Adversarial per-topic Step 3 docs review |
+| `/scaffold-iterate-engine` | `[--target doc.md] [--topic N]` | Adversarial per-topic engine doc review |
+| `/scaffold-iterate-roadmap` | `[--topic N]` | Adversarial per-topic roadmap review |
+| `/scaffold-iterate-phase` | `[P#-###] [--topic N]` | Adversarial per-topic phase review |
+| `/scaffold-iterate-slice` | `[SLICE-###] [--topic N]` | Adversarial per-topic slice review |
+| `/scaffold-iterate-spec` | `[SPEC-### or range] [--topic N]` | Adversarial per-topic spec review |
+| `/scaffold-iterate-task` | `[TASK-### or range] [--topic N]` | Adversarial per-topic task review |
+| **Revise** | | |
+| `/scaffold-revise-design` | `[--source P#-###\|SLICE-###\|foundation-recheck]` | Detect design drift from implementation feedback |
+| `/scaffold-revise-systems` | `[--source SLICE-###]` | Detect system design drift from implementation feedback |
+| `/scaffold-revise-references` | `[--source SLICE-###]` | Detect Step 3 doc drift from implementation feedback |
+| `/scaffold-revise-engine` | `[--source SLICE-###]` | Detect engine doc drift from implementation feedback |
+| `/scaffold-revise-foundation` | `[--mode initial\|recheck]` | Verify foundation stability, dispatch revision loops |
+| `/scaffold-revise-roadmap` | — | Update roadmap after phase completion |
+| `/scaffold-revise-phases` | `[--source P#-###]` | Update remaining phases from implementation feedback |
+| `/scaffold-revise-slices` | `[--source SLICE-###]` | Update remaining slices from implementation feedback |
+| **Approve** | | |
+| `/scaffold-approve-phases` | — | Lifecycle gate: approve Draft phases for slice seeding |
+| `/scaffold-approve-slices` | — | Lifecycle gate: approve Draft slices for spec seeding |
+| `/scaffold-approve-specs` | — | Lifecycle gate: approve Draft specs in a slice |
+| `/scaffold-approve-tasks` | — | Lifecycle gate: approve Draft tasks in a slice |
+| **Triage** | | |
+| `/scaffold-triage-specs` | `[SLICE-###]` | Resolve spec-level issues from iterate-spec |
+| `/scaffold-triage-tasks` | `[SLICE-###]` | Resolve task-level issues from iterate-task |
+| `/scaffold-reorder-tasks` | `[SLICE-###]` | Reorder tasks by dependency and implementation sequence |
+| **Implement** | | |
+| `/scaffold-implement-task` | `[TASK-### or range]` | Implement task(s) end-to-end: code, tests, review, sync |
+| `/scaffold-build-and-test` | `[--files file...] [--skip-unit] [--skip-lint]` | Pure verification gate: build, lint, tests |
+| `/scaffold-code-review` | `[file or system scope]` | Adversarial code review via external LLM (7 topics) |
+| `/scaffold-add-regression-tests` | `[TASK-###]` | Add regression tests using 6-layer model |
+| **Complete** | | |
 | `/scaffold-complete` | `[document-path\|ID]` | Mark a planning doc as Complete; ripples up through parents |
+| **Edit** | | |
 | `/scaffold-update-doc` | `[doc-name\|path]` | Add, remove, or modify entries in any scaffold doc |
-| `/scaffold-validate` | — | Run cross-reference validation across all scaffold docs |
+| `/scaffold-sync-reference-docs` | — | Sync reference docs after upstream changes |
+| **Validate** | | |
+| `/scaffold-validate` | `[--scope refs\|design\|systems\|foundation\|roadmap\|phases\|slices\|specs\|tasks\|all]` | Run cross-reference validation across scaffold docs |
+| **Playtest** | | |
 | `/scaffold-playtest-log` | `[session-type]` | Log playtester observations into the feedback tracker |
 | `/scaffold-playtest-review` | — | Analyze playtest feedback patterns with priority grid |
-| `/scaffold-art-concept` | `[prompt or document-path]` | Generate concept art using DALL-E, informed by style guide and color system |
-| `/scaffold-art-ui-mockup` | `[prompt or document-path]` | Generate UI mockup art using DALL-E, informed by UI kit, style guide, and color system |
-| `/scaffold-art-character` | `[prompt or document-path]` | Generate character art using DALL-E, informed by style guide and color system |
-| `/scaffold-art-environment` | `[prompt or document-path]` | Generate environment art using DALL-E, informed by style guide and color system |
-| `/scaffold-art-sprite` | `[prompt or document-path]` | Generate sprite art using DALL-E, informed by style guide and color system |
-| `/scaffold-art-icon` | `[prompt or document-path]` | Generate icon art using DALL-E, informed by UI kit, color system, and style guide |
-| `/scaffold-art-promo` | `[prompt or document-path]` | Generate promotional art using DALL-E, informed by style guide and color system |
-| `/scaffold-review-art` | — | Audit all art assets for visual consistency, index health, and coverage gaps |
-| `/scaffold-audio-music` | `[prompt or document-path]` | Generate music tracks using ElevenLabs, informed by style guide and design doc mood/tone |
-| `/scaffold-audio-sfx` | `[prompt or document-path]` | Generate sound effects using ElevenLabs, informed by style guide and design doc game feel |
-| `/scaffold-audio-ambience` | `[prompt or document-path]` | Generate ambient audio loops using ElevenLabs, informed by style guide, color system mood, and design doc world/setting |
-| `/scaffold-audio-voice` | `[prompt or document-path]` | Generate voice audio using OpenAI TTS, informed by style guide and design doc characters/narrative |
-| `/scaffold-review-audio` | — | Audit all audio assets for prompt consistency, index health, and coverage gaps |
+| **Art** | | |
+| `/scaffold-art-concept` | `[prompt or document-path]` | Generate concept art using DALL-E |
+| `/scaffold-art-ui-mockup` | `[prompt or document-path]` | Generate UI mockup art using DALL-E |
+| `/scaffold-art-character` | `[prompt or document-path]` | Generate character art using DALL-E |
+| `/scaffold-art-environment` | `[prompt or document-path]` | Generate environment art using DALL-E |
+| `/scaffold-art-sprite` | `[prompt or document-path]` | Generate sprite art using DALL-E |
+| `/scaffold-art-icon` | `[prompt or document-path]` | Generate icon art using DALL-E |
+| `/scaffold-art-promo` | `[prompt or document-path]` | Generate promotional art using DALL-E |
+| **Audio** | | |
+| `/scaffold-audio-music` | `[prompt or document-path]` | Generate music tracks using ElevenLabs |
+| `/scaffold-audio-sfx` | `[prompt or document-path]` | Generate sound effects using ElevenLabs |
+| `/scaffold-audio-ambience` | `[prompt or document-path]` | Generate ambient audio loops using ElevenLabs |
+| `/scaffold-audio-voice` | `[prompt or document-path]` | Generate voice audio using OpenAI TTS |
 
 ---
 
@@ -75,190 +104,6 @@
 
 Skills for initializing individual documents from templates. All create skills ask one section at a time, write answers immediately, and set Status to Draft.
 
----
-
-### /scaffold-new-design
-
-Fill out the design document interactively.
-
-**Synopsis**
-
-    /scaffold-new-design [game-name]
-
-**Description**
-
-Walks through the core design document in 7 passes: Identity, Shape, World, Depth, Narrative, Practical, Accessibility & Scope. Reads design principles, common pitfalls, and genre conventions from `theory/` as advisory context. Writes answers into the document immediately, replacing TODO markers. Reports sections filled vs remaining TODOs at the end.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `game-name` | No | Pre-fills the game title. |
-
-**Examples**
-
-    /scaffold-new-design Verdant
-    /scaffold-new-design
-
-**See Also**
-
-`/scaffold-review-design`, `/scaffold-bulk-seed-style`
-
----
-
-### /scaffold-new-style
-
-Fill out one Rank 2 style document interactively.
-
-**Synopsis**
-
-    /scaffold-new-style [style-guide|color-system|ui-kit]
-
-**Description**
-
-Interactively fills one Rank 2 style document by reading the design doc for context (Tone, Aesthetic Pillars, Camera/Perspective) and theory docs (UX heuristics, color theory, visual design). Asks one section at a time and writes answers immediately. Reports completion and reminds user to run `/scaffold-review-style` when done.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `style-guide\|color-system\|ui-kit` | No | Which style doc to fill. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-new-style style-guide
-    /scaffold-new-style color-system
-    /scaffold-new-style ui-kit
-    /scaffold-new-style
-
-**See Also**
-
-`/scaffold-bulk-seed-style`, `/scaffold-review-style`, `/scaffold-bulk-review-style`
-
----
-
-### /scaffold-new-system
-
-Create a system design with automatic ID assignment.
-
-**Synopsis**
-
-    /scaffold-new-system [system-name]
-
-**Description**
-
-Creates a system design file at `design/systems/SYS-###-<name>.md` with automatic sequential ID assignment. Reads the design doc to pre-fill Purpose and Player Intent when context exists. Seeds the glossary with candidate terms if the system introduces new terminology. Registers in both `design/systems/_index.md` and the design doc's System Design Index.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `system-name` | No | Name for the system. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-new-system combat
-    /scaffold-new-system inventory-management
-    /scaffold-new-system
-
-**See Also**
-
-`/scaffold-bulk-seed-systems`, `/scaffold-review-system`, `/scaffold-bulk-review-systems`
-
----
-
-### /scaffold-new-reference
-
-Populate a single reference document from system designs.
-
-**Synopsis**
-
-    /scaffold-new-reference [authority|interfaces|states|entities|resources|signals|balance]
-
-**Description**
-
-Reads all system designs and proposes entries for the chosen reference document. Extracts candidates based on the document type (e.g., authority from data ownership, signals from system inputs/outputs). Presents all proposed entries as a table for user confirmation. Writes confirmed entries only, preserving existing content.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `authority\|interfaces\|states\|entities\|resources\|signals\|balance` | No | Which reference doc to populate. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-new-reference authority
-    /scaffold-new-reference signals
-    /scaffold-new-reference
-
-**See Also**
-
-`/scaffold-bulk-seed-references`, `/scaffold-review-reference`, `/scaffold-bulk-review-references`
-
----
-
-### /scaffold-new-engine
-
-Fill out one engine document interactively.
-
-**Synopsis**
-
-    /scaffold-new-engine [coding|ui|input|scene-architecture|performance]
-
-**Description**
-
-Guides user through filling one engine doc by reading the design doc for scope, style docs for visual/UI context, and input docs for input philosophy. Maps sections to engine-specific patterns. Asks one section at a time and writes answers immediately. Reports sections filled vs remaining TODOs.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `coding\|ui\|input\|scene-architecture\|performance` | No | Which engine doc to fill. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-new-engine coding
-    /scaffold-new-engine scene-architecture
-    /scaffold-new-engine
-
-**See Also**
-
-`/scaffold-bulk-seed-engine`, `/scaffold-review-engine`, `/scaffold-bulk-review-engine`
-
----
-
-### /scaffold-new-input
-
-Fill out one input document interactively.
-
-**Synopsis**
-
-    /scaffold-new-input [action-map|bindings-kbm|bindings-gamepad|ui-navigation|input-philosophy]
-
-**Description**
-
-Interactively fills one input document by reading the design doc for context (Player Verbs, Core Loop, Input Feel) and theory docs (UX heuristics for accessibility, game design principles for agency). Asks one section at a time and writes answers immediately. For action-map: walks through namespaces then actions per namespace. For bindings: reads the action-map and proposes defaults, checking for conflicts. For ui-navigation: walks through navigation model, focus flow, and mouse behavior. For input-philosophy: walks through principles, responsiveness targets, accessibility, and constraints.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `action-map\|bindings-kbm\|bindings-gamepad\|ui-navigation\|input-philosophy` | No | Which input doc to fill. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-new-input action-map
-    /scaffold-new-input bindings-kbm
-    /scaffold-new-input bindings-gamepad
-    /scaffold-new-input ui-navigation
-    /scaffold-new-input input-philosophy
-    /scaffold-new-input
-
-**See Also**
-
-`/scaffold-bulk-seed-input`, `/scaffold-review-input`, `/scaffold-bulk-review-input`
-
----
 
 ### /scaffold-new-roadmap
 
@@ -278,7 +123,7 @@ Creates the project roadmap by copying Core Fantasy from the design doc as the V
 
 **See Also**
 
-`/scaffold-review-roadmap`, `/scaffold-new-phase`
+`/scaffold-new-phase`
 
 ---
 
@@ -308,7 +153,7 @@ Creates a phase scope gate at `phases/P#-###-<name>.md` with automatic sequentia
 
 **See Also**
 
-`/scaffold-review-phase`, `/scaffold-bulk-review-phases`, `/scaffold-new-slice`
+`/scaffold-new-slice`
 
 ---
 
@@ -338,7 +183,7 @@ Creates a vertical slice at `slices/SLICE-###-<name>.md` with automatic sequenti
 
 **See Also**
 
-`/scaffold-bulk-seed-slices`, `/scaffold-review-slice`, `/scaffold-bulk-review-slices`, `/scaffold-new-spec`
+`/scaffold-bulk-seed-slices`, `/scaffold-new-spec`
 
 ---
 
@@ -368,7 +213,7 @@ Creates a behavior spec at `specs/SPEC-###-<name>.md` with automatic sequential 
 
 **See Also**
 
-`/scaffold-bulk-seed-specs`, `/scaffold-review-spec`, `/scaffold-bulk-review-specs`, `/scaffold-new-task`
+`/scaffold-bulk-seed-specs`, `/scaffold-new-task`
 
 ---
 
@@ -398,7 +243,7 @@ Creates an implementation task at `tasks/TASK-###-<name>.md` with automatic sequ
 
 **See Also**
 
-`/scaffold-bulk-seed-tasks`, `/scaffold-review-task`, `/scaffold-bulk-review-tasks`, `/scaffold-complete`
+`/scaffold-bulk-seed-tasks`, `/scaffold-complete`
 
 ---
 
@@ -410,7 +255,7 @@ Skills for bulk-populating multiple documents from source documents. All bulk se
 
 ### /scaffold-bulk-seed-style
 
-Seed all style docs from the design doc.
+Seed all 6 Step 5 visual/UX docs from upstream context.
 
 **Synopsis**
 
@@ -418,15 +263,42 @@ Seed all style docs from the design doc.
 
 **Description**
 
-Reads the completed design doc and bulk-seeds `style-guide.md`, `color-system.md`, and `ui-kit.md` in 3 sequential phases. Phase 1 extracts visual identity and proposes style-guide content. Phase 2 proposes color-system from Aesthetic Pillars and Visual Tone. Phase 3 proposes ui-kit from Player Verbs and Core Loop. Presents each section to user for confirmation; writes confirmed content only.
+Reads the design doc, system designs, and supporting docs to seed `style-guide.md`, `color-system.md`, `ui-kit.md`, `interaction-model.md`, `feedback-system.md`, and `audio-direction.md` in 6 phases. Auto-writes high-confidence sections directly, tags medium-confidence sections with rationale in the changelog, and leaves low-confidence sections as TODOs. Only pauses for user confirmation on ambiguous style direction, competing visual interpretations, major UX model choices, or decisions that would materially change downstream docs. Skips already-authored docs. Reports confidence breakdown, assumptions made, unresolved questions, and cross-doc tensions.
 
 **Examples**
 
     /scaffold-bulk-seed-style
 
+---
+
+### /scaffold-fix-style
+
+Mechanical cleanup for all 6 Step 5 visual/UX docs.
+
+**Synopsis**
+
+    /scaffold-fix-style [--target doc.md] [--iterate N]
+
+**Description**
+
+Formatter and linter for Step 5 docs: style-guide, color-system, ui-kit, interaction-model, feedback-system, and audio-direction. Auto-fixes structural issues (missing sections, template text, terminology drift, token normalization, hex formatting, duplicate entries). Detects design signals (tone mismatches, component gaps, priority conflicts, scope creep, boundary violations) for adversarial review. Enforces cross-doc consistency: style-guide → color-system → ui-kit, interaction-model ↔ feedback-system, audio-direction derives priority from feedback-system. Supports `--target` for single-doc focus (cross-doc checks still run, only target is edited). Iterates until clean, human-only, stable, or limit reached.
+
+**Arguments**
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `--target` | No | Single doc to fix (e.g., `style-guide.md`, `ui-kit.md`). Omit to fix all 6. |
+| `--iterate N` | No | Max passes (default: 10). |
+
+**Examples**
+
+    /scaffold-fix-style
+    /scaffold-fix-style --target ui-kit.md
+    /scaffold-fix-style --target feedback-system.md --iterate 5
+
 **See Also**
 
-`/scaffold-new-style`, `/scaffold-bulk-review-style`
+`/scaffold-bulk-seed-style`, `/scaffold-iterate-style`
 
 ---
 
@@ -448,7 +320,7 @@ Reads the completed design doc and bulk-seeds the glossary and system design stu
 
 **See Also**
 
-`/scaffold-new-system`, `/scaffold-bulk-review-systems`
+`/scaffold-fix-systems`, `/scaffold-iterate-systems`
 
 ---
 
@@ -470,7 +342,7 @@ Reads all completed system designs and bulk-populates 7 companion docs in order:
 
 **See Also**
 
-`/scaffold-new-reference`, `/scaffold-bulk-review-references`
+`/scaffold-fix-references`, `/scaffold-iterate-references`
 
 ---
 
@@ -492,7 +364,7 @@ Asks which engine the project uses (Godot 4, Unity, Unreal 5, or custom), then c
 
 **See Also**
 
-`/scaffold-new-engine`, `/scaffold-bulk-review-engine`
+`/scaffold-fix-engine`, `/scaffold-iterate-engine`
 
 ---
 
@@ -514,7 +386,7 @@ Reads the completed design doc and bulk-seeds all 5 input documents in 5 sequent
 
 **See Also**
 
-`/scaffold-new-input`, `/scaffold-bulk-review-input`
+`/scaffold-fix-style`, `/scaffold-bulk-seed-input`
 
 ---
 
@@ -536,7 +408,7 @@ Reads all phases, system designs, and interface contracts to bulk-create vertica
 
 **See Also**
 
-`/scaffold-new-slice`, `/scaffold-bulk-review-slices`
+`/scaffold-new-slice`
 
 ---
 
@@ -558,7 +430,7 @@ Reads all slices, system designs, and state transitions to bulk-create behavior 
 
 **See Also**
 
-`/scaffold-new-spec`, `/scaffold-bulk-review-specs`
+`/scaffold-new-spec`
 
 ---
 
@@ -580,574 +452,8 @@ Reads all specs, engine docs, and signal registry to bulk-create implementation 
 
 **See Also**
 
-`/scaffold-new-task`, `/scaffold-bulk-review-tasks`
+`/scaffold-new-task`
 
----
-
-## Review
-
-Skills for auditing individual documents. All review skills are read-only and report completeness, quality, alignment, and prioritized recommendations.
-
----
-
-### /scaffold-review-design
-
-Audit the design doc for completeness and system index sync.
-
-**Synopsis**
-
-    /scaffold-review-design
-
-**Description**
-
-Reads the design doc and all system designs to audit completeness and consistency. Checks design doc sections (Complete/Partial/Empty), System Index sync between `design-doc.md` and `systems/_index.md`, system file existence, per-system completeness (Purpose, Player Actions, System Resolution as critical sections), and cross-references. Flags unresolved references and issues. Advisory observations from theory docs. Reports recommendations prioritized by impact.
-
-**Examples**
-
-    /scaffold-review-design
-
-**See Also**
-
-`/scaffold-new-design`, `/scaffold-iterate`
-
----
-
-### /scaffold-review-style
-
-Audit one Rank 2 style doc for quality and design alignment.
-
-**Synopsis**
-
-    /scaffold-review-style [style-guide|color-system|ui-kit|glossary]
-
-**Description**
-
-Reviews a single Rank 2 document for completeness, quality, and consistency with the design doc. Checks each section status (Complete/Partial/Empty), specificity (implementable vs vague), internal consistency (sections agree with each other), and design alignment (visual identity, tone, pillars match). Reads theory docs for advisory UX heuristics, color theory, and visual design context. Reports completeness, quality issues, design alignment, and recommendations.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `style-guide\|color-system\|ui-kit\|glossary` | No | Which style doc to review. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-review-style style-guide
-    /scaffold-review-style glossary
-    /scaffold-review-style
-
-**See Also**
-
-`/scaffold-new-style`, `/scaffold-bulk-review-style`, `/scaffold-iterate`
-
----
-
-### /scaffold-review-system
-
-Audit one system's completeness and registration.
-
-**Synopsis**
-
-    /scaffold-review-system [SYS-ID|system-name]
-
-**Description**
-
-Reviews a single system design for completeness, quality, and registration. Checks all 11 sections (Purpose, Player Intent, Player Actions, System Resolution, Failure States, Inputs/Outputs, Non-Responsibilities, Edge Cases, Feel/Feedback, Open Questions) for Complete/Partial/Empty status. Flags implementation leaks, vague content, missing dependencies, and unregistered systems. Verifies registration in both index tables. Advisory observations from theory docs. Reports recommendations.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `SYS-ID\|system-name` | No | System to review (e.g., `SYS-001` or `combat`). If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-review-system SYS-001
-    /scaffold-review-system combat
-    /scaffold-review-system
-
-**See Also**
-
-`/scaffold-new-system`, `/scaffold-bulk-review-systems`, `/scaffold-iterate`
-
----
-
-### /scaffold-review-reference
-
-Audit one reference doc for coverage and traceability.
-
-**Synopsis**
-
-    /scaffold-review-reference [authority|interfaces|states|entities|resources|signals|balance]
-
-**Description**
-
-Reviews a single reference doc for completeness and cross-system consistency. Checks entry coverage (every system-referenced item registered), traceability (entries link back to systems), and consistency (no duplicates, proper formatting). Flags stale orphaned entries and broken references. Reports entries vs gaps, quality issues, cross-reference gaps, and recommendations.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `authority\|interfaces\|states\|entities\|resources\|signals\|balance` | No | Which reference doc to review. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-review-reference authority
-    /scaffold-review-reference signals
-    /scaffold-review-reference
-
-**See Also**
-
-`/scaffold-new-reference`, `/scaffold-bulk-review-references`, `/scaffold-iterate`
-
----
-
-### /scaffold-review-engine
-
-Audit one engine doc for quality and design consistency.
-
-**Synopsis**
-
-    /scaffold-review-engine [coding|ui|input|scene-architecture|performance]
-
-**Description**
-
-Reviews a single engine doc for completeness, quality, and design consistency. Checks section status (Complete/Partial/Empty), engine-specificity (uses engine API names), and no design-layer leaks. Verifies design alignment (implementation approach supports design intent). Flags vague or missing sections and contradictions. Reports completeness, quality issues, design alignment, and recommendations.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `coding\|ui\|input\|scene-architecture\|performance` | No | Which engine doc to review. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-review-engine coding
-    /scaffold-review-engine performance
-    /scaffold-review-engine
-
-**See Also**
-
-`/scaffold-new-engine`, `/scaffold-bulk-review-engine`, `/scaffold-iterate`
-
----
-
-### /scaffold-review-input
-
-Audit one input doc for completeness and consistency.
-
-**Synopsis**
-
-    /scaffold-review-input [action-map|bindings-kbm|bindings-gamepad|ui-navigation|input-philosophy]
-
-**Description**
-
-Reviews a single input doc for completeness, quality, and consistency with other input docs. For action-map: checks namespaces, actions, rules. For bindings: verifies every action has a binding, no conflicts, reasonable modifiers. For ui-navigation: checks focus flow, navigation model, mouse behavior. For input-philosophy: checks principles, responsiveness targets, accessibility, constraints. Flags missing bindings and cross-input mismatches.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `action-map\|bindings-kbm\|bindings-gamepad\|ui-navigation\|input-philosophy` | No | Which input doc to review. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-review-input action-map
-    /scaffold-review-input bindings-kbm
-    /scaffold-review-input
-
-**See Also**
-
-`/scaffold-bulk-review-input`, `/scaffold-iterate`
-
----
-
-### /scaffold-review-roadmap
-
-Audit the roadmap for phase coverage, ADR currency, and vision alignment.
-
-**Synopsis**
-
-    /scaffold-review-roadmap
-
-**Description**
-
-Reviews the roadmap for completeness, currency, and alignment with the design doc. Checks Vision Checkpoint (matches Core Fantasy), Phase Overview (at least 2 phases with goals), Current Phase, ADR Feedback Log, Completed Phases, and Upcoming Phases. Verifies system and feature coverage (every system in at least one phase), phase progression, scope alignment, and ADR feedback currency (every completed phase's ADRs logged). Reports section completeness, phase coverage, ADR currency, vision alignment, and recommendations.
-
-**Examples**
-
-    /scaffold-review-roadmap
-
-**See Also**
-
-`/scaffold-new-roadmap`, `/scaffold-review-phase`, `/scaffold-bulk-review-phases`
-
----
-
-### /scaffold-review-phase
-
-Audit one phase's clarity, system alignment, and ADR impact.
-
-**Synopsis**
-
-    /scaffold-review-phase [P#-###|phase-name]
-
-**Description**
-
-Reviews a single phase for clarity, specificity, system alignment, and ADR impact. Checks all 7 sections (Goal, Entry Criteria, In Scope, Out of Scope, Deliverables, Exit Criteria, Dependencies) for Complete/Partial/Empty. Verifies entry criteria use specific IDs (not vague), In Scope items are specific, Goals are outcome-oriented, and Exit Criteria are verifiable. Checks system references exist and ADR impacts are reflected in scope. Verifies registration and downstream slice coverage.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `P#-###\|phase-name` | No | Phase to review (e.g., `P1-001` or `foundation`). If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-review-phase P1-001
-    /scaffold-review-phase foundation
-    /scaffold-review-phase
-
-**See Also**
-
-`/scaffold-new-phase`, `/scaffold-bulk-review-phases`, `/scaffold-iterate`
-
----
-
-### /scaffold-review-slice
-
-Audit one slice's vertical coverage and spec completeness.
-
-**Synopsis**
-
-    /scaffold-review-slice [SLICE-###|slice-name]
-
-**Description**
-
-Reviews a single slice for coverage, spec completeness, demo script quality, and integration points. Checks all 6 sections (Goal, Specs Included, Tasks, Integration Points, Done Criteria, Demo Script) for Complete/Partial/Empty. Verifies Goal is vertical (crosses system boundaries), Specs cover the goal, Integration Points reference real interfaces from `interfaces.md`, Done Criteria are testable, and Demo Script is followable and exercises all specs/integration points. Verifies spec/task coverage and cross-references.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `SLICE-###\|slice-name` | No | Slice to review (e.g., `SLICE-001` or `core-combat-loop`). If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-review-slice SLICE-001
-    /scaffold-review-slice core-combat-loop
-    /scaffold-review-slice
-
-**See Also**
-
-`/scaffold-new-slice`, `/scaffold-bulk-review-slices`, `/scaffold-iterate`
-
----
-
-### /scaffold-review-spec
-
-Audit one spec's behavioral clarity and system alignment.
-
-**Synopsis**
-
-    /scaffold-review-spec [SPEC-###|spec-name]
-
-**Description**
-
-Reviews a behavior spec for clarity, completeness, acceptance criteria, and system alignment. Checks all 6 sections (Summary, Preconditions, Behavior, Postconditions, Edge Cases, Acceptance Criteria) for Complete/Partial/Empty. Flags implementation leaks (signals, methods, nodes, classes), vague steps, and non-verifiable preconditions/postconditions. Verifies behavior aligns with parent system design's Player Actions/System Resolution. Checks ADR impacts and registration.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `SPEC-###\|spec-name` | No | Spec to review (e.g., `SPEC-001` or `player-attack`). If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-review-spec SPEC-001
-    /scaffold-review-spec player-attack
-    /scaffold-review-spec
-
-**See Also**
-
-`/scaffold-new-spec`, `/scaffold-bulk-review-specs`, `/scaffold-iterate`
-
----
-
-### /scaffold-review-task
-
-Audit one task's completeness, engine compliance, and sizing.
-
-**Synopsis**
-
-    /scaffold-review-task [TASK-###|task-name]
-
-**Description**
-
-Reviews an implementation task for completeness, spec alignment, engine pattern compliance, and sizing. Checks all 5 sections (Objective, Steps, Files Affected, Verification, Notes) for Complete/Partial/Empty. Verifies steps are concrete/actionable, use correct engine patterns, files list is realistic, and verification is testable. Flags oversized tasks (>8 steps or >5 files). Checks spec coverage, engine compliance, ADR impacts, and registration.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `TASK-###\|task-name` | No | Task to review (e.g., `TASK-001` or `implement-attack-resolution`). If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-review-task TASK-001
-    /scaffold-review-task implement-attack-resolution
-    /scaffold-review-task
-
-**See Also**
-
-`/scaffold-new-task`, `/scaffold-bulk-review-tasks`, `/scaffold-iterate`, `/scaffold-complete`
-
----
-
-## Bulk Review
-
-Skills for auditing all documents in a category at once. Bulk reviews check cross-document consistency — the main value over individual reviews.
-
----
-
-### /scaffold-bulk-review-style
-
-Audit all Rank 2 docs and cross-doc consistency.
-
-**Synopsis**
-
-    /scaffold-bulk-review-style
-
-**Description**
-
-Reviews all 4 Rank 2 docs (style-guide, color-system, ui-kit, glossary) at once for consistency. Per-doc: checks section completeness. Cross-doc checks: Style ↔ Colors (mood alignment), Style ↔ UI Kit (art direction → icon style), Colors ↔ UI Kit (tokens cover states, contrast achievable), Glossary ↔ All (no NOT-column violations), Design Doc ↔ All (Pillars/Tone/Perspective align). Gap analysis and specificity audit. Reports per-doc status, cross-doc consistency, gaps, and recommendations prioritized by blast radius.
-
-**Examples**
-
-    /scaffold-bulk-review-style
-
-**See Also**
-
-`/scaffold-review-style`, `/scaffold-bulk-seed-style`
-
----
-
-### /scaffold-bulk-review-systems
-
-Audit all systems and cross-system consistency.
-
-**Synopsis**
-
-    /scaffold-bulk-review-systems
-
-**Description**
-
-Reviews all registered systems at once for completeness and cross-system consistency. Per-system: checks all 11 sections. Cross-system checks: dependency symmetry (if A depends on B, B should output to A), orphan systems (no inputs/outputs), authority conflicts (two systems writing same variable), state coverage (specs align with state machines), glossary compliance, and signal alignment (Inputs/Outputs match signal-registry). Reports per-system details, cross-system consistency, and recommendations prioritized by blast radius.
-
-**Examples**
-
-    /scaffold-bulk-review-systems
-
-**See Also**
-
-`/scaffold-review-system`, `/scaffold-bulk-seed-systems`
-
----
-
-### /scaffold-bulk-review-references
-
-Audit all reference docs and cross-doc consistency.
-
-**Synopsis**
-
-    /scaffold-bulk-review-references
-
-**Description**
-
-Reviews all 10 reference docs (authority, interfaces, states, entities, resources, signals, balance, glossary, known-issues, design-debt) at once for consistency. Cross-doc checks: Authority ↔ Entities (ownership matches), Signals ↔ System Outputs (complete correspondence), Interfaces ↔ Authority (non-owners don't push owned data), Resources ↔ Balance Params (related numbers registered), State Transitions ↔ Entities (state machines have fields), Glossary ↔ Everything (terminology correct). Gap analysis and stale entry detection. Reports per-doc status, cross-doc consistency, gaps, and recommendations prioritized by blast radius.
-
-**Examples**
-
-    /scaffold-bulk-review-references
-
-**See Also**
-
-`/scaffold-review-reference`, `/scaffold-bulk-seed-references`
-
----
-
-### /scaffold-bulk-review-engine
-
-Audit all engine docs and cross-doc consistency.
-
-**Synopsis**
-
-    /scaffold-bulk-review-engine
-
-**Description**
-
-Reviews all 5 engine docs at once for consistency. Cross-doc checks: Coding ↔ Scene Architecture (naming consistency), Coding ↔ UI (event patterns consistent), UI ↔ Input (focus implementation uses input patterns), UI ↔ Performance (frame budget accounts for UI), Input ↔ Performance (buffering compatible with budget), Scene Architecture ↔ Performance (memory budgets respected), All Docs ↔ Design (implementation supports design intent). Gap analysis and layer boundary check (no design-layer leaks). Reports per-doc status, cross-doc consistency, gaps, and recommendations prioritized by blast radius.
-
-**Examples**
-
-    /scaffold-bulk-review-engine
-
-**See Also**
-
-`/scaffold-review-engine`, `/scaffold-bulk-seed-engine`
-
----
-
-### /scaffold-bulk-review-input
-
-Audit all input docs and cross-doc consistency.
-
-**Synopsis**
-
-    /scaffold-bulk-review-input
-
-**Description**
-
-Reviews all 5 input docs at once for consistency. Cross-doc checks: Action Map ↔ Bindings KBM (every action bound), Action Map ↔ Bindings Gamepad (every action bound), Action Map ↔ UI Navigation (ui_ actions have navigation rules), KBM ↔ Gamepad (same actions covered), Input Philosophy ↔ All Docs (principles reflected in bindings), Design Doc ↔ Action Map (player verbs mapped). Gap analysis for unmapped design actions, unbound actions, and missing navigation rules. Layer boundary check. Reports per-doc status, cross-doc consistency, gaps, and recommendations prioritized by blast radius.
-
-**Examples**
-
-    /scaffold-bulk-review-input
-
-**See Also**
-
-`/scaffold-review-input`
-
----
-
-### /scaffold-bulk-review-phases
-
-Audit all phases, entry/exit chains, and scope coverage.
-
-**Synopsis**
-
-    /scaffold-bulk-review-phases
-
-**Description**
-
-Reviews all phases at once for roadmap alignment, entry/exit chains, scope coverage, ADR absorption, and dependency graph. Cross-phase checks: Roadmap alignment (every phase in file and roadmap), entry/exit chains (phase N's exit → phase N+1's entry), scope coverage (all systems and features covered), scope overlap (flagging exact duplicates), ADR absorption (deferred work reflected in phases), dependency graph (no cycles), status consistency, and out-of-scope hand-offs (deferred items picked up later). Reports per-phase details, cross-phase consistency, and recommendations prioritized by blast radius.
-
-**Examples**
-
-    /scaffold-bulk-review-phases
-
-**See Also**
-
-`/scaffold-review-phase`, `/scaffold-review-roadmap`
-
----
-
-### /scaffold-bulk-review-slices
-
-Audit all slices, phase coverage, and interface coverage.
-
-**Synopsis**
-
-    /scaffold-bulk-review-slices
-
-**Description**
-
-Reviews all slices at once for phase coverage, spec overlap, interface coverage, and vertical completeness. Cross-slice checks: Phase coverage (scope items have slices), spec overlap (specs in multiple slices flagged), interface coverage (every interface exercised), vertical completeness (at least 2 system boundaries per slice), demo consistency (no contradictory assumptions), spec coverage (every spec in a slice), and task completeness (every spec has implementing tasks). Reports per-slice details, cross-slice consistency, and recommendations prioritized by blast radius.
-
-**Examples**
-
-    /scaffold-bulk-review-slices
-
-**See Also**
-
-`/scaffold-review-slice`, `/scaffold-bulk-seed-slices`
-
----
-
-### /scaffold-bulk-review-specs
-
-Audit all specs, system coverage, and state machine alignment.
-
-**Synopsis**
-
-    /scaffold-bulk-review-specs
-
-**Description**
-
-Reviews all specs at once for slice coverage, system coverage, layer boundary compliance, state machine alignment, and precondition chains. Cross-spec checks: Slice coverage (spec references match slice tables), system coverage (every system has specs, full Player Actions covered), layer boundary (implementation leaks scanned across all specs), state machine alignment (spec transitions match `state-transitions.md`), precondition chains (postconditions → next spec's preconditions), glossary compliance, ADR currency, and acceptance criteria overlap. Reports per-spec details, cross-spec consistency, implementation leak count, and recommendations prioritized by blast radius.
-
-**Examples**
-
-    /scaffold-bulk-review-specs
-
-**See Also**
-
-`/scaffold-review-spec`, `/scaffold-bulk-seed-specs`
-
----
-
-### /scaffold-bulk-review-tasks
-
-Audit all tasks, file conflicts, and ordering sanity.
-
-**Synopsis**
-
-    /scaffold-bulk-review-tasks
-
-**Description**
-
-Reviews all tasks at once for spec coverage, engine consistency, file conflicts, ordering sanity, and sizing. Cross-task checks: Spec coverage (every spec has implementing tasks), engine consistency (consistent patterns across tasks), file conflicts (files created/modified by multiple tasks), ordering sanity (dependencies resolve in order), sizing distribution (median steps/files, flagging outliers), signal alignment (all signals in registry), and ADR currency. Reports per-task details, cross-task consistency, sizing distribution (min/median/max), and recommendations prioritized by blast radius.
-
-**Examples**
-
-    /scaffold-bulk-review-tasks
-
-**See Also**
-
-`/scaffold-review-task`, `/scaffold-bulk-seed-tasks`
-
----
-
-## Iterate
-
-Adversarial review using an external LLM.
-
----
-
-### /scaffold-iterate
-
-Run adversarial two-loop review on any scaffold document.
-
-**Synopsis**
-
-    /scaffold-iterate [document-path] [--focus "section or concern"] [--iterations N]
-
-**Description**
-
-Runs adversarial two-loop review using an external LLM. The outer loop (1–5 iterations) requests a fresh review, applies changes, and logs the iteration. The inner loop (up to 5 exchanges per iteration) follows a pattern: reviewer raises issues, Claude evaluates each (AGREE/PUSHBACK/PARTIAL) with project context, reviewer counter-responds, continuing until consensus or max exchanges.
-
-Auto-detects doc type to select a review tier: **Full tier** (5 iterations, all severity) for design, style, system, roadmap, phase, and spec docs; **Lite tier** (1 iteration, HIGH only) for engine, input, slice, and task docs; **Lint tier** (1 iteration, HIGH + accuracy) for reference docs. Gathers context files by type. Applies consensus changes. Updates doc status to Approved if no unresolved HIGH issues remain. Creates a review log in `decisions/review/`.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `document-path` | No | Path to the document to review. If omitted, asks interactively. |
-| `--focus` | No | Narrow the review to a specific section or concern. |
-| `--iterations` | No | Override the default iteration count (1–5). |
-
-**Examples**
-
-    /scaffold-iterate design/design-doc.md
-    /scaffold-iterate design/systems/SYS-001-combat.md --focus "Failure States"
-    /scaffold-iterate specs/SPEC-003-item-pickup.md --iterations 3
-    /scaffold-iterate
-
-**See Also**
-
-`/scaffold-review-design`, `/scaffold-review-system`, `/scaffold-review-spec`
-
----
 
 ## Complete
 
@@ -1184,7 +490,7 @@ For tasks: direct Complete (leaf nodes, no children check). For specs, slices, a
 
 **See Also**
 
-`/scaffold-review-task`, `/scaffold-review-spec`
+`/scaffold-iterate-task`, `/scaffold-complete`
 
 ---
 
@@ -1249,7 +555,7 @@ Presents results as a summary table with PASS/FAIL per check and lists each fail
 
 **See Also**
 
-`/scaffold-review-design`, `/scaffold-bulk-review-references`, `/scaffold-update-doc`
+`/scaffold-update-doc`
 
 ---
 
@@ -1307,7 +613,7 @@ Read-only analysis of `decisions/playtest-feedback.md`. Groups feedback by syste
 
 **See Also**
 
-`/scaffold-playtest-log`, `/scaffold-review-roadmap`, `/scaffold-new-phase`
+`/scaffold-playtest-log`, `/scaffold-new-phase`
 
 ---
 
@@ -1343,7 +649,7 @@ Generates concept art using DALL-E, grounded in the project's visual identity. R
 
 **See Also**
 
-`/scaffold-new-style`, `/scaffold-review-style`, `/scaffold-art-ui-mockup`, `/scaffold-art-character`, `/scaffold-art-environment`, `/scaffold-art-sprite`, `/scaffold-art-icon`, `/scaffold-art-promo`
+`/scaffold-art-ui-mockup`, `/scaffold-art-character`, `/scaffold-art-environment`, `/scaffold-art-sprite`, `/scaffold-art-icon`, `/scaffold-art-promo`
 
 ---
 
@@ -1373,7 +679,7 @@ Generates UI mockup art using DALL-E, grounded in the project's visual identity.
 
 **See Also**
 
-`/scaffold-art-concept`, `/scaffold-art-icon`, `/scaffold-new-style`
+`/scaffold-art-concept`, `/scaffold-art-icon`
 
 ---
 
@@ -1403,7 +709,7 @@ Generates character art using DALL-E, grounded in the project's visual identity.
 
 **See Also**
 
-`/scaffold-art-concept`, `/scaffold-art-sprite`, `/scaffold-new-style`
+`/scaffold-art-concept`, `/scaffold-art-sprite`
 
 ---
 
@@ -1433,7 +739,7 @@ Generates environment art using DALL-E, grounded in the project's visual identit
 
 **See Also**
 
-`/scaffold-art-concept`, `/scaffold-art-promo`, `/scaffold-new-style`
+`/scaffold-art-concept`, `/scaffold-art-promo`
 
 ---
 
@@ -1463,7 +769,7 @@ Generates sprite art using DALL-E, grounded in the project's visual identity. Re
 
 **See Also**
 
-`/scaffold-art-concept`, `/scaffold-art-character`, `/scaffold-new-style`
+`/scaffold-art-concept`, `/scaffold-art-character`
 
 ---
 
@@ -1493,7 +799,7 @@ Generates icon art using DALL-E, grounded in the project's visual identity. Read
 
 **See Also**
 
-`/scaffold-art-ui-mockup`, `/scaffold-art-concept`, `/scaffold-new-style`
+`/scaffold-art-ui-mockup`, `/scaffold-art-concept`
 
 ---
 
@@ -1523,29 +829,7 @@ Generates promotional art using DALL-E, grounded in the project's visual identit
 
 **See Also**
 
-`/scaffold-art-concept`, `/scaffold-art-environment`, `/scaffold-new-style`
-
----
-
-### /scaffold-review-art
-
-Audit all art assets for visual consistency, index health, and coverage gaps.
-
-**Synopsis**
-
-    /scaffold-review-art
-
-**Description**
-
-Reviews all generated art assets across 7 subdirectories (concept-art, ui-mockups, character-art, environment-art, sprite-art, icon-art, promo-art). Reads the style guide and color system for visual identity, then visually inspects each image for palette adherence, art style match, and quality consistency. Cross-references the design doc to identify coverage gaps (characters, environments, systems, UI, icons without art). Checks index health for missing entries, stale entries, and naming convention violations. Reports asset counts per type, visual consistency findings, coverage gaps, and prioritized recommendations.
-
-**Examples**
-
-    /scaffold-review-art
-
-**See Also**
-
-`/scaffold-art-concept`, `/scaffold-art-character`, `/scaffold-art-environment`, `/scaffold-art-sprite`, `/scaffold-art-icon`, `/scaffold-art-ui-mockup`, `/scaffold-art-promo`
+`/scaffold-art-concept`, `/scaffold-art-environment`
 
 ---
 
@@ -1673,24 +957,3 @@ Generates voice audio using OpenAI TTS, grounded in the project's narrative iden
 
 `/scaffold-audio-music`, `/scaffold-audio-sfx`, `/scaffold-audio-ambience`
 
----
-
-### /scaffold-review-audio
-
-Audit all audio assets for prompt consistency, index health, and coverage gaps.
-
-**Synopsis**
-
-    /scaffold-review-audio
-
-**Description**
-
-Reviews all generated audio assets across 4 subdirectories (music, sfx, ambience, voice). Reads the style guide, color system, and design doc for tonal and mood direction, then reviews prompts recorded in indexes for consistency with the project's audio identity. Cross-references the design doc to identify coverage gaps (game states needing music, systems needing SFX, environments needing ambience, characters needing voice). Checks index health for missing entries, stale entries, and naming convention violations. Reports asset counts per type, prompt consistency findings, coverage gaps, and prioritized recommendations. Note: Claude cannot listen to audio files — this review audits prompts, metadata, and coverage, not audio content.
-
-**Examples**
-
-    /scaffold-review-audio
-
-**See Also**
-
-`/scaffold-audio-music`, `/scaffold-audio-sfx`, `/scaffold-audio-ambience`, `/scaffold-audio-voice`

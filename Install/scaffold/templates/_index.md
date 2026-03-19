@@ -33,6 +33,9 @@
 
 | Step | Template | ID Format | Target Directory |
 |------|----------|-----------|-----------------|
+| S5 | [style-guide-template.md](style-guide-template.md) | (singleton) | [design/](../design/) |
+| S5 | [color-system-template.md](color-system-template.md) | (singleton) | [design/](../design/) |
+| S5 | [ui-kit-template.md](ui-kit-template.md) | (singleton) | [design/](../design/) |
 | S5 | [interaction-model-template.md](interaction-model-template.md) | (singleton) | [design/](../design/) |
 | S5 | [feedback-system-template.md](feedback-system-template.md) | (singleton) | [design/](../design/) |
 | S5 | [audio-direction-template.md](audio-direction-template.md) | (singleton) | [design/](../design/) |

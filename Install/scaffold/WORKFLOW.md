@@ -319,13 +319,9 @@ Step 5 runs after engine constraints are locked, so visual/UX decisions have ful
 /scaffold-bulk-seed-style
 ```
 
-Reads the design doc, system designs, architecture docs, and engine docs to pre-fill style-guide, color-system, ui-kit, interaction-model, feedback-system, and audio-direction. Style docs define visual identity and presentation rules. The interaction model defines how the player interacts with the game world — input→intent mapping. The feedback system defines how the game responds — coordinated visual + audio + UI. Audio direction defines the role of sound in the experience.
+Reads the design doc and system designs (primary), architecture/reference/engine docs (secondary constraints), and theory docs (advisory) to seed all 6 docs. Auto-writes high-confidence sections directly, tags medium-confidence sections with rationale in the changelog, and leaves low-confidence sections as TODOs. Only pauses for user confirmation on ambiguous style direction, competing visual interpretations, major UX model choices, or decisions that would materially change downstream docs. Phases are processed in order (style-guide → color-system → ui-kit → interaction-model → feedback-system → audio-direction) but ui-kit and interaction-model may reveal back-propagation needs — these are noted in the report, not silently fixed. Skips already-authored docs.
 
-For any sections the bulk seed couldn't derive, fill them interactively:
-
-```
-/scaffold-new-style [style-guide|color-system|ui-kit|interaction-model|audio-direction]
-```
+After seeding, review the report for medium-confidence assumptions and low-confidence TODOs. For any sections the bulk seed couldn't derive, fill them interactively.
 
 **`interaction-model.md` covers:**
 - **Selection model** — single select, multi-select, drag-select, what's selectable, selection persistence across layers, deselection rules
@@ -351,17 +347,39 @@ For any sections the bulk seed couldn't derive, fill them interactively:
 - **Feedback hierarchy** — priority ordering of audio signals (critical alerts > interaction feedback > ambient)
 - **Asset style rules** — 2D/3D audio, realistic vs stylized, frequency ranges, loudness conventions
 
-**`style-guide.md` should include** (in addition to standard visual pillars):
-- **Rendering style** — 2D / 3D / hybrid, sprite vs model, realistic vs stylized
-- **Lighting model** — how light communicates game state and mood
+**`style-guide.md` covers:**
+- **Art direction** — aesthetic pillars, visual references, overall style (pixel art, hand-painted, low-poly, etc.)
+- **Visual tone** — tone registers (baseline, tension, crisis) and how mood shifts visually with game state
+- **Rendering approach** — 2D / 3D / hybrid, camera perspective, resolution and scale
+- **Character & entity style** — entity visual hierarchy, how types are distinguished at a glance
+- **Environment style** — terrain, structures, how player-built is distinct from natural
 - **Animation style** — motion language, transition timing, feedback animations
 - **Iconography style** — icon design rules, readability requirements, state representation
 
+**`color-system.md` covers:**
+- **Palette** — base palette (default look), signal palette (system state colors), identity palette (factions, zones, categories)
+- **Color tokens** — semantic tokens that decouple meaning from hex values (state tokens, UI tokens)
+- **Usage rules** — how many accent colors on screen, signal color reservation, contrast requirements
+- **UI vs world colors** — relationship between UI overlay palette and game world colors
+- **Accessibility** — WCAG contrast targets, color-blind safe palette, redundant encoding rules
+- **Theme variants** — faction palettes, biome shifts, escalation-driven palette changes
+
+**`ui-kit.md` covers:**
+- **Component definitions** — panels, buttons, tooltips, progress bars, alerts, confirmation dialogs
+- **Component states** — default, hover, pressed, focused, disabled, error, selected (mapped to color tokens)
+- **Typography** — type scale, font choices, weight usage, data density rules
+- **Iconography** — icon categories, size constraints, color usage, state variants
+- **Spacing & layout conventions** — spacing scale, safe zones (component-level, not screen maps)
+- **Animation & transitions** — panel open/close, hover/press timing, easing curves
+- **Sound feedback** — per-component sounds only (click, hover, toggle); cross-modal coordination is in feedback-system
+
 ### 5b — Fix (mechanical cleanup)
 
-<!-- TODO: create fix-style skill when Step 5 is hardened -->
+```
+/scaffold-fix-style
+```
 
-Mechanical cleanup pass for style, color, UI kit, interaction model, and audio direction docs. Auto-fixes template text, terminology drift, cross-doc inconsistencies. Detects misalignment with design doc, system designs, and engine docs.
+Mechanical cleanup pass for all 6 Step 5 docs. Auto-fixes template text, terminology drift, cross-doc inconsistencies, token normalization, and boundary violations. Detects design signals (tone mismatches, component gaps, scope creep, priority conflicts) for adversarial review. Supports `--target` for single-doc focus. Authority flows downstream within Step 5: style-guide → color-system → ui-kit; interaction-model ↔ feedback-system (peers); audio-direction derives priority from feedback-system.
 
 ### 5c — Iterate (adversarial review)
 
@@ -1009,7 +1027,7 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 
 | Skill | What | Why | How |
 |-------|------|-----|-----|
-| `bulk-seed-style` | Create style/UX docs (6 total) | Define visual language, interaction, feedback, audio | Seeds 6 docs sequentially: style-guide → color-system → ui-kit → interaction-model → feedback-system → audio-direction. Full context from Steps 1-4 (design doc, systems, architecture, engine). Each phase reads prior docs. Skips already-authored docs. |
+| `bulk-seed-style` | Create style/UX docs (6 total) | Define visual language, interaction, feedback, audio | Seeds 6 docs in order: style-guide → color-system → ui-kit → interaction-model → feedback-system → audio-direction. Auto-writes high-confidence, tags medium in changelog, leaves low as TODO. Design doc and system designs are primary sources; architecture/reference/engine are secondary constraints. Pauses only on ambiguous or high-impact decisions. Reports confidence, assumptions, and cross-doc tensions. |
 
 ### Step 6 — Input
 

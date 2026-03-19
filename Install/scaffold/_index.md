@@ -32,7 +32,7 @@
 ## Key Files
 
 - [WORKFLOW.md](WORKFLOW.md) — Step-by-step recipe for the full pipeline
-- [SKILLS.md](SKILLS.md) — Man-page reference for all 71 slash commands
+- [SKILLS.md](SKILLS.md) — Man-page reference for all 72 slash commands
 - [doc-authority.md](doc-authority.md) — Precedence rules (read when conflicts arise)
 - [README.md](README.md) — How to use this scaffold
 
