@@ -198,21 +198,24 @@ For each confirmed system:
 3. **Create the file** at `design/systems/SYS-###-name_draft.md`:
    - Replace `SYS-###` with the actual ID
    - Replace `[System Name]` with the confirmed name
-   - Pre-fill these sections from the proposal:
+   - **Write substantive content** for the 8 pre-fill sections listed below. "Pre-fill" means writing real prose derived from the design doc analysis in Phase 2 — not copying the template HTML comments, not writing TODO, not leaving placeholders. Every pre-filled section must contain authored content that a downstream reviewer could evaluate.
 
-   | Section | Pre-fill from |
-   |---------|--------------|
-   | **Purpose** | Confirmed purpose line |
-   | **Simulation Responsibility** | What state this system uniquely owns |
-   | **Player Intent** | Bullet points derived from relevant player verbs |
-   | **Design Constraints** | Invariants, boundaries, and control model rules that apply |
-   | **Owned State** | Gameplay-facing state this system probably manages (derived from design doc content categories, entities, resources). List gameplay state only — not caches, scene nodes, engine objects, or data-structure choices. |
-   | **Upstream Dependencies** | Systems from the "Likely dependencies" column |
-   | **Downstream Consequences** | Systems from the "Likely downstream effects" column |
-   | **Non-Responsibilities** | Adjacent concerns from the "Likely out of scope" column |
+   | Section | What to write | Minimum content |
+   |---------|--------------|-----------------|
+   | **Purpose** | 1-2 sentences describing what player-visible behavior this system owns, derived from the confirmed proposal | Must be a complete sentence, not a fragment or TODO |
+   | **Simulation Responsibility** | What state this system uniquely owns and updates — the reason this system exists as a separate entity | 2-3 sentences explaining what this system simulates and why no other system can own it |
+   | **Player Intent** | Bullet list of what the player is trying to accomplish when engaging with this system, derived from player verbs and the control model | At least 3 bullet points |
+   | **Design Constraints** | Invariants, boundaries, anchors, and control model rules that constrain this system — referenced by name from the design doc | At least 1 named constraint with explanation of how it applies |
+   | **Owned State** | Table of gameplay-facing state this system exclusively manages, derived from design doc content categories, entities, and resources. Gameplay state only — not caches, scene nodes, engine objects, or data-structure choices | At least 2 state entries in the table with Description and Persistence columns filled |
+   | **Upstream Dependencies** | Table of systems this one requires to function, with what each provides — derived from the "Likely dependencies" column | At least 1 entry if dependencies exist, or explicit "None — this system has no upstream dependencies" |
+   | **Downstream Consequences** | Table of systems this one feeds state to, with what each receives — derived from the "Likely downstream effects" column | At least 1 entry if downstream effects exist, or explicit "None — this system does not feed other systems" |
+   | **Non-Responsibilities** | Bullet list of adjacent concerns this system explicitly does NOT own, naming the system that does where possible | At least 2 bullet points |
 
-   - Mark pre-filled sections with `<!-- SEEDED: derived from design doc. Verify and expand. -->` so reviewers know what was inferred vs authored.
-   - Leave remaining sections (State Transitions, Owned Variables detail, Inputs/Outputs tables, etc.) as template prompts.
+   **Pre-fill quality standard:** If a downstream reviewer reads only the pre-filled sections, they should understand what this system does, what it owns, what constrains it, and what it does NOT do. A file where every pre-filled section is a single generic sentence or a rephrased template prompt has failed the pre-fill — go back to the design doc analysis and write specific content.
+
+   - After the authored content in each pre-filled section, append `<!-- SEEDED: derived from design doc. Verify and expand. -->` so reviewers know what was inferred vs authored.
+   - Remove the template's HTML comment prompts from pre-filled sections — replace them with the authored content. Do not leave the template instruction comments alongside the real content.
+   - Leave remaining sections (Visibility to Player, Player Actions, System Resolution, State Lifecycle, Failure / Friction States, Edge Cases, Feel & Feedback, Observability, Performance Characteristics, Open Questions) as template prompts with their HTML comments intact.
 
 4. **Register in both indexes:**
    - Add a row to `design/systems/_index.md`
@@ -272,8 +275,8 @@ For each confirmed system:
 - **Respect Design Invariants.** Every proposed system must be checked against invariants and boundaries. A system that implies a mechanic violating an invariant is a contradiction, not a valid proposal.
 - **Respect the Simulation Depth Target.** If the design doc says "moderate simulation", don't propose 25 deeply interconnected systems. Match system complexity to stated depth.
 - **Owned State is gameplay state, not implementation structures.** Do not seed caches, engine nodes, scene references, registries, service locators, or data-structure choices. List only player-facing or simulation-facing state (blueprint placement, construction progress, need levels, mood scores).
-- **Pre-fill stubs with design context, not invented content.** Seeded sections come from the design doc, not from the skill's assumptions about how the system should work.
-- **Mark seeded content clearly.** Use `<!-- SEEDED -->` comments so fix/iterate/review passes know what was inferred vs authored.
+- **Pre-fill means write real content, not copy template prompts.** Every pre-fill section must contain substantive authored prose derived from the design doc analysis. A system file where pre-fill sections are TODO, single generic sentences, or rephrased template comments is a failed seed. Go back to the Phase 2 proposal data and write specific content about THIS system. Template HTML comments must be removed from pre-filled sections and replaced with the authored content.
+- **Mark seeded content clearly.** Append `<!-- SEEDED -->` comments after authored content so fix/iterate/review passes know what was inferred vs authored. The SEEDED marker goes after the content, not instead of it.
 - **System names are nouns, not verbs.** "Construction" not "Building things." "Combat" not "Fighting."
 - **IDs are sequential and permanent.** Never skip or reuse.
 - **Preserve existing systems.** If SYS-### files already exist, start numbering after the highest existing ID and don't overwrite. Present existing systems alongside new proposals so the user can see the full picture.
