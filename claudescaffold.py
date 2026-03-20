@@ -13,7 +13,7 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
-VERSION = "2.25.0"
+VERSION = "2.25.1"
 GITHUB_ZIP_URL = "https://github.com/rmans/ClaudeScaffold/archive/refs/heads/{branch}.zip"
 EXCLUDE_DIRS = {"__pycache__"}
 SCAFFOLD_SKILL_PREFIX = "scaffold-"
@@ -166,6 +166,15 @@ def copy_file(src: Path, dst: Path, dry_run: bool, verbose: bool):
     dst.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src, dst)
     log(f"  Copied: {dst}", verbose_only=True, verbose=verbose)
+
+
+def files_identical(a: Path, b: Path) -> bool:
+    """Return True if two files have identical contents."""
+    if not a.is_file() or not b.is_file():
+        return False
+    if a.stat().st_size != b.stat().st_size:
+        return False
+    return a.read_bytes() == b.read_bytes()
 
 
 # ---------------------------------------------------------------------------
@@ -490,47 +499,98 @@ def do_upgrade(args):
         label = "[DRY RUN] " if args.dry_run else ""
         print(f"\n{label}Upgrading ClaudeScaffold in {target}\n")
 
-        files_replaced = 0
-        files_preserved = 0
+        files_updated = 0
+        files_added = 0
+        files_unchanged = 0
+        files_removed = 0
         dirs_added = 0
+
+        def upgrade_file(src: Path, dst: Path, label_path: str):
+            """Copy src to dst only if content differs. Returns 'added', 'updated', or 'unchanged'."""
+            nonlocal files_updated, files_added, files_unchanged
+            if not dst.exists():
+                copy_file(src, dst, args.dry_run, args.verbose)
+                files_added += 1
+                log(f"  Added: {label_path}", verbose_only=True, verbose=args.verbose)
+                return "added"
+            if files_identical(src, dst):
+                files_unchanged += 1
+                return "unchanged"
+            copy_file(src, dst, args.dry_run, args.verbose)
+            files_updated += 1
+            log(f"  Updated: {label_path}", verbose_only=True, verbose=args.verbose)
+            return "updated"
 
         # --- Step 1: CLAUDE.md ---
         print("1. CLAUDE.md")
-        if dst_claude_md.exists():
+        if dst_claude_md.exists() and not files_identical(src_claude_md, dst_claude_md):
             backup = target / "CLAUDE.md.bak"
             if args.dry_run:
                 log("  Would back up existing CLAUDE.md to CLAUDE.md.bak")
             else:
                 shutil.copy2(dst_claude_md, backup)
                 log("  Backed up existing CLAUDE.md to CLAUDE.md.bak")
-        copy_file(src_claude_md, dst_claude_md, args.dry_run, args.verbose)
-        files_replaced += 1
+        result = upgrade_file(src_claude_md, dst_claude_md, "CLAUDE.md")
+        if result == "unchanged":
+            log("  Unchanged")
 
         # --- Step 2: .claude/ (skills + settings) ---
         print("\n2. .claude/ (skills + settings)")
 
-        # Delete all existing scaffold-* skill dirs, then copy fresh
+        src_skills_dir = src_claude_dir / "skills"
+
+        # Build set of source scaffold skill names
+        src_skill_names = set()
+        if src_skills_dir.is_dir():
+            for skill_dir in src_skills_dir.iterdir():
+                if skill_dir.is_dir() and skill_dir.name.startswith(SCAFFOLD_SKILL_PREFIX):
+                    src_skill_names.add(skill_dir.name)
+
+        # Remove scaffold skills that no longer exist in source
         if dst_skills_dir.is_dir():
             for skill_dir in sorted(dst_skills_dir.iterdir()):
                 if skill_dir.is_dir() and skill_dir.name.startswith(SCAFFOLD_SKILL_PREFIX):
-                    if args.dry_run:
-                        log(f"  Would remove: {skill_dir.name}/", verbose_only=True, verbose=args.verbose)
-                    else:
-                        shutil.rmtree(skill_dir)
-                        log(f"  Removed: {skill_dir.name}/", verbose_only=True, verbose=args.verbose)
+                    if skill_dir.name not in src_skill_names:
+                        if args.dry_run:
+                            log(f"  Would remove deprecated skill: {skill_dir.name}/")
+                        else:
+                            shutil.rmtree(skill_dir)
+                            log(f"  Removed deprecated skill: {skill_dir.name}/")
+                        files_removed += 1
 
-        src_skills_dir = src_claude_dir / "skills"
-        skills_installed = 0
+        # Update/add scaffold skills — only copy changed files
+        existing_skill_names = set()
+        if dst_skills_dir.is_dir():
+            for d in dst_skills_dir.iterdir():
+                if d.is_dir() and d.name.startswith(SCAFFOLD_SKILL_PREFIX):
+                    existing_skill_names.add(d.name)
+
+        skills_updated = 0
+        skills_added = 0
+        skills_unchanged = 0
         if src_skills_dir.is_dir():
             for skill_dir in sorted(src_skills_dir.iterdir()):
                 if not skill_dir.is_dir() or skill_dir.name in EXCLUDE_DIRS:
                     continue
+                if not skill_dir.name.startswith(SCAFFOLD_SKILL_PREFIX):
+                    continue
+                is_new = skill_dir.name not in existing_skill_names
+                skill_had_changes = False
                 for src_file in sorted(skill_dir.rglob("*")):
                     if src_file.is_file() and not is_excluded(src_file.relative_to(src_skills_dir)):
                         rel = src_file.relative_to(src_skills_dir)
-                        copy_file(src_file, dst_skills_dir / rel, args.dry_run, args.verbose)
-                        files_replaced += 1
-                skills_installed += 1
+                        result = upgrade_file(src_file, dst_skills_dir / rel, f".claude/skills/{rel}")
+                        if result != "unchanged":
+                            skill_had_changes = True
+                if is_new:
+                    skills_added += 1
+                    log(f"  New skill: {skill_dir.name}/")
+                elif skill_had_changes:
+                    skills_updated += 1
+                else:
+                    skills_unchanged += 1
+
+        log(f"  Skills: {skills_updated} updated, {skills_added} added, {skills_unchanged} unchanged, {files_removed} removed")
 
         # Settings merge
         if dst_settings.exists():
@@ -538,52 +598,61 @@ def do_upgrade(args):
             merge_settings(dst_settings, src_settings, args.dry_run, args.verbose)
         else:
             copy_file(src_settings, dst_settings, args.dry_run, args.verbose)
+            files_added += 1
 
         # --- Step 3: scaffold/ (replace infrastructure, preserve user content) ---
         print("\n3. scaffold/ (infrastructure upgrade)")
 
-        # 3a: Replace infrastructure directories entirely
+        # 3a: Update infrastructure directories — only copy changed/new files, remove stale ones
         for dir_name in sorted(UPGRADE_REPLACE_DIRS):
             src_dir = src_scaffold_dir / dir_name
             dst_dir = dst_scaffold_dir / dir_name
             if not src_dir.is_dir():
                 continue
-            if dst_dir.is_dir():
-                if args.dry_run:
-                    log(f"  Would replace: scaffold/{dir_name}/")
-                else:
-                    shutil.rmtree(dst_dir)
-                    log(f"  Replaced: scaffold/{dir_name}/", verbose_only=True, verbose=args.verbose)
-            dir_files = collect_files(src_dir, src_dir)
-            for src_file, rel_path in dir_files:
-                copy_file(src_file, dst_dir / rel_path, args.dry_run, args.verbose)
-                files_replaced += 1
 
-        # 3b: Replace infrastructure root files
+            # Collect source files
+            src_files = collect_files(src_dir, src_dir)
+            src_rel_paths = {rel for _, rel in src_files}
+
+            # Remove files in dst that no longer exist in src
+            if dst_dir.is_dir():
+                dst_files = collect_files(dst_dir, dst_dir)
+                for dst_file, rel_path in dst_files:
+                    if rel_path not in src_rel_paths:
+                        if args.dry_run:
+                            log(f"  Would remove stale: scaffold/{dir_name}/{rel_path}")
+                        else:
+                            dst_file.unlink()
+                            log(f"  Removed stale: scaffold/{dir_name}/{rel_path}", verbose_only=True, verbose=args.verbose)
+                        files_removed += 1
+
+            # Copy new/changed files
+            dir_changes = 0
+            for src_file, rel_path in src_files:
+                result = upgrade_file(src_file, dst_dir / rel_path, f"scaffold/{dir_name}/{rel_path}")
+                if result != "unchanged":
+                    dir_changes += 1
+
+            if dir_changes > 0:
+                log(f"  scaffold/{dir_name}/: {dir_changes} file(s) updated")
+            else:
+                log(f"  scaffold/{dir_name}/: unchanged", verbose_only=True, verbose=args.verbose)
+
+        # 3b: Update infrastructure root files
         for file_name in sorted(UPGRADE_REPLACE_ROOT_FILES):
             src_file = src_scaffold_dir / file_name
             if not src_file.is_file():
                 continue
             dst_file = dst_scaffold_dir / file_name
-            if args.dry_run:
-                log(f"  Would replace: scaffold/{file_name}")
-            else:
-                log(f"  Replaced: scaffold/{file_name}", verbose_only=True, verbose=args.verbose)
-            copy_file(src_file, dst_file, args.dry_run, args.verbose)
-            files_replaced += 1
+            upgrade_file(src_file, dst_file, f"scaffold/{file_name}")
 
-        # 3c: Replace infrastructure subdir files
+        # 3c: Update infrastructure subdir files
         for rel_file in sorted(UPGRADE_REPLACE_SUBDIR_FILES):
             src_file = src_scaffold_dir / rel_file
             if not src_file.is_file():
                 continue
             dst_file = dst_scaffold_dir / rel_file
-            if args.dry_run:
-                log(f"  Would replace: scaffold/{rel_file}")
-            else:
-                log(f"  Replaced: scaffold/{rel_file}", verbose_only=True, verbose=args.verbose)
-            copy_file(src_file, dst_file, args.dry_run, args.verbose)
-            files_replaced += 1
+            upgrade_file(src_file, dst_file, f"scaffold/{rel_file}")
 
         # 3d: Copy any new directories that don't exist in target
         if src_scaffold_dir.is_dir():
@@ -596,14 +665,15 @@ def do_upgrade(args):
                     child_files = collect_files(src_child, src_child)
                     for src_file, rel_path in child_files:
                         copy_file(src_file, dst_child / rel_path, args.dry_run, args.verbose)
-                        files_replaced += 1
+                        files_added += 1
                     dirs_added += 1
 
         # 3e: Count preserved dirs for summary
+        preserved_dirs = 0
         if dst_scaffold_dir.is_dir():
             for dst_child in sorted(dst_scaffold_dir.iterdir()):
                 if dst_child.is_dir() and dst_child.name not in UPGRADE_REPLACE_DIRS:
-                    files_preserved += 1  # count as preserved directories
+                    preserved_dirs += 1
 
         # --- Step 4: Verification ---
         verify_installation(target, args.dry_run)
@@ -616,9 +686,12 @@ def do_upgrade(args):
         print(f"\n{'=' * 50}")
         print(f"{label}Upgrade summary:")
         print(f"  Source:            github.com/rmans/ClaudeScaffold ({args.branch})")
-        print(f"  Files replaced:    {files_replaced}")
-        print(f"  Skills refreshed:  {skills_installed}")
-        print(f"  User dirs kept:    {files_preserved}")
+        print(f"  Files updated:     {files_updated}")
+        print(f"  Files added:       {files_added}")
+        print(f"  Files removed:     {files_removed}")
+        print(f"  Files unchanged:   {files_unchanged}")
+        print(f"  Skills:            {skills_updated} updated, {skills_added} new, {skills_unchanged} unchanged")
+        print(f"  User dirs kept:    {preserved_dirs}")
         if dirs_added:
             print(f"  New dirs added:    {dirs_added}")
         print(f"  Target:            {target}")
