@@ -891,6 +891,18 @@ Outer Loop (iterations — fresh review of updated docs)
 
 Each topic gets its own review → respond → consensus cycle via the Python `doc-review.py` script. After topics complete, the per-doc mandatory interrogation runs for each doc in scope. Findings are deduplicated against topic results. After all topics and per-doc checks in one outer iteration, re-read updated docs and start the next outer iteration if issues remain.
 
+### Multi-Doc Parallelization
+
+When reviewing all engine docs (no `--target`), spawn parallel agents — one agent per doc. Each agent runs a **complete, self-contained review** of ONE engine doc — all per-doc topics, all exchanges, all iterations up to `--iterations` max, all adjudication, all edits. An agent is the same as running `iterate-engine --target <doc>` on that doc alone.
+
+1. **Build work list.** Identify all engine docs in scope. Log: "Reviewing N engine docs: coding-best-practices, scene-architecture, ..."
+2. **Spawn parallel agents.** One agent per doc, all spawned in parallel (use multiple Agent tool calls in a single message). Each agent receives the doc file, context files (Step 3 docs, design doc, glossary, other engine docs as read-only context, ADRs, known issues, design signals if provided), review config, and full topic/adjudication instructions.
+3. **Collect results.** As agents complete, log progress: "coding-best-practices.md — Issues: Y accepted, Z rejected (N of M complete)"
+4. **Cross-engine consistency check.** After ALL per-doc agents complete, run the cross-engine consistency topic across the full doc set. This evaluates naming conventions, pattern consistency, and cross-doc alignment.
+5. **Agent failure handling.** Failed agents retry once. If retry fails, report as "review failed" with the error. The overall review continues.
+
+When `--target` is specified, skip parallelization and review that single doc directly.
+
 **Stop conditions** (any one stops iteration):
 - **Clean** — a complete topic pass produces no new issues.
 - **Converged** — two consecutive passes produce the same issue set with no new findings.

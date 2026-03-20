@@ -212,10 +212,21 @@ Add `sleep 10` between topics to avoid rate limits, then proceed to the next top
 
 ## Step 4 — Iterate
 
+### Single-Task Review
+
 If `--iterations > 1`:
 
 1. After all 5 topics complete, re-read the task file (it may have been modified) and repeat the full topic loop on the updated content.
 2. Track reappearing issues. Two issues are considered the **same issue** if they match on all three criteria: (a) same document section (e.g., Step 3, Files Created, Files Modified, Verification), (b) same issue type (e.g., missing coverage, wrong file path, authority violation), and (c) same underlying problem, even if phrased differently by the reviewer across iterations. If the same issue appears in 2+ iterations, escalate to the user.
+
+### Range Review
+
+For a range (e.g., `TASK-001-TASK-050`), **every task in the range must be reviewed**. The range is a work list. Reviewing one task and stopping is a skill failure.
+
+1. **Build work list.** Glob all task files matching the range. Sort by ID. Log: "Reviewing N tasks: TASK-001, TASK-002, ..."
+2. **Spawn parallel agents.** One agent per task, all spawned in parallel (use multiple Agent tool calls in a single message). Each agent runs a **complete, self-contained review** of ONE task — all 5 topics, all exchanges, all iterations up to `--iterations` max, all adjudication, all edits. An agent is the same as running `iterate-task TASK-###` on that task alone. Each agent receives the task file, context files (parent spec, slice, system design, engine docs, architecture, authority, interfaces, reference docs, ADRs, known issues), review config, and full topic/adjudication instructions.
+3. **Collect results.** As agents complete, log progress: "TASK-### — Rating: X/5, Issues: Y accepted, Z rejected (N of M complete)"
+4. **Agent failure handling.** Failed agents retry once after all others complete. If retry fails, report as "review failed" with the error.
 
 **Stop conditions** (any one stops iteration):
 - **Clean:** No issues found in a full 5-topic pass.

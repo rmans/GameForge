@@ -197,10 +197,21 @@ Add `sleep 10` between topics to avoid rate limits, then proceed to the next top
 
 ## Step 4 — Iterate
 
+### Single-Spec Review
+
 If `--iterations > 1`:
 
 1. After all 6 topics complete, re-read the spec file (it may have been modified) and repeat the full topic loop on the updated content.
 2. Track reappearing issues. Two issues are considered the **same issue** if they match on all three criteria: (a) same spec section (e.g., Behavior step 3, AC-2), (b) same issue type (e.g., determinism, authority violation, missing failure path), and (c) same underlying problem, even if phrased differently by the reviewer across iterations. If the same issue appears in 2+ iterations, escalate to the user.
+
+### Range Review
+
+For a range (e.g., `SPEC-001-SPEC-030`), **every spec in the range must be reviewed**. The range is a work list. Reviewing one spec and stopping is a skill failure.
+
+1. **Build work list.** Glob all spec files matching the range. Sort by ID. Log: "Reviewing N specs: SPEC-001, SPEC-002, ..."
+2. **Spawn parallel agents.** One agent per spec, all spawned in parallel (use multiple Agent tool calls in a single message). Each agent runs a **complete, self-contained review** of ONE spec — all 6 topics, all exchanges, all iterations up to `--iterations` max, all adjudication, all edits. An agent is the same as running `iterate-spec SPEC-###` on that spec alone. Each agent receives the spec file, context files (system design, slice file, design doc, glossary, interfaces, authority, ADRs, known issues), review config, and full topic/adjudication instructions.
+3. **Collect results.** As agents complete, log progress: "SPEC-### — Rating: X/5, Issues: Y accepted, Z rejected (N of M complete)"
+4. **Agent failure handling.** Failed agents retry once after all others complete. If retry fails, report as "review failed" with the error.
 
 **Stop conditions** (any one stops iteration):
 - **Clean:** No issues found in a full 6-topic pass.

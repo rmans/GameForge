@@ -196,10 +196,21 @@ Add `sleep 10` between topics to avoid rate limits, then proceed to the next top
 
 ## Step 4 — Iterate
 
+### Single-Slice Review
+
 If `--iterations > 1`:
 
 1. After all 5 topics complete, re-read the slice file (it may have been modified) and repeat the full topic loop on the updated content.
 2. Track reappearing issues. Two issues are considered the **same issue** if they match on all three criteria: (a) same slice section (e.g., Goal, Integration Points, Demo Script), (b) same issue type (e.g., hidden prerequisite, scope leak, weak proof), and (c) same underlying problem, even if phrased differently by the reviewer across iterations. If the same issue appears in 2+ iterations, escalate to the user.
+
+### Range Review
+
+For a range (e.g., `SLICE-001-SLICE-010`), **every slice in the range must be reviewed**. The range is a work list. Reviewing one slice and stopping is a skill failure.
+
+1. **Build work list.** Glob all slice files matching the range. Sort by ID. Log: "Reviewing N slices: SLICE-001, SLICE-002, ..."
+2. **Spawn parallel agents.** One agent per slice, all spawned in parallel (use multiple Agent tool calls in a single message). Each agent runs a **complete, self-contained review** of ONE slice — all 5 topics, all exchanges, all iterations up to `--iterations` max, all adjudication, all edits. An agent is the same as running `iterate-slice SLICE-###` on that slice alone. Each agent receives the slice file, context files (phase file, specs, system designs, interfaces, design doc, glossary, ADRs, known issues), review config, and full topic/adjudication instructions.
+3. **Collect results.** As agents complete, log progress: "SLICE-### — Rating: X/5, Issues: Y accepted, Z rejected (N of M complete)"
+4. **Agent failure handling.** Failed agents retry once after all others complete. If retry fails, report as "review failed" with the error.
 
 **Stop conditions** (any one stops iteration):
 - **Clean:** No issues found in a full 5-topic pass.

@@ -75,7 +75,18 @@ Only include context files that exist — skip missing ones silently.
 
 ## Execution
 
-Follow the same topic loop, inner loop (exchanges), consensus, and apply-changes pattern as `/scaffold-iterate-slice`. The iteration mechanics, stop conditions, and review log creation are identical.
+### Single-Phase Review
+
+For a single phase, follow the standard topic loop, inner loop (exchanges), consensus, and apply-changes pattern. Run all topics sequentially with back-and-forth exchanges up to `--max-exchanges`, then iterate up to `--iterations` max.
+
+### Range Review
+
+For a range (e.g., `P1-001-P1-005`), **every phase in the range must be reviewed**. The range is a work list, not a suggestion. Reviewing one phase and stopping is a skill failure.
+
+1. **Build work list.** Glob all phase files matching the range. Sort by ID. Log: "Reviewing N phases: P1-001, P1-002, ..."
+2. **Spawn parallel agents.** One agent per phase, all spawned in parallel (use multiple Agent tool calls in a single message). Each agent runs a **complete, self-contained review** of ONE phase — all topics, all exchanges, all iterations up to `--iterations` max, all adjudication, all edits. An agent is the same as running `iterate-phase P#-###` on that phase alone. Each agent receives the phase file, context files (roadmap, design doc, glossary, systems index, ADRs, known issues), review config, and full topic/adjudication instructions.
+3. **Collect results.** As agents complete, log progress: "P#-### — Rating: X/5, Issues: Y accepted, Z rejected (N of M complete)"
+4. **Agent failure handling.** Failed agents retry once after all others complete. If retry fails, report as "review failed" with the error. The range review continues.
 
 **Stop conditions** (any one stops iteration):
 - **Clean** — a complete topic pass produces no new issues.

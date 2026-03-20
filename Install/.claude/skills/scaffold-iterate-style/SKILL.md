@@ -457,6 +457,20 @@ Outer Loop (iterations — fresh review of updated docs)
 └── Re-read updated docs → next outer iteration if issues remain
 ```
 
+### Multi-Doc Parallelization
+
+When reviewing all 6 style docs (no `--target`), spawn parallel agents for the per-doc topics (1-6) — one agent per doc. Each agent runs a **complete, self-contained review** of ONE style doc — its dedicated per-doc topic plus all exchanges, all iterations up to `--iterations` max, all adjudication, all edits. An agent is the same as running `iterate-style --target <doc>` on that doc alone.
+
+1. **Build work list.** Identify all 6 Step 5 docs. Log: "Reviewing 6 style docs: style-guide, color-system, ui-kit, interaction-model, feedback-system, audio-direction"
+2. **Run Topic 7 first** (cross-doc integration gate). If mandatory gates fail, apply fixes before spawning per-doc agents.
+3. **Spawn parallel agents.** One agent per doc, all spawned in parallel (use multiple Agent tool calls in a single message). Each agent receives the doc file, context files (design doc, other style docs as read-only context, system designs, glossary, ADRs, design signals if provided), review config, and full topic/adjudication instructions.
+4. **Collect results.** As agents complete, log progress: "style-guide.md — Issues: Y accepted, Z rejected (N of M complete)"
+5. **Re-run Topic 7** after ALL per-doc agents complete — cross-doc consistency may have changed from per-doc edits.
+6. **Agent failure handling.** Failed agents retry once. If retry fails, report as "review failed" with the error.
+
+When `--target` is specified, skip parallelization and review that single doc directly.
+```
+
 Each topic gets its own review → respond → consensus cycle via the Python `doc-review.py` script. Topic 7 runs first and can short-circuit: if a mandatory gate fails (end-to-end scenario, information load stress, or spec derivation), stop remaining per-doc topics for that iteration, apply accepted fixes, and restart from Topic 7 in the next iteration. Per-doc topics only run when Topic 7 passes.
 
 **Stop conditions** (any one stops iteration):
