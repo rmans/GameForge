@@ -212,15 +212,49 @@ Include these detection patterns in the reviewer's system prompt. They represent
 
 ## Execution
 
-Follow the same topic loop, inner loop (exchanges), consensus, and apply-changes pattern as `/scaffold-iterate-design`.
+### Single-System Review
+
+For a single system (e.g., `SYS-005`), follow the same topic loop, inner loop (exchanges), consensus, and apply-changes pattern as `/scaffold-iterate-design`. Run Topics 1-5 sequentially for that system.
+
+### Range Review
+
+For a range (e.g., `SYS-001-SYS-043`), **every system in the range must be reviewed**. The range is not a suggestion — it is a work list. Skipping systems is not acceptable.
+
+**Step 1 — Build the work list.**
+1. Glob all system files matching the range: `design/systems/SYS-*.md` where the ID falls within the specified range.
+2. Sort by ID number.
+3. Log the full work list: "Reviewing N systems: SYS-001, SYS-002, ..., SYS-043"
+4. If any IDs in the range have no matching file, note them as missing and continue with the rest.
+
+**Step 2 — Per-system review (Topics 1-3, 5).**
+For EACH system in the work list, sequentially:
+1. Load the system file and its context files (interaction partners, design doc, glossary, authority, interfaces).
+2. Run Topics 1, 2, 3, and 5 — each with its own back-and-forth exchange loop.
+3. Adjudicate and apply changes.
+4. Log progress: "Completed SYS-### (N of M) — Rating: X/5, Issues: Y accepted, Z rejected"
+5. Move to the next system. **Do not stop after one system.**
+
+Systems with no mutual dependency edges (per the Parallelization section) may be reviewed in parallel where the Python infrastructure supports it. Systems that list each other in Upstream Dependencies or Downstream Consequences must be reviewed sequentially.
+
+**Step 3 — Cross-system batch review (Topic 4).**
+After ALL per-system reviews in Step 2 are complete:
+1. Run Topic 4 (Cross-System Coherence) as a single batch across the full range.
+2. This evaluates the interaction graph — dependency symmetry, authority conflicts, handoff clarity, orphan detection, dependency cycles.
+3. Topic 4 findings may reference any system in the range.
+
+**Step 4 — Convergence check.**
+After the full pass (Steps 2-3), check convergence:
+- If no new issues were found across the entire range → stop.
+- If new issues exist → run another iteration, but only on systems that had accepted changes or unresolved escalations.
+- Maximum `--iterations` outer loops across the full range.
 
 **Stop conditions** (any one stops iteration):
-- **Clean** — a complete topic pass produces no new issues.
+- **Clean** — a complete pass across all systems produces no new issues.
 - **Converged** — two consecutive passes produce the same issue set with no new findings.
 - **Human-only** — only issues requiring user decisions remain; further iteration won't resolve them.
 - **Limit** — `--iterations` maximum reached.
 
-**For range reviews:** Review each system individually through all topics, but run Topic 4 (Cross-System Coherence) as a batch across the full range rather than per-system — cross-system issues only surface when reviewing the interaction graph.
+**Critical rule for ranges:** The skill MUST process every system in the work list before stopping. Reviewing one system and stopping is a skill failure, not convergence. Convergence is checked after a complete pass through the entire range, not after a single system.
 
 ### Issue Adjudication
 
