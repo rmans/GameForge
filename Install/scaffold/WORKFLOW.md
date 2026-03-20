@@ -1022,7 +1022,7 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 | `init-design` | Create/update design doc | Highest-authority document — everything flows from it | Ingests canon, classifies sections, pre-fills from existing docs, interviews for gaps. 4 modes: seed, fill-gaps, reconcile, refresh |
 | `fix-design` | Mechanical cleanup | Normalize structure before adversarial review | Auto-fixes template text, governance formats, terminology. Surfaces contradictions/drift for human decision |
 | `iterate-design` | Adversarial review | Catch coherence issues self-review misses | 6 topics — 5 structural (vision, experience, world, governance, scope) + 1 design interrogation (stress test). Design Identity Check + Design Choice Examination. External LLM reviewer |
-| `validate --scope design` | Structural gate | Confirm doc is ready to govern downstream work | 13 deterministic checks: structure, health, governance format, glossary, ADR consistency |
+| `validate --scope design` | Structural gate | Confirm doc is ready to govern downstream work | Markdown formatting pass (all scopes), then 13 deterministic checks: structure, health, governance format, glossary, ADR consistency |
 | `revise-design` | Post-implementation drift | Keep design doc matching accepted project reality | Reads ADRs/KIs/playtest/friction. Classifies design-led vs implementation-led. Auto-updates safe changes, escalates governance |
 
 ### Step 2 — Systems

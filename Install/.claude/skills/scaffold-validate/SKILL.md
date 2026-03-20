@@ -1,6 +1,6 @@
 ---
 name: scaffold-validate
-description: Run cross-reference and planning-pipeline validation across all scaffold documents. Reports broken references, missing registrations, glossary violations, synchronization drift across spec and task pipelines, engine doc structural integrity, Step 5 style doc validation (structure, tokens, boundaries, accessibility, design intent, signal clarity), Step 6 input doc validation (action traceability, binding coverage, collision detection, navigation completeness, upstream alignment), cross-cutting integrity (decision closure, workflow compliance, staleness), and cross-layer integrity (pipeline deadlock detection, change impact surface, orphan concepts, implementation coherence, semantic overlap). Outputs a Validation Verdict (PASS/WARN/FAIL) with severity-weighted issue counts. Enforcement mode blocks downstream progression on FAIL. Incremental mode validates only changed files and their dependents.
+description: Normalize markdown formatting and run cross-reference and planning-pipeline validation across all scaffold documents. Formatting pass (trailing whitespace, blank lines, heading spacing, table alignment, list markers, blockquote headers) runs first, then reports broken references, missing registrations, glossary violations, synchronization drift across spec and task pipelines, engine doc structural integrity, Step 5 style doc validation (structure, tokens, boundaries, accessibility, design intent, signal clarity), Step 6 input doc validation (action traceability, binding coverage, collision detection, navigation completeness, upstream alignment), cross-cutting integrity (decision closure, workflow compliance, staleness), and cross-layer integrity (pipeline deadlock detection, change impact surface, orphan concepts, implementation coherence, semantic overlap). Outputs a Validation Verdict (PASS/WARN/FAIL) with severity-weighted issue counts. Enforcement mode blocks downstream progression on FAIL. Incremental mode validates only changed files and their dependents.
 allowed-tools: Read, Edit, Write, Bash, Grep, Glob
 argument-hint: [--scope all|design|systems|foundation|roadmap|phases|slices|tasks|specs|refs|engine|style|input] [--range SYS-###-SYS-###] [--incremental]
 ---
@@ -54,6 +54,37 @@ When `--incremental` is provided, reduce the validation surface to only changed 
 5. **Report scope:** Add `[INCREMENTAL]` prefix to the report header. List which files triggered the validation and which dependents were included.
 
 If no scaffold files changed, report: **No scaffold changes detected. Skipping validation.**
+
+### 0c. Markdown Formatting Pass
+
+Before running any validation checks, normalize markdown formatting across all scaffold documents in scope. This pass modifies files in place — formatting changes are structural normalization, not content changes.
+
+**Scope:** When `--incremental` is set, format only files in the changed-or-dependent set. Otherwise, format all `.md` files under `scaffold/`. When `--scope` targets a specific layer, format only files in that layer's directories.
+
+**Formatting rules (applied in order):**
+
+1. **Trailing whitespace** — remove trailing spaces and tabs from every line.
+2. **Consecutive blank lines** — collapse runs of 2+ blank lines into exactly one blank line. Exception: inside fenced code blocks (` ``` `) — leave unchanged.
+3. **Heading spacing** — ensure exactly one blank line before every `#`-level heading (unless the heading is the first line of the file or immediately follows a blockquote header). Ensure exactly one blank line after every heading before body content.
+4. **List consistency** — normalize unordered list markers to `-` (not `*` or `+`). Do not change ordered list markers.
+5. **Table pipe alignment** — for each markdown table, align pipe characters so columns are consistently spaced. Pad cells with spaces to match the widest entry in each column. Preserve the separator row (`|---|`) pattern, adjusting dash counts to match column widths.
+6. **Blockquote header format** — normalize blockquote header fields (`> **Field:**`) to have exactly one space after `>`, bold field names, and a space after the colon before the value. Do not change field values.
+7. **Trailing newline** — ensure every file ends with exactly one newline character (no trailing blank lines, no missing final newline).
+8. **No leading BOM** — strip UTF-8 BOM if present.
+
+**What NOT to format:**
+- Content inside fenced code blocks (` ``` ... ``` `) — leave completely untouched.
+- HTML comments (`<!-- ... -->`) — leave untouched.
+- Indentation of nested lists — preserve existing indentation depth.
+- Table cell content — only adjust spacing, never change text.
+
+**Execution:**
+1. Glob the target `.md` files based on scope.
+2. For each file, read contents, apply rules 1-8 in order, write back only if changes were made.
+3. Track files modified: report count in the validation output as `**Formatted:** N files`.
+4. If no files needed formatting changes, report: `**Formatted:** 0 files (already clean)`.
+
+**This pass is silent on success.** It does not produce PASS/FAIL/WARN findings — it simply normalizes before checks run. Formatting changes are not logged as validation issues.
 
 ### 1. Run the Validator (scope: `all` or `refs`)
 
@@ -1213,6 +1244,7 @@ After the report table, always output a Validation Verdict block:
 ```
 ## Validation Verdict
 
+- **Formatted:** N files (or "0 files (already clean)")
 - **Status:** PASS | WARN | FAIL
 - **Critical Issues:** N
 - **High Issues:** N
@@ -1405,7 +1437,7 @@ For each failing check, suggest the specific edit needed:
 
 ## Rules
 
-- **Analysis-first, enforcement-aware, log-writing.** This skill analyzes scaffold documents and produces a Validation Verdict but does not fix issues. Use the suggested fix skill or `/scaffold-update-doc` to apply fixes. The only files this skill writes are `scaffold/decisions/validation-log.md` (verdict log) and — on `--scope all` only — `scaffold/decisions/cross-cutting-findings.md` (finding updates).
+- **Format-then-validate, enforcement-aware, log-writing.** This skill first normalizes markdown formatting across scaffold documents (Step 0c), then analyzes them and produces a Validation Verdict. The formatting pass modifies scaffold `.md` files in place (whitespace, blank lines, heading spacing, table alignment, list markers, blockquote headers). It does not fix content issues — use the suggested fix skill or `/scaffold-update-doc` for that. Beyond formatting, the only files this skill writes are `scaffold/decisions/validation-log.md` (verdict log) and — on `--scope all` only — `scaffold/decisions/cross-cutting-findings.md` (finding updates).
 - **Scoped runs write only the validation log.** When using `--scope style`, `--scope engine`, or any other single-scope argument, the skill writes only to `validation-log.md`. Cross-cutting findings (`cross-cutting-findings.md`) are updated only on `--scope all` runs, because cross-cutting checks span multiple layers and require full context.
 - **Run from project root.** The script expects `scaffold/` to be in the current directory.
 - **If the script fails**, check that Python 3 is available and `scaffold/tools/validate-refs.py` exists.

@@ -86,7 +86,7 @@
 | `/scaffold-sync-glossary` | `[--scope all\|design\|systems\|references\|style\|input] [--dry-run]` | Scan docs for glossary-worthy terms with worthiness gate and ambiguity detection |
 | `/scaffold-sync-reference-docs` | — | Sync reference docs after upstream changes |
 | **Validate** | | |
-| `/scaffold-validate` | `[--scope refs\|design\|systems\|foundation\|roadmap\|phases\|slices\|specs\|tasks\|engine\|style\|input\|all]` | Run cross-reference validation across scaffold docs |
+| `/scaffold-validate` | `[--scope refs\|design\|systems\|foundation\|roadmap\|phases\|slices\|specs\|tasks\|engine\|style\|input\|all]` | Normalize markdown formatting, then run cross-reference validation across scaffold docs |
 | **Playtest** | | |
 | `/scaffold-playtest-log` | `[session-type]` | Log playtester observations into the feedback tracker |
 | `/scaffold-playtest-review` | — | Analyze playtest feedback patterns with priority grid |
