@@ -13,7 +13,7 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
-VERSION = "2.27.3"
+VERSION = "2.28.0"
 GITHUB_ZIP_URL = "https://github.com/rmans/ClaudeScaffold/archive/refs/heads/{branch}.zip"
 EXCLUDE_DIRS = {"__pycache__"}
 SCAFFOLD_SKILL_PREFIX = "scaffold-"
@@ -282,7 +282,7 @@ def validate_target(target: Path):
 
 
 def download_and_extract(branch: str):
-    """Download from GitHub, extract, return (tmp_dir, install_dir)."""
+    """Download from GitHub, extract, return (tmp_dir, install_dir, repo_root)."""
     print(f"\n0. Downloading ClaudeScaffold ({branch})")
     tmp_dir = tempfile.mkdtemp(prefix="claudescaffold-")
     zip_path = Path(tmp_dir) / "repo.zip"
@@ -293,13 +293,15 @@ def download_and_extract(branch: str):
     with zipfile.ZipFile(zip_path, "r") as zf:
         zf.extractall(tmp_dir)
 
-    # Locate the Install/ directory inside the extracted archive
+    # Locate the Install/ directory and repo root inside the extracted archive
     extracted_dirs = [d for d in Path(tmp_dir).iterdir() if d.is_dir()]
     install_dir = None
+    repo_root = None
     for d in extracted_dirs:
         candidate = d / "Install"
         if candidate.is_dir():
             install_dir = candidate
+            repo_root = d
             break
 
     if install_dir is None:
@@ -308,7 +310,40 @@ def download_and_extract(branch: str):
         sys.exit(1)
 
     print(f"  Source: {install_dir}")
-    return tmp_dir, install_dir
+    return tmp_dir, install_dir, repo_root
+
+
+def self_update(repo_root: Path, dry_run: bool):
+    """Update claudescaffold.py itself from the downloaded archive. Returns True if updated."""
+    src_script = repo_root / "claudescaffold.py"
+    dst_script = Path(__file__).resolve()
+
+    if not src_script.is_file():
+        log("  WARNING: claudescaffold.py not found in downloaded archive — skipping self-update")
+        return False
+
+    if files_identical(src_script, dst_script):
+        log("  claudescaffold.py is already up to date")
+        return False
+
+    # Extract remote version for logging
+    remote_version = "unknown"
+    try:
+        for line in src_script.read_text(encoding="utf-8").splitlines():
+            if line.strip().startswith("VERSION"):
+                remote_version = line.split('"')[1]
+                break
+    except Exception:
+        pass
+
+    if dry_run:
+        log(f"  Would update claudescaffold.py ({VERSION} → {remote_version})")
+        return False
+
+    # Replace ourselves
+    shutil.copy2(src_script, dst_script)
+    log(f"  Updated claudescaffold.py ({VERSION} → {remote_version})")
+    return True
 
 
 def verify_installation(target: Path, dry_run: bool):
@@ -356,7 +391,7 @@ def do_install(args):
     target = Path(args.target).resolve()
     validate_target(target)
 
-    tmp_dir, install_dir = download_and_extract(args.branch)
+    tmp_dir, install_dir, _repo_root = download_and_extract(args.branch)
 
     try:
         # Source paths
@@ -484,9 +519,18 @@ def do_upgrade(args):
         print("  Use --install for first-time installation.", file=sys.stderr)
         sys.exit(1)
 
-    tmp_dir, install_dir = download_and_extract(args.branch)
+    tmp_dir, install_dir, repo_root = download_and_extract(args.branch)
 
     try:
+        # --- Step 0: Self-update ---
+        print("\n0b. Self-update check")
+        did_update = self_update(repo_root, args.dry_run)
+        if did_update:
+            # Re-exec with the updated script so the rest of the upgrade uses the new code
+            print("  Re-running with updated installer...")
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+
         src_claude_md = install_dir / "CLAUDE.md"
         src_claude_dir = install_dir / ".claude"
         src_scaffold_dir = install_dir / "scaffold"
