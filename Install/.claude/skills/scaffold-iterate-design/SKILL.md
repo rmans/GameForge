@@ -1,6 +1,6 @@
 ---
 name: scaffold-iterate-design
-description: Adversarial per-topic design doc review using an external LLM. Reviews the design document across 5 topics (vision coherence, player experience model, world & presentation integrity, governance mechanism quality, scope & content realism) with back-and-forth discussion. Use for deep design review beyond what fix-design catches.
+description: Adversarial per-topic design doc review using an external LLM. Reviews the design document across 6 topics — 5 structural (vision coherence, player experience model, world & presentation integrity, governance mechanism quality, scope & content realism) plus 1 design interrogation (design stress test — tries to break the game design itself). Use for deep design review beyond what fix-design catches.
 argument-hint: [--focus "concern"] [--iterations N]
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 ---
@@ -11,19 +11,24 @@ Run an adversarial per-topic review of the design document using an external LLM
 
 This skill reviews `design/design-doc.md` across 5 sequential topics, each with its own back-and-forth conversation. It uses the same Python infrastructure as iterate-roadmap/iterate-references/iterate-phase but with design-doc-optimized topics.
 
-The design doc is the highest authority for player-facing intent and non-breakable design rules. This review evaluates whether the document clearly and coherently describes the intended game — whether its sections agree, whether its governance mechanisms actually govern, and whether its scope claims are honest. It does not evaluate downstream documents — only the design doc itself.
+The design doc is the highest authority for player-facing intent and non-breakable design rules. This review operates in two modes:
 
-The real question this review answers: **will this document keep the project building the same game six months from now?**
+**Mode 1 — Structural Review (Topics 1-5):** Evaluates whether the document is internally consistent, well-governed, and honestly scoped. Catches contradictions, drift, and governance gaps. The question: *will this document keep the project building the same game six months from now?*
+
+**Mode 2 — Design Interrogation (Topic 6):** Tries to break the game design itself. Not "is this document well-formed?" but "will this game actually work?" Targets gameplay quality, player frustration, dominant strategies, engagement gaps, and emotional failure modes. The question: *where does this design fail in practice even if the document is perfect?*
+
+Both modes run every pass. Topics 1-5 validate the document. Topic 6 attacks the design.
 
 ## Topics
 
-| # | Topic | What It Evaluates |
-|---|-------|-------------------|
-| 1 | Vision Coherence & Identity Clarity | Does the design doc describe one game or several conflicting ones? |
-| 2 | Player Experience Model | Do the loops, control model, and decision architecture produce the intended experience? |
-| 3 | World & Presentation Integrity | Does the world, tone, camera, and information model support the core fantasy? |
-| 4 | Governance Mechanism Quality | Are invariants testable, anchors actionable, pressure tests realistic, gravity directions clear? |
-| 5 | Scope & Content Realism | Does the design doc describe a game with honest scope and believable player-facing complexity? |
+| # | Topic | Mode | What It Evaluates |
+|---|-------|------|-------------------|
+| 1 | Vision Coherence & Identity Clarity | Structural | Does the design doc describe one game or several conflicting ones? |
+| 2 | Player Experience Model | Structural | Do the loops, control model, and decision architecture produce the intended experience? |
+| 3 | World & Presentation Integrity | Structural | Does the world, tone, camera, and information model support the core fantasy? |
+| 4 | Governance Mechanism Quality | Structural | Are invariants testable, anchors actionable, pressure tests realistic, gravity directions clear? |
+| 5 | Scope & Content Realism | Structural | Does the design doc describe a game with honest scope and believable player-facing complexity? |
+| 6 | Design Stress Test | Interrogation | Where does this design break, bore, frustrate, or fail under real player behavior? |
 
 ### Topic 1 — Vision Coherence & Identity Clarity
 
@@ -152,14 +157,41 @@ Core question: *does this design doc describe a game whose complexity matches wh
    - 4 = solid design (internally consistent, governance works, minor soft spots)
    - 5 = strong design (sections reinforce the same vision, governance resolves real ambiguities, scope claims are honest)
 
+### Topic 6 — Design Stress Test
+
+**Mode: Design Interrogation.** The reviewer shifts from document auditor to game design attacker. The goal is to find where the design breaks, bores, or frustrates under real player behavior — even if the document is perfectly consistent.
+
+**Reviewer instruction:** "You are NOT checking documentation. You are trying to break the game design. Think as a player, a critic, and a rival designer simultaneously. Every issue must describe a concrete gameplay scenario, not a document structure concern."
+
+- **Control model stress** — Construct a specific scenario where the player desperately wants direct control but cannot have it. Does the design provide enough indirect tools to make the player feel satisfied rather than helpless? What is the emotional recovery path? If the design cannot answer "the player still feels agency here," the control model has a hole.
+- **Stable-state boredom test** — What does the player do for 10 uninterrupted minutes when nothing is going wrong? No crises, no alerts, no cascades. List the moment-to-moment decisions available. If the answer is "wait for something to break," the design depends on disruption for engagement and the core loop is weak between emergencies. Colony sims live or die on this question.
+- **Consequence tracing apathy** — The design promises traceable cause chains. What happens when the player doesn't care enough to trace? Most players won't dig into logs unless forced or rewarded. If traceability is intellectually strong but emotionally weak — if the player can ignore the logs and still play effectively — is the traceability a player experience or a developer safety net?
+- **Irreversibility tipping point** — Permanent scars, permanent deaths, irreversible power progression. At what point does the player feel locked out instead of invested? Identify the specific decision or accumulation threshold where irreversibility shifts from "meaningful weight" to "I should restart." If the design cannot describe that boundary, it doesn't know where its own punishment system breaks.
+- **Cognitive load ceiling** — The design claims high transparency and high data density. At what point does transparency become overload? More data does not equal more clarity. Describe the late-game information state: how many simultaneous systems must the player monitor, how many overlays, how many trends? Is this playable, or is it a full-time job?
+- **Dominant strategy search** — What is the most efficient strategy a min-maxer would find? Does it invalidate other systems? Does it bypass the core tension? If an optimizing player can avoid the instability loop entirely, or reduce it to a solved formula, the design's central conflict is decorative.
+- **Corporate loop dominance test** — Can the player ignore the corporate funding loop and still succeed? If yes, it's optional flavor. If no, it dominates the game and every other system is subordinate to evaluation optimization. Where does this loop actually sit in the priority hierarchy during play?
+- **Emotional failure mode** — When does the game stop being "tense and engaging" and become "exhausting and demoralizing"? Describe the specific colony state where the player's emotional experience crosses from the intended "dread + mastery" into "I don't want to play anymore." What recovery mechanism prevents this?
+- **Fantasy-mechanics convergence** — Based purely on the mechanics described (not the flavor text), what does the player actually spend 80% of their time doing? Does that activity match the Core Fantasy, or does the fantasy describe one experience while the mechanics produce another? If the answer is "reading panels and adjusting numbers" but the fantasy says "custodial dread," is there enough dread in the panel-reading to carry the fantasy?
+- **New player cliff** — The design says "familiar problems, unfamiliar tools." At what exact moment does the unfamiliar tool set stop feeling like a fresh challenge and start feeling like a missing feature? When does "I can't click on colonists" go from "oh interesting" to "why can't I just tell them what to do"? What keeps the player past that moment?
+
+Core question: *would you actually play this game for 20 hours, and if you'd stop before that, why?*
+
+**Topic 6 adjudication rules:**
+- Issues from Topic 6 are gameplay concerns, not document defects. They should be classified as:
+  - **Design risk** — a real concern the design should acknowledge (add to known issues or pressure tests)
+  - **Already mitigated** — the design addresses this but the reviewer missed it (cite the specific section)
+  - **Escalate to user** — a genuine design question only the designer can answer
+- Topic 6 issues do NOT result in design doc edits unless the user explicitly accepts a design change. They result in awareness, known issues, or new pressure tests.
+- Do not reject Topic 6 issues for being "not a document problem." That's the point — they're design problems.
+
 ## Arguments
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `--focus` | No | -- | Narrow the review within each topic to a specific concern |
-| `--iterations` | No | 10 | Maximum outer loop iterations (full 5-topic cycles). Stops early on convergence — if a pass produces no new issues, iteration ends. |
-| `--topic` | No | all | Review only a specific topic (1-5) |
-| `--sections` | No | all | Comma-separated section groups that changed (e.g., `"Identity,Shape"`). Automatically selects only the topics relevant to those sections instead of running all 5. Used by the revision loop to scope iterate to just the changed areas. Section-to-topic mapping: Identity → Topics 1,4; Shape → Topics 1,2; Control → Topics 2,3; World → Topic 3; Presentation → Topic 3; Content → Topic 5; System Domains → Topics 2,5; Philosophy → Topics 4,5; Scope → Topic 5. Deduplicates — if multiple sections map to the same topic, it runs once. |
+| `--iterations` | No | 10 | Maximum outer loop iterations (full 6-topic cycles). Stops early on convergence — if a pass produces no new issues, iteration ends. |
+| `--topic` | No | all | Review only a specific topic (1-6) |
+| `--sections` | No | all | Comma-separated section groups that changed (e.g., `"Identity,Shape"`). Automatically selects only the topics relevant to those sections instead of running all 6. Used by the revision loop to scope iterate to just the changed areas. Section-to-topic mapping: Identity → Topics 1,4,6; Shape → Topics 1,2,6; Control → Topics 2,3,6; World → Topic 3; Presentation → Topic 3; Content → Topic 5; System Domains → Topics 2,5; Philosophy → Topics 4,5; Scope → Topic 5. Topic 6 runs whenever any gameplay-affecting section changes. Deduplicates — if multiple sections map to the same topic, it runs once. |
 | `--max-exchanges` | No | 5 | Maximum back-and-forth exchanges per topic |
 
 ## Preflight
@@ -287,6 +319,7 @@ Create review log in `scaffold/decisions/review/`:
 | 3. World & Presentation Integrity | N | N | N |
 | 4. Governance Mechanism Quality | N (or "skipped") | N | N |
 | 5. Scope & Content Realism | N | N | N |
+| 6. Design Stress Test | N | N | N |
 
 **Design Strength Rating:** N/5 — [one-line reason]
 **Iterations:** N completed / M max [early stop: yes/no]

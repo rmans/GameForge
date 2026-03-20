@@ -44,7 +44,7 @@
 | `/scaffold-fix-input` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for Step 6 input docs |
 | `/scaffold-fix-cross-cutting` | — | Resolve cross-document integrity findings |
 | **Iterate** | | |
-| `/scaffold-iterate-design` | `[--topic N] [--iterations N]` | Adversarial per-topic design doc review |
+| `/scaffold-iterate-design` | `[--topic N] [--iterations N]` | Adversarial per-topic design doc review (5 structural + 1 design stress test) |
 | `/scaffold-iterate-systems` | `[SYS-### or SYS-###-SYS-###]` | Adversarial per-topic system design review |
 | `/scaffold-iterate-references` | `[--target doc.md] [--topic N]` | Adversarial per-topic Step 3 docs review |
 | `/scaffold-iterate-engine` | `[--target doc.md] [--topic N]` | Adversarial per-topic engine doc review |
