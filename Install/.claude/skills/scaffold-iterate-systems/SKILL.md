@@ -269,6 +269,8 @@ After the full pass (Steps 2-4), check convergence:
 - **Human-only** — only issues requiring user decisions remain; further iteration won't resolve them.
 - **Limit** — `--iterations` maximum reached.
 
+**Verification pass rule:** A pass that found issues and applied fixes is NOT clean — it is a “fixed” pass. After a fixed pass, you MUST run at least one more full pass on the updated document to verify no new issues were introduced by the fixes and no previously-hidden issues are now exposed. Only a pass that finds ZERO new issues counts as **Clean**. Stopping after fixing issues without a verification pass is a skill failure.
+
 **Agent failure handling:**
 - If an agent fails (Python script error, API error, timeout), log the failure and continue with remaining agents. Do not abort the entire range.
 - Failed systems are retried once after all other agents complete. If retry also fails, report the system as "review failed" with the error.

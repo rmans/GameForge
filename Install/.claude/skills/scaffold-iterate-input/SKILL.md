@@ -349,6 +349,8 @@ When `--target` is specified, skip parallelization and review that single doc di
 - **Human-only** — only issues requiring user decisions remain.
 - **Limit** — `--iterations` maximum reached.
 
+**Verification pass rule:** A pass that found issues and applied fixes is NOT clean — it is a “fixed” pass. After a fixed pass, you MUST run at least one more full pass on the updated document to verify no new issues were introduced by the fixes and no previously-hidden issues are now exposed. Only a pass that finds ZERO new issues counts as **Clean**. Stopping after fixing issues without a verification pass is a skill failure.
+
 **Budget priority:** When `--topics` is omitted and `--iterations` is low (≤ 3), run Topic 6 first. Topic 6 is the highest-value topic — it catches integration failures that per-doc reviews miss.
 
 ### Review Consistency Lock

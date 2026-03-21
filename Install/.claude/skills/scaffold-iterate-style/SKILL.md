@@ -479,6 +479,8 @@ Each topic gets its own review → respond → consensus cycle via the Python `d
 - **Human-only** — only issues requiring user decisions remain; further iteration won't resolve them.
 - **Limit** — `--iterations` maximum reached.
 
+**Verification pass rule:** A pass that found issues and applied fixes is NOT clean — it is a “fixed” pass. After a fixed pass, you MUST run at least one more full pass on the updated document to verify no new issues were introduced by the fixes and no previously-hidden issues are now exposed. Only a pass that finds ZERO new issues counts as **Clean**. Stopping after fixing issues without a verification pass is a skill failure.
+
 ### Review Consistency Lock
 
 Across iterations and topics, resolved issues are locked. Once an issue is **accepted and fixed** or **explicitly rejected with reasoning**, it must not be re-litigated.

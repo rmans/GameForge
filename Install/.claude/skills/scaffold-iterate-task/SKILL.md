@@ -234,6 +234,8 @@ For a range (e.g., `TASK-001-TASK-050`), **every task in the range must be revie
 - **Converged:** Changes were applied but no further issues remain after applying them.
 - **Limit:** Iteration limit reached.
 
+**Verification pass rule:** A pass that found issues and applied fixes is NOT clean — it is a "fixed" pass. After a fixed pass, you MUST run at least one more full pass on the updated document to verify no new issues were introduced by the fixes and no previously-hidden issues are now exposed. Only a pass that finds ZERO new issues counts as **Clean**. Stopping after fixing issues without a verification pass is a skill failure.
+
 ### Review Consistency Lock
 
 Across iterations and topics, resolved issues are locked. Once an issue is **accepted and fixed** or **explicitly rejected with reasoning**, it must not be re-litigated.
