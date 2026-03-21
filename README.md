@@ -24,7 +24,7 @@ Every design decision, visual style rule, system behavior, interface contract, a
 - **Draft → Review → Approved → Complete lifecycle.** Documents start as `Draft`, move through adversarial review via `/scaffold-iterate-*`, are set to `Approved` by approval gates, and marked `Complete` by `/scaffold-complete` when implementation is done. Completion ripples up from tasks through specs, slices, and phases.
 - **Token-efficient retrieval.** Index files in every directory let Claude find what it needs without loading entire folders.
 - **Asset requirements in specs.** Specs identify what art and audio the behavior needs, scan for reusable assets, and track production status. Tasks wire the ready assets.
-- **78 skills automate the pipeline.** Create, seed, fix, iterate, revise, approve, implement, generate art/audio, and edit documents with slash commands — no manual file wrangling.
+- **79 skills automate the pipeline.** Create, seed, fix, iterate, revise, approve, implement, file decisions, generate art/audio, and edit documents with slash commands — no manual file wrangling.
 
 ## How It Works
 
@@ -166,6 +166,7 @@ See [Install/README.md](Install/README.md) for full installation details.
 | **Complete (1)** | `complete` |
 | **Edit (3)** | `update-doc`, `sync-reference-docs`, `sync-glossary` |
 | **Validate (1)** | `validate` |
+| **Decisions (1)** | `file-decision` |
 | **Playtest (2)** | `playtest-log`, `playtest-review` |
 | **Art (7)** | `art-concept`, `art-ui-mockup`, `art-character`, `art-environment`, `art-sprite`, `art-icon`, `art-promo` |
 | **Audio (4)** | `audio-music`, `audio-sfx`, `audio-ambience`, `audio-voice` |

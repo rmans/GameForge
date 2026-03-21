@@ -145,6 +145,7 @@ See `scaffold/WORKFLOW.md` for the full 24-step recipe.
 | **Complete** | `complete` |
 | **Edit** | `update-doc`, `sync-reference-docs`, `sync-glossary` |
 | **Validate** | `validate` |
+| **Decisions** | `file-decision` |
 | **Playtest** | `playtest-log`, `playtest-review` |
 | **Art** | `art-concept`, `art-ui-mockup`, `art-character`, `art-environment`, `art-sprite`, `art-icon`, `art-promo` |
 | **Audio** | `audio-music`, `audio-sfx`, `audio-ambience`, `audio-voice` |

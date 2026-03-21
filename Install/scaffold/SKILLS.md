@@ -87,6 +87,8 @@
 | `/scaffold-sync-reference-docs` | — | Sync reference docs after upstream changes |
 | **Validate** | | |
 | `/scaffold-validate` | `[--scope refs\|design\|systems\|foundation\|roadmap\|phases\|slices\|specs\|tasks\|engine\|style\|input\|all]` | Normalize markdown formatting, then run cross-reference validation across scaffold docs |
+| **Decisions** | | |
+| `/scaffold-file-decision` | `--type adr\|ki\|dd "title"` | File an ADR, Known Issue, or Design Debt entry with cross-references |
 | **Playtest** | | |
 | `/scaffold-playtest-log` | `[session-type]` | Log playtester observations into the feedback tracker |
 | `/scaffold-playtest-review` | — | Analyze playtest feedback patterns with priority grid |
