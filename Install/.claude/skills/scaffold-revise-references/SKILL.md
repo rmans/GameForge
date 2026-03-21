@@ -190,8 +190,8 @@ Present using the Human Decision Presentation pattern:
 
 **Options:**
 a) Update reference doc to match implementation — [implication, cross-doc effects]
-b) File an ADR to correct the implementation — [implication]
-c) Defer — log in known-issues.md for future resolution
+b) file via `/scaffold-file-decision --type adr` to correct the implementation — [implication]
+c) Defer — file via `/scaffold-file-decision --type ki` for future resolution
 
 **Likely follow-up:** [fix-references --target X / iterate-references --target X / validate --scope refs / none]
 ```

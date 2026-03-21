@@ -178,7 +178,7 @@ Core question: *would you actually play this game for 20 hours, and if you'd sto
 
 **Topic 6 adjudication rules:**
 - Issues from Topic 6 are gameplay concerns, not document defects. They should be classified as:
-  - **Design risk** — a real concern the design should acknowledge (add to known issues or pressure tests)
+  - **Design risk** — a real concern the design should acknowledge (file via `/scaffold-file-decision --type ki` or add to pressure tests)
   - **Already mitigated** — the design addresses this but the reviewer missed it (cite the specific section)
   - **Escalate to user** — a genuine design question only the designer can answer
 - Topic 6 issues do NOT result in design doc edits unless the user explicitly accepts a design change. They result in awareness, known issues, or new pressure tests.

@@ -182,8 +182,8 @@ Present using the Human Decision Presentation pattern (see WORKFLOW.md):
 
 **Options:**
 a) Update system doc to match implementation — [implication]
-b) File an ADR to correct the implementation — [implication]
-c) Defer — log in known-issues.md for future resolution
+b) file via `/scaffold-file-decision --type adr` to correct the implementation — [implication]
+c) Defer — file via `/scaffold-file-decision --type ki` for future resolution
 
 **Likely follow-up:** [iterate-systems Topics N,N / revise-design / revise-foundation / none]
 ```

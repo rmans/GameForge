@@ -256,7 +256,7 @@ Present using the Human Decision Presentation pattern:
 **Options:**
 a) Update engine doc to match — [implication, what changes, any downstream task impact]
 b) Keep engine doc, update implementation — [implication, what code needs changing]
-c) Defer — log in known-issues.md for future resolution
+c) Defer — file via `/scaffold-file-decision --type ki` for future resolution
 
 **Likely follow-up:** [fix-engine --target X / iterate-engine --target X / validate --scope engine / none]
 ```

@@ -347,7 +347,7 @@ For each signal in the Normalized Signals table:
 | SIG-003 | Philosophy-binding conflict | High | Partially Resolved | KBM bindings updated, gamepad still pending | default-bindings-kbm.md |
 ```
 
-**Completion gate:** The revision cycle is complete only when ALL signals are either Resolved or explicitly deferred with tracking (logged in known-issues.md with the Signal ID reference). Partially Resolved and Unresolved signals of severity High or Critical block completion.
+**Completion gate:** The revision cycle is complete only when ALL signals are either Resolved or explicitly deferred with tracking (filed via `/scaffold-file-decision --type ki` with the Signal ID reference). Partially Resolved and Unresolved signals of severity High or Critical block completion.
 
 ### Step 6 — Report
 

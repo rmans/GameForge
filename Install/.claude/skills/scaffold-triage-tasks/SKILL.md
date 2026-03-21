@@ -157,7 +157,7 @@ This prevents the classic bug where everything works until the player saves and 
 
 Read `scaffold/decisions/known-issues.md`. If any open known issue affects systems or behaviors that tasks in this slice implement, check whether the tasks account for it (as a step, verification check, or noted constraint). If not, record as a **Scope** issue.
 
-If triage discovers a new problem that doesn't fit task-level resolution (architectural smell, performance concern, system coupling), recommend adding it to `known-issues.md` rather than creating a task to fix it.
+If triage discovers a new problem that doesn't fit task-level resolution (architectural smell, performance concern, system coupling), recommend filing via `/scaffold-file-decision --type ki` rather than creating a task to fix it.
 
 ### 1o. Deduplicate Issues
 
@@ -286,7 +286,7 @@ For each decision the user makes:
 1. Add a note to the task: `> **Known risk:** KI-### — [description]. Proceeding despite blocker.`
 
 ### Defer
-1. Add a design debt entry to `scaffold/decisions/design-debt.md` if one doesn't exist.
+1. File via `/scaffold-file-decision --type dd` if a design debt entry doesn't already exist.
 2. Add a note to the task referencing the DD-### entry.
 
 ### Ownership

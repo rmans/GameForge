@@ -69,7 +69,7 @@ Show the user:
 - The file path and assigned ID
 - ADRs that influenced the task (if any)
 - The parent spec and slice
-- Remind the user: if conflicts or ambiguities arise during implementation, file an ADR with `/scaffold-update-doc`
+- Remind the user: if conflicts or ambiguities arise during implementation, file via `/scaffold-file-decision --type adr`
 
 ## Rules
 

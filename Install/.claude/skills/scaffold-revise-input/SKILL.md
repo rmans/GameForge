@@ -235,7 +235,7 @@ Present using the Human Decision Presentation pattern:
 **Options:**
 a) Update input doc to match — [implications, cross-doc effects]
 b) Keep input doc, update implementation/upstream — [implications]
-c) Defer — log in known-issues.md for future resolution
+c) Defer — file via `/scaffold-file-decision --type ki` for future resolution
 
 **Likely follow-up:** [fix-input / iterate-input --topics N / validate --scope input / none]
 ```

@@ -67,7 +67,7 @@ Cross-reference specs with `scaffold/design/authority.md`. If a spec implies cro
 
 Read `scaffold/decisions/known-issues.md`. If any open known issue affects a system or behavior covered by specs in this slice, check whether the specs account for it (as an edge case, constraint, or AC). If not, record as a **Scope** issue — the spec may need to address the known constraint.
 
-If triage discovers a new issue that doesn't fit any existing category (e.g., an architectural smell, performance concern, or system coupling problem), recommend adding it to `known-issues.md` rather than trying to resolve it as a spec change.
+If triage discovers a new issue that doesn't fit any existing category (e.g., an architectural smell, performance concern, or system coupling problem), recommend filing via `/scaffold-file-decision --type ki` rather than trying to resolve it as a spec change.
 
 ### 1j. Check ADR Compliance
 

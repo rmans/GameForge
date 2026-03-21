@@ -228,7 +228,7 @@ Write to `scaffold/decisions/revision-logs/REVISION-post-P#-###.md`. If the file
 - **Four-tier classification: direct-apply, confirmation-required (widening), confirmation-required (weakening), ADR-required (invalidation).** Direct-apply changes proceed without user pause. Only confirmation and ADR items stop for decisions.
 - **Safe refinements must preserve or strengthen milestone meaning.** Clarifying, constraining, or sharpening is safe. Reducing exit rigor, narrowing deliverables, or moving core work out is milestone weakening — not safe refinement.
 - **Never change an Approved phase's Goal without explicit user request.** The goal is what the phase was approved to deliver.
-- **Never remove something a Complete slice delivered.** That contradicts existing implementation — file an ADR instead.
+- **Never remove something a Complete slice delivered.** That contradicts existing implementation — file via `/scaffold-file-decision --type adr` instead.
 - **Explicit edit boundaries.** This skill may edit: Approved phase editable sections, Draft phase all sections. This skill must never edit: completed phases, roadmap ordering, phase IDs, slice/spec/task docs, architecture docs, or ADRs themselves.
 - **Write a persistent revision log every run.** Even no-op runs log that no revisions were needed.
 - **Revisions must be grounded in feedback.** Revised scope should preserve alignment with higher-authority documents and the intended final architecture, without introducing speculative scope not supported by implementation feedback.

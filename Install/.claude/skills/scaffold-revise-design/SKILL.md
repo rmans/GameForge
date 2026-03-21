@@ -211,8 +211,8 @@ Present using the Human Decision Presentation pattern (see WORKFLOW.md):
 
 **Options:**
 a) Update the design doc to match implementation — [implication]
-b) File an ADR to change the implementation to match design — [implication]
-c) Defer — log in known-issues.md for future resolution
+b) file via `/scaffold-file-decision --type adr` to change the implementation to match design — [implication]
+c) Defer — file via `/scaffold-file-decision --type ki` for future resolution
 ```
 
 Wait for the user's decision on each escalation before proceeding.

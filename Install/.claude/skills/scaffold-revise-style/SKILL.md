@@ -276,7 +276,7 @@ Present using the Human Decision Presentation pattern:
 **Options:**
 a) Update style doc to match — [implication, cross-doc effects, which other Step 5 docs need updating]
 b) Keep style doc, update implementation — [implication, what code/upstream needs changing]
-c) Defer — log in known-issues.md for future resolution
+c) Defer — file via `/scaffold-file-decision --type ki` for future resolution
 
 **Likely follow-up:** [fix-style --target X / iterate-style --target X --topics "affected" / validate --scope style / none]
 ```

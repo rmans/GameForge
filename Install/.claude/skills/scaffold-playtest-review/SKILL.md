@@ -51,8 +51,8 @@ List specific PF-### IDs in each cell. Flag any "ACT NOW" entries that don't yet
 For each ACT NOW and WATCH CLOSELY entry, recommend one of:
 
 - **Create a spec** — the issue needs a behavior change. Suggest a spec name.
-- **File a known issue** — the issue needs investigation. Suggest a KI entry.
-- **File design debt** — the issue is understood but deferred. Suggest a DD entry.
+- **File a known issue** — the issue needs investigation. File via `/scaffold-file-decision --type ki`.
+- **File design debt** — the issue is understood but deferred. File via `/scaffold-file-decision --type dd`.
 - **Update an existing spec** — the issue affects an already-defined behavior. Identify which spec.
 - **Add to phase scope** — the issue should be addressed in the next phase. Identify which phase.
 - **Protect** — (for Delight entries) ensure upcoming changes don't break what players love.

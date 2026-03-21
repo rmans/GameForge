@@ -54,7 +54,7 @@ These indicate Approved/Complete docs with unresolved TODO/TBD/Open Questions.
    - **Resolvable now** — the information exists elsewhere in the scaffold (upstream doc, ADR, system design). Auto-fill the answer and remove the marker.
    - **Needs user decision** — the marker represents a genuine open question. Present options:
      - (a) **Resolve** — user provides the answer, skill writes it and removes the marker.
-     - (b) **Defer** — file in known-issues.md or reference an existing ADR. Mark finding as Deferred with tracking reference.
+     - (b) **Defer** — file via `/scaffold-file-decision --type ki` or reference an existing ADR. Mark finding as Deferred with tracking reference.
      - (c) **Downgrade status** — revert the doc from Approved back to Draft. This requires: rename file suffix with `git mv` (`_approved` → `_draft`), update the internal `Status:` field to `Draft`, update `_index.md` status column, and update any parent doc tables that reflect this doc's status (e.g., slice Specs/Tasks tables, phase Slice Strategy). Mark finding as Resolved (the closure requirement no longer applies at Draft).
    - **Constrained TODO** — the marker is legitimately blocked on an unresolved upstream decision. Most common in engine docs (blocked on Step 3), but can appear in any doc type where a section depends on an upstream decision not yet made. Verify the blocking decision is still unresolved. If so, mark finding as Acknowledged with reason "blocked on [upstream doc/decision]". If the blocking decision was resolved, auto-fill and remove the marker.
 
@@ -95,12 +95,12 @@ These indicate upstream docs changed after downstream docs were stabilized.
    - **Minor impact** — the downstream doc needs a small update (terminology, reference, section name). Auto-apply the edit. Mark finding as Resolved.
    - **Uncertain impact** — insufficient evidence to determine whether the upstream change materially affects the downstream doc. Present options:
      - (a) **Inspect manually** — user reads both docs and makes the call.
-     - (b) **Defer** — add to known-issues.md with the staleness note. Mark finding as Deferred.
+     - (b) **Defer** — file via `/scaffold-file-decision --type ki` with the staleness note. Mark finding as Deferred.
      - (c) **Restabilize conservatively** — dispatch fix/iterate for the downstream doc even though impact is unclear. Safer but more expensive.
    - **Major impact** — the downstream doc needs restabilization. Present options:
      - (a) **Restabilize** — dispatch the appropriate fix/iterate skill for the downstream doc type. Mark finding as **Still Open** with note "Restabilization dispatched via [command]". Only mark Resolved after fix + iterate complete and re-check confirms the issue no longer reproduces.
-     - (b) **Defer** — the downstream doc is still usable as-is despite upstream drift. Add to known-issues.md with the staleness note. Mark finding as Deferred.
-     - (c) **Escalate** — the upstream change implies a broader architecture shift. File an ADR stub. Mark finding as Deferred with ADR reference.
+     - (b) **Defer** — the downstream doc is still usable as-is despite upstream drift. File via `/scaffold-file-decision --type ki` with the staleness note. Mark finding as Deferred.
+     - (c) **Escalate** — the upstream change implies a broader architecture shift. File via `/scaffold-file-decision --type adr`. Mark finding as Deferred with ADR reference.
 
 4. After resolving, update the finding's Status in cross-cutting-findings.md.
 
