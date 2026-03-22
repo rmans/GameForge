@@ -392,7 +392,7 @@ This is a lightweight post-edit validation, not a full `/scaffold-validate --sco
 
 ### Next Steps
 - Run `/scaffold-fix-style [--target X]` to clean up mechanical issues from updates
-- Run `/scaffold-iterate-style [--target X --topics "affected"]` to review changed areas
+- Run `/scaffold-iterate style [--target X --topics "affected"]` to review changed areas
 - Run `/scaffold-validate --scope style` to confirm structural readiness
 ```
 

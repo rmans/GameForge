@@ -1,0 +1,249 @@
+# task.yaml — Iterate config for implementation tasks (Step 11)
+# Three-pass review: L3 (subsections) → L2 (sections) → L1 (document)
+
+layer: task
+display_name: "Implementation Task"
+target_pattern: "tasks/TASK-*.md"
+target_type: range
+
+preflight:
+  required_files: []
+  glob_pattern: "tasks/TASK-*-*.md"
+  critical_sections: ["Implements", "Steps", "Summary"]
+  blocked_message: "Task is too incomplete for adversarial review."
+
+context_files:
+  static:
+    - design/architecture.md
+    - design/glossary.md
+    - scaffold/doc-authority.md
+  dynamic:
+    - pattern: "decisions/architecture-decision-record/ADR-*.md"
+      filter: "status: Accepted"
+  per_target:
+    - type: parent_spec
+      description: "Parent spec file (follow Implements: SPEC-###)"
+    - type: parent_system
+      description: "Parent system design (follow spec's system reference)"
+    - type: signal_registry
+      file: reference/signal-registry.md
+    - type: relevant_engine_docs
+      description: "Engine docs from scaffold/engine/ relevant to the task domain"
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L3 — Subsection Review (### level)
+# ---------------------------------------------------------------------------
+
+l3_sections:
+
+  # -- Goal --
+
+  "### Objective":
+    parent: "## Goal"
+    questions:
+      - "Is this one sentence that describes what this task produces?"
+      - "Does it connect to the parent spec?"
+
+  "### Deliverable":
+    parent: "## Goal"
+    questions:
+      - "Is it concrete — what should exist when this task is done?"
+      - "Is it more specific than the Objective?"
+
+  "### Out of Scope":
+    parent: "## Goal"
+    questions:
+      - "Does it prevent task bloat?"
+      - "Are exclusions specific?"
+
+  # -- Implementation --
+
+  "### Steps":
+    parent: "## Implementation"
+    questions:
+      - "Is each step concrete and verifiable — can a developer follow it without guessing?"
+      - "Are steps in the right execution order?"
+      - "Are file paths correct?"
+      - "Are the right engine patterns used?"
+      - "Do steps cover all acceptance criteria from the parent spec?"
+
+  "### Files Created":
+    parent: "## Implementation"
+    questions:
+      - "Are all new files listed with their purpose?"
+      - "Do file paths follow engine conventions?"
+
+  "### Files Modified":
+    parent: "## Implementation"
+    questions:
+      - "Are all modified files listed?"
+      - "Are modifications consistent with the steps?"
+
+  "### Data Tables":
+    parent: "## Implementation"
+    questions:
+      - "Are balance parameters in CSV, not hardcoded?"
+      - "Are content definitions using string IDs?"
+
+  "### Diagnostics":
+    parent: "## Implementation"
+    questions:
+      - "Are [DIAG] warnings at key decision points?"
+      - "Are new invariants added to _validate_state()?"
+
+  "### Localization":
+    parent: "## Implementation"
+    questions:
+      - "Are all player-visible strings using tr() with keys in strings.csv?"
+      - "Are debug strings correctly exempted?"
+
+  # -- Testing --
+
+  "### Regression Tests":
+    parent: "## Testing"
+    questions:
+      - "Are all 6 layers addressed (or explicitly skipped with reason)?"
+      - "Do tests cover the parent spec's acceptance criteria?"
+      - "Are edge cases from the parent spec tested?"
+      - "Are cross-system integration points tested?"
+
+  "### GUT Unit Tests":
+    parent: "## Testing"
+    questions:
+      - "Are GDScript-layer behaviors tested?"
+      - "Is this section correctly skipped for pure C++ tasks?"
+
+  "### GDScript Lint":
+    parent: "## Testing"
+    questions:
+      - "Is lint required for all changed .gd files?"
+
+  "### Manual Playtest Checklist":
+    parent: "## Testing"
+    questions:
+      - "Does each item have Setup, Action, Expected Result, Pass/Fail?"
+      - "Does it focus on things automated tests cannot verify?"
+
+  # -- Verification --
+
+  "### Summary":
+    parent: "## Verification"
+    questions:
+      - "Does it include build check and diagnostics check?"
+      - "Does it cover both automated and manual verification?"
+
+  "### Verification Mapping":
+    parent: "## Verification"
+    questions:
+      - "Does every parent spec AC map to a verification step?"
+      - "Are there unmapped ACs?"
+
+  # -- Risk & Notes --
+
+  "### Risks":
+    parent: "## Risk & Notes"
+    questions:
+      - "Are risks task-local execution risks, not design risks?"
+      - "Where is the implementer most likely to break things?"
+
+  "### Notes":
+    parent: "## Risk & Notes"
+    questions:
+      - "Are there gotchas or engine doc references that would help?"
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Goal":
+    questions:
+      - "Do Objective, Deliverable, and Out of Scope define a clear, bounded unit of work?"
+      - "Does the goal connect to the parent spec's acceptance criteria?"
+
+  "## Implementation":
+    questions:
+      - "Do Steps, Files, Data Tables, Diagnostics, and Localization form a complete implementation plan?"
+      - "Does the task follow architecture.md conventions (tick order, signal wiring, data flow)?"
+      - "Are there steps that redefine behavior (spec territory) rather than implement it?"
+
+  "## Testing":
+    questions:
+      - "Do the four testing subsections together provide complete coverage?"
+      - "Are regression tests structured across all 6 layers?"
+      - "Do tests verify the parent spec's acceptance criteria?"
+
+  "## Verification":
+    questions:
+      - "Does the verification mapping prove spec coverage is complete?"
+      - "Are there ACs that no verification step addresses?"
+
+  "## Risk & Notes":
+    questions:
+      - "Are the right risks identified — where will things actually break?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Does this task implement all relevant acceptance criteria from its parent spec?"
+  - "Does it follow the project's architectural conventions?"
+  - "Will it integrate correctly with the rest of the codebase?"
+  - "Can a developer follow these steps as written, without guessing?"
+  - "Does it handle the messy reality of a running system (null guards, lifecycle, save/load, cleanup)?"
+
+scope_guard:
+  upward: "specs (behavioral decisions), engine docs (project-wide conventions)"
+  downward: null
+  tests:
+    - name: upward_leakage
+      question: "Does this change introduce behavioral decisions that belong in specs, or convention decisions that belong in engine docs?"
+      guidance: "Tasks implement a specific spec's behavior using engine conventions."
+    - name: behavioral_redefinition
+      question: "Does this change alter what the task implements rather than how?"
+      guidance: "If it changes acceptance criteria or observable behavior, it's spec leakage."
+    - name: convention_scope
+      question: "Does this change establish a pattern that would apply to other tasks too?"
+      guidance: "If yes, it belongs in an engine doc."
+
+adjudication:
+  editable_files_pattern: "tasks/TASK-*.md"
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+  rules:
+    - "Only edit the task file"
+    - "Ambiguous upstream intent is not a task defect"
+    - "Spec coverage issues may require spec revision, not task fixes"
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "REVIEW-task-{target}-{date}.md"
+  final_questions:
+    - name: "Most Dangerous Thing"
+      prompt: "The issue most likely to cause implementation failure or spec non-compliance."
+    - name: "Undetected Failure Risk"
+      prompt: "Bugs that could exist if all verification steps pass."
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (spec not covered, architecture violated)"
+      2: "major issues (significant gaps in coverage or integration)"
+      3: "workable but soft (some missing steps, minor integration gaps)"
+      4: "solid task (good coverage, correct architecture, minor soft spots)"
+      5: "strong task (complete coverage, robust integration, thorough verification)"
+
+rules:
+  - "Claude is the authority on this codebase"
+  - "Only edit the task file"
+  - "Never blindly accept"
+  - "Pushback is expected and healthy"
+  - "Resolved issues are locked across iterations by root cause"
+  - "Practicality check: reject changes that increase rigidity without improving implementability"

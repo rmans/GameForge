@@ -375,7 +375,7 @@ After all actions (auto-updates, escalation resolutions), append a revision entr
 
 ### Next Steps
 - Run `/scaffold-fix-input [--target doc]` to clean up mechanical issues from updates
-- Run `/scaffold-iterate-input [--topics "affected-topics"]` to review changed areas
+- Run `/scaffold-iterate input [--topics "affected-topics"]` to review changed areas
 - Run `/scaffold-validate --scope input` to confirm structural readiness
 ```
 

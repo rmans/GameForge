@@ -287,7 +287,7 @@ If a previous triage log exists for this slice's specs, append a new dated secti
 
 ### Next Steps
 - If **Stable**: Run `/scaffold-validate` then `/scaffold-approve-specs SLICE-###` then proceed to task seeding
-- If **Needs another pass**: Run `/scaffold-fix-spec` on new/modified specs, then `/scaffold-iterate-spec`, then `/scaffold-triage-specs` again
+- If **Needs another pass**: Run `/scaffold-fix-spec` on new/modified specs, then `/scaffold-iterate spec`, then `/scaffold-triage-specs` again
 ```
 
 ## Rules

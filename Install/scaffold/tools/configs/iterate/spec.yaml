@@ -1,0 +1,227 @@
+# spec.yaml — Iterate config for behavior specs (Step 9)
+# Three-pass review: L3 (subsections) → L2 (sections) → L1 (document)
+
+layer: spec
+display_name: "Behavior Spec"
+target_pattern: "specs/SPEC-*.md"
+target_type: range
+
+preflight:
+  required_files: []
+  glob_pattern: "specs/SPEC-*-*.md"
+  critical_sections: [Trigger, "Observable Outcome", "Failure Outcome", "Acceptance Criteria"]
+  blocked_message: "Spec is too incomplete for adversarial review. Run `/scaffold-fix-specs` first."
+
+context_files:
+  static:
+    - design/state-transitions.md
+    - design/interfaces.md
+    - design/authority.md
+    - design/glossary.md
+    - scaffold/doc-authority.md
+    - decisions/known-issues.md
+  dynamic:
+    - pattern: "decisions/architecture-decision-record/ADR-*.md"
+      filter: "status: Accepted"
+  per_target:
+    - type: parent_system
+      description: "Parent system design (follow spec's system reference)"
+    - type: parent_slice
+      description: "Parent slice file (find via spec index or slice tables)"
+    - type: signal_registry
+      file: reference/signal-registry.md
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L3 — Subsection Review (### level)
+# ---------------------------------------------------------------------------
+
+l3_sections:
+
+  # -- Definition --
+
+  "### Summary":
+    parent: "## Definition"
+    questions:
+      - "Is this one sentence that describes one atomic behavior?"
+      - "Is it specific enough to distinguish this spec from every other spec?"
+
+  "### Proof Intent":
+    parent: "## Definition"
+    questions:
+      - "Does it connect to the parent slice's proof goal?"
+      - "Is it clear what uncertainty this spec reduces?"
+
+  "### Trigger":
+    parent: "## Definition"
+    questions:
+      - "Is the initiating action or event explicit and unambiguous?"
+      - "Is it clear who/what causes this behavior to start?"
+
+  "### Preconditions":
+    parent: "## Definition"
+    questions:
+      - "Are preconditions testable — can you verify each one before running the behavior?"
+      - "Are they complete — if any precondition is missing, the behavior could fire unexpectedly?"
+
+  # -- Behavior --
+
+  "### Steps":
+    parent: "## Behavior"
+    questions:
+      - "Is each step one observable action or result?"
+      - "Are steps in the right order with no gaps?"
+      - "Is it clear who/what performs each step?"
+      - "Could two engineers implement this the same way?"
+      - "Is there any vague selection or ambiguous decision?"
+
+  "### Observable Outcome":
+    parent: "## Behavior"
+    questions:
+      - "Are all player-visible success results described?"
+      - "Are results observable — not internal state changes?"
+
+  "### Failure Outcome":
+    parent: "## Behavior"
+    questions:
+      - "Are visible rejection/failure behaviors described with the same rigor as success?"
+      - "Does the player know why it failed?"
+
+  "### Postconditions":
+    parent: "## Behavior"
+    questions:
+      - "Are postconditions testable — can you verify each one after the behavior completes?"
+      - "Do they match what Observable Outcome and Failure Outcome describe?"
+
+  # -- Boundaries --
+
+  "### Edge Cases":
+    parent: "## Boundaries"
+    questions:
+      - "Do edge cases cover real boundary conditions, not filler?"
+      - "Are interruption scenarios covered (target destroyed mid-action, actor dies mid-task)?"
+
+  "### Secondary Effects":
+    parent: "## Boundaries"
+    questions:
+      - "Are all cross-system follow-on effects listed?"
+      - "Check for hidden dependencies: economy effects, pathfinding reactions, AI consequences, persistence impacts."
+
+  "### Out of Scope":
+    parent: "## Boundaries"
+    questions:
+      - "Does it prevent spec creep and duplicate overlap?"
+      - "Is each exclusion specific?"
+
+  # -- Verification --
+
+  "### Acceptance Criteria":
+    parent: "## Verification"
+    questions:
+      - "Are ACs testable and concrete?"
+      - "Does each AC map to a behavior step?"
+      - "Do ACs cover both success and failure paths?"
+      - "Are there redundant ACs?"
+      - "Are results player-visible or test-observable?"
+
+  "### Asset Requirements":
+    parent: "## Verification"
+    questions:
+      - "Are all required assets listed with type and status?"
+      - "Have existing assets been checked for reuse?"
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Definition":
+    questions:
+      - "Do Summary, Proof Intent, Trigger, and Preconditions define one clear, atomic behavior?"
+      - "Is the spec correctly owned by its referenced system?"
+      - "Does the proof intent connect to the parent slice's proof goal?"
+
+  "## Behavior":
+    questions:
+      - "Do Steps, Observable Outcome, Failure Outcome, and Postconditions tell a complete story?"
+      - "Are failure paths described with the same rigor as success paths?"
+      - "Does behavior match the parent system design's Player Actions and System Resolution?"
+      - "Do state transitions match state-transitions.md?"
+
+  "## Boundaries":
+    questions:
+      - "Do edge cases, secondary effects, and out of scope together define clean boundaries?"
+      - "Is the spec hiding system dependencies that will cause integration pain?"
+      - "Are there known issues from known-issues.md that should be reflected here?"
+      - "Have accepted ADRs been absorbed?"
+
+  "## Verification":
+    questions:
+      - "Can someone actually verify this spec passes or fails from the ACs alone?"
+      - "What implementation bugs could exist if all acceptance criteria pass?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Could two engineers implement this the same way?"
+  - "Does this spec belong to this system and match what it defines?"
+  - "Does this spec help prove what the slice is trying to prove?"
+  - "Is this spec hiding system dependencies that will cause integration pain?"
+  - "Is this spec ignoring prior decisions or known constraints?"
+
+scope_guard:
+  upward: "system designs, slice scope, design decisions"
+  downward: "implementation approaches, engine patterns, code structure"
+  tests:
+    - name: upward_leakage
+      question: "Does this change introduce system-level responsibilities, slice-level scope, or design decisions?"
+      guidance: "Specs define one atomic behavior, not system scope or slice boundaries."
+    - name: downward_leakage
+      question: "Does this change prescribe specific implementation approaches, engine patterns, or code structure?"
+      guidance: "Specs describe WHAT happens (behavior), not HOW to build it."
+    - name: implementation_survival
+      question: "If the engine or implementation approach changed tomorrow, would this spec still be valid?"
+
+adjudication:
+  editable_files_pattern: "specs/SPEC-*.md"
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+  rules:
+    - "Specs describe BEHAVIOR, not IMPLEMENTATION"
+    - "Only edit the spec file"
+    - "Ambiguous upstream behavior is not a spec defect — flag for user decision"
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "REVIEW-spec-{target}-{date}.md"
+  final_questions:
+    - name: "Most Dangerous Thing"
+      prompt: "The issue most likely to cause implementation divergence, integration pain, or testing failure."
+    - name: "Undetected Failure Risk"
+      prompt: "Implementation bugs that could exist if all acceptance criteria pass."
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (behavior undefined, untestable, system misaligned)"
+      2: "major issues (significant gaps in behavior or acceptance criteria)"
+      3: "workable but soft (some ambiguity, incomplete edge cases)"
+      4: "solid spec (clear behavior, good ACs, minor soft spots)"
+      5: "strong spec (unambiguous behavior, complete ACs, robust edge cases)"
+
+rules:
+  - "Claude is the authority on this codebase — ties go to Claude"
+  - "Specs describe BEHAVIOR, not IMPLEMENTATION"
+  - "Only edit the spec file"
+  - "Never blindly accept"
+  - "Pushback is expected and healthy"
+  - "Reappearing material issues escalate to user"
+  - "Resolved issues are locked across iterations by root cause"
+  - "Practicality check: reject changes that increase rigidity without improving testability"

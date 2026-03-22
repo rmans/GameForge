@@ -70,12 +70,12 @@ The pipeline before approval is: `review-slice` → `iterate-slice` → `approve
 
 Verify that **both** review and iterate logs exist for this slice:
 - Glob `scaffold/decisions/review/REVIEW-slice-SLICE-###-*.md` for the review log (from `/scaffold-review-slice`).
-- Glob `scaffold/decisions/review/ITERATE-slice-SLICE-###-*.md` for the iterate log (from `/scaffold-iterate-slice`).
+- Glob `scaffold/decisions/review/ITERATE-slice-SLICE-###-*.md` for the iterate log (from `/scaffold-iterate slice`).
 
 Checks:
-- If no review log exists, **stop**: "No review log found for SLICE-###. Run `/scaffold-review-slice` and `/scaffold-iterate-slice` before approving."
-- If a review log exists but no iterate log exists, **stop**: "SLICE-### was reviewed but never iterated. Run `/scaffold-iterate-slice` before approving."
-- If both exist, determine the **latest** timestamp across the newest REVIEW log and the newest ITERATE log. Compare the slice file's last-modified date against that latest timestamp. If the slice file was modified after it, **stop**: "SLICE-### was modified after its last review/iterate (latest log: YYYY-MM-DD, file modified: YYYY-MM-DD). Rerun `/scaffold-review-slice` and `/scaffold-iterate-slice`."
+- If no review log exists, **stop**: "No review log found for SLICE-###. Run `/scaffold-review-slice` and `/scaffold-iterate slice` before approving."
+- If a review log exists but no iterate log exists, **stop**: "SLICE-### was reviewed but never iterated. Run `/scaffold-iterate slice` before approving."
+- If both exist, determine the **latest** timestamp across the newest REVIEW log and the newest ITERATE log. Compare the slice file's last-modified date against that latest timestamp. If the slice file was modified after it, **stop**: "SLICE-### was modified after its last review/iterate (latest log: YYYY-MM-DD, file modified: YYYY-MM-DD). Rerun `/scaffold-review-slice` and `/scaffold-iterate slice`."
 
 This is a **hard stop** — approving content that skipped adversarial review bypasses the review gate.
 

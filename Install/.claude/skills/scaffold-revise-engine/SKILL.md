@@ -349,7 +349,7 @@ This is a lightweight post-edit validation, not a full `/scaffold-validate --sco
 
 ### Next Steps
 - Run `/scaffold-fix-engine [--target X]` to clean up mechanical issues from updates
-- Run `/scaffold-iterate-engine [--target X --topics "affected"]` to review changed areas
+- Run `/scaffold-iterate engine [--target X --topics "affected"]` to review changed areas
 - Run `/scaffold-validate --scope engine` to confirm structural readiness
 ```
 

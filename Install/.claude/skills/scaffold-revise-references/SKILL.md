@@ -266,7 +266,7 @@ Apply safe alignment updates within Step 3 docs following canonical direction. F
 
 ### Next Steps
 - Run `/scaffold-fix-references [--target X]` to clean up mechanical issues from updates
-- Run `/scaffold-iterate-references [--target X --topics "affected"]` to review changed areas
+- Run `/scaffold-iterate references [--target X --topics "affected"]` to review changed areas
 - Run `/scaffold-validate --scope refs` to confirm structural readiness
 ```
 

@@ -223,7 +223,7 @@ Ownership must be inferred in this strict order. Lower sources cannot override h
    - State table: `| State | Transitions To | Trigger | Notes |`
    - Invariants (testable rules that must always hold)
    - Terminal states marked with `*(terminal)*`
-4. **Write state machines.** Add provenance: `<!-- Derived from SYS-### State Lifecycle -->`.
+4. **Write state machines.** Add provenance: `<!-- Derived from SYS-### State & Lifecycle > State Lifecycle -->`.
 
 ---
 
@@ -258,7 +258,7 @@ Not every noun is an entity. **Candidate entities must have at least one of:**
    - Authority: from authority table (Phase 2). Must match — if it doesn't, flag the mismatch.
    - Cadence: Once, Per tick, On event, On change
 5. **Include singleton entities** — entities with exactly one instance (PowerGrid, Colony, World, etc.)
-6. **Write entities.** Add provenance: `<!-- Fields from SYS-### Owned State, authority from Phase 2 -->`.
+6. **Write entities.** Add provenance: `<!-- Fields from SYS-### State & Lifecycle > Owned State, authority from Phase 2 -->`.
 
 ---
 
@@ -280,7 +280,7 @@ Not every noun is an entity. **Candidate entities must have at least one of:**
 5. **Organize into categories** — one section per category with a summary table at the top.
 5. **Draft production chains** if multi-step resource transformations exist.
 6. **Draft production station registry** if crafting stations are mentioned.
-7. **Write resources.** Add provenance: `<!-- From SYS-### Player Actions / System Resolution -->`.
+7. **Write resources.** Add provenance: `<!-- From SYS-### Player Experience > Player Actions / System Resolution -->`.
 
 ---
 
@@ -302,7 +302,7 @@ Not every noun is an entity. **Candidate entities must have at least one of:**
    | Intent Object | Payload | Requester | Handler | Notes |
    ```
 5. **Cross-reference with interfaces.md (Phase 3).** Every interface contract should have a defined **realization path**: signal, intent, query API, or direct sanctioned interface call. Flag contracts with no clear realization path as **TBD** — but do not assume every interface must be a signal. Pull/query interfaces are realized through API calls, not signals.
-6. **Write signals and intents.** Add provenance: `<!-- SYS-### Downstream Consequences -->`.
+6. **Write signals and intents.** Add provenance: `<!-- SYS-### Relationships > Downstream Consequences -->`.
 
 ---
 
@@ -328,7 +328,7 @@ When uncertain whether a number is a tunable parameter, register it with **TBD**
    | Parameter | Value | Unit | Range | System | Notes |
    ```
 4. **Organize by system** — one subsection per system in ascending SYS-### order.
-5. **Write parameters.** Add provenance: `<!-- SYS-### System Resolution / Failure States -->`.
+5. **Write parameters.** Add provenance: `<!-- SYS-### Player Experience > System Resolution / State & Lifecycle > Failure States -->`.
 
 ---
 
@@ -417,7 +417,7 @@ These were safely deferred as TBD placeholders. Seeding continued.
 - Run `/scaffold-sync-glossary --scope references` to register new domain terms (entity names, resource names, signal names, state names) in the glossary
 - Resolve Decision Queue items (user decisions or defer to Step 7)
 - Run `/scaffold-fix-references` to auto-fix cross-doc inconsistencies
-- Run `/scaffold-iterate-references` for adversarial architecture review
+- Run `/scaffold-iterate references` for adversarial architecture review
 - Run `/scaffold-validate --scope refs` for cross-reference integrity check
 
 ---

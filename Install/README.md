@@ -83,7 +83,7 @@ Follow the pipeline in order. Each step builds on the last.
 ```
 /scaffold-init-design               ← core vision, pillars, mechanics, loops, scope
 /scaffold-fix-design                 ← mechanical cleanup
-/scaffold-iterate-design             ← adversarial review
+/scaffold-iterate design             ← adversarial review
 /scaffold-validate --scope design    ← gate check
 ```
 

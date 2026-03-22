@@ -209,7 +209,7 @@ Run these checks to validate the phase planning pipeline.
 | `phase-status-sync` | Phase files with `_draft` suffix have `Status: Draft` inside. Files with `_approved` suffix have `Status: Approved`. Files with `_complete` suffix have `Status: Complete`. |
 | `phase-structure` | Every phase file contains required structural sections: Goal, Capability Unlocked, Entry Criteria, In Scope, Out of Scope, Deliverables, Exit Criteria, Dependencies. Missing sections are FAIL — a malformed phase should not pass validation even if all references resolve. |
 | `phase-order-integrity` | Phase order in `scaffold/phases/_index.md` matches the Phase Overview order in `scaffold/phases/roadmap.md`. All IDs may exist and sync, but if sequencing differs between the two files, tools and humans get conflicting ordering signals. |
-| `phase-entry-chain` | For each phase, entry criteria that reference other phase IDs resolve to existing phase files. Referenced phases have status Complete (for "P#-### Complete" conditions) or at least exist. This check validates existence and status only, not semantic sufficiency of prior phase exits — semantic chain validation belongs in `/scaffold-iterate-phase` Topic 2. |
+| `phase-entry-chain` | For each phase, entry criteria that reference other phase IDs resolve to existing phase files. Referenced phases have status Complete (for "P#-### Complete" conditions) or at least exist. This check validates existence and status only, not semantic sufficiency of prior phase exits — semantic chain validation belongs in `/scaffold-iterate phase` Topic 2. |
 | `single-active-phase` | At most one phase may have Status: Approved while not Complete. Catches accidental multi-phase activation. |
 | `phase-system-resolution` | Every SYS-### ID referenced in a phase's In Scope resolves to an existing system file. |
 | `phase-slice-resolution` | Every SLICE-### ID referenced in structured sections of a phase file (Slice Strategy, Deliverables, Dependencies, Done Criteria tables) resolves to an existing slice file. Ignores prose mentions in Goal, Notes, or changelog sections to avoid false positives. Keeps `--scope phases` self-contained without depending on slice-pipeline checks. |
@@ -530,7 +530,7 @@ These run independently per engine doc.
 | Check | What It Validates | Severity |
 |-------|------------------|----------|
 | `engine-constrained-todo-freshness` | For each TODO that references a blocking document or decision ("after architecture.md", "pending ADR-###", "when SPEC-### is approved"), check whether the referenced item has been resolved (status changed to Approved/Complete/Accepted). Stale constrained TODOs mean the blocking decision was made but the engine doc wasn't updated. | WARN if blocking decision appears resolved |
-| `engine-no-system-design-sections` | Engine docs do not contain section headings from the system design template. `## Purpose` is shared and exempt; but `## Simulation Responsibility`, `## Player Intent`, `## Design Constraints`, `## Owned State`, `## Non-Responsibilities` are system-design-only sections. Their presence in an engine doc indicates misplaced design content. | FAIL if found |
+| `engine-no-system-design-sections` | Engine docs do not contain section headings from the system design template. `## Purpose` is shared and exempt; but `Simulation Responsibility`, `Player Intent`, `Design Constraints`, `Owned State`, `Non-Responsibilities` are system-design-only sections (at any heading level). Their presence in an engine doc indicates misplaced design content. | FAIL if found |
 
 **Step 3 Alignment (heuristic advisory):**
 
@@ -594,7 +594,7 @@ These checks are labeled `[ADVISORY]` in the report. They compare code examples 
 15. For `engine-seeded-markers`: Grep all engine docs for `<!-- SEEDED`. Count per doc. Apply status matrix.
 16. For `engine-template-comments`: For each `##` section classified as Complete or Partial, check for remaining `<!-- ... -->` HTML comments. Flag as stale. Apply status matrix.
 17. For `engine-constrained-todo-freshness`: For each `*TODO:` that references a document path or ID, check the referenced document's current status. If resolved (Approved/Complete/Accepted), WARN as stale.
-18. For `engine-no-system-design-sections`: Check engine doc headings against system-design-only sections: `## Simulation Responsibility`, `## Player Intent`, `## Design Constraints`, `## Owned State`, `## Non-Responsibilities`. `## Purpose` is shared and exempt. Case-insensitive match.
+18. For `engine-no-system-design-sections`: Check engine doc headings (any level: `##`, `###`, `####`) against system-design-only section names: `Simulation Responsibility`, `Player Intent`, `Design Constraints`, `Owned State`, `Non-Responsibilities`. `Purpose` is shared and exempt. Case-insensitive match on heading text after stripping `#` prefix.
 19. For `engine-architecture-references`: Check doc topic against the scoped list (scene-architecture, simulation-runtime, save-load, coding-best-practices). SKIP for other docs. Read `scaffold/design/architecture.md`. Extract system names from Scene Tree Layout and Tick Processing Order. Extract system/node names from the engine doc. Compare sets. Report engine-doc references not found in architecture.md.
 20. For `engine-authority-compliance`: Grep each engine doc for ownership-claiming phrases (`owns`, `single writer`, `authority over`, `writes to`). Extract nearby system and variable names. Cross-reference authority.md ownership table. Report mismatches. Label `[ADVISORY]`.
 21. For `engine-signal-registry-compliance`: Grep engine docs for signal name patterns (snake_case near "signal", "emit", "connect"). Cross-reference `scaffold/reference/signal-registry.md`. Exclude: underscore-prefixed signals, signals in code block comments, signals in explicitly illustrative examples, `ui_`-prefixed signals in UI engine docs. Report orphans. Label `[ADVISORY]`.
@@ -1068,7 +1068,7 @@ These checks span all document types. They enforce decision closure, workflow co
 
 **Suggested fixes:**
 - Decision closure FAIL → "Resolve the TODO/TBD in [file] at [line], or mark it `[DEFERRED: tracked in KI-### / ADR-###]` if intentionally deferred"
-- Workflow review missing → "Run `/scaffold-iterate-[type]` on [doc] before keeping Approved status"
+- Workflow review missing → "Run `/scaffold-iterate [type]` on [doc] before keeping Approved status"
 - Workflow tasks not reordered → "Run `/scaffold-reorder-tasks SLICE-###` to fix ordering, then re-approve"
 - Workflow phase sequence → "Complete P#-### before approving P#-### — entry criteria require it"
 - Workflow phase revision missing → "Run `/scaffold-revise-roadmap` to record the completed phase"
@@ -1345,16 +1345,16 @@ For each failing check, suggest the specific edit needed:
 - Slice dependency cross-phase → "Move the dependency SLICE-### to the same phase, or remove the cross-phase dependency and document the prerequisite in the phase's entry criteria instead"
 - Slice dependency order violation → "Manually reorder `scaffold/slices/_index.md` so SLICE-### appears before SLICE-### (its dependent). If the bad order reflects a deeper planning change, run `/scaffold-revise-slices` to reconcile the full dependency graph."
 - Single active slice violation → "Phase P#-### has multiple Approved slices: SLICE-### and SLICE-###. Complete one before the other can be active. Run `/scaffold-complete` on the finished slice."
-- Slice review freshness (stale) → "SLICE-### was modified after its last review/iterate log. Rerun `/scaffold-review-slice` and `/scaffold-iterate-slice`."
-- Slice review freshness (missing) → "SLICE-### has no review or iterate log. Run `/scaffold-review-slice` and `/scaffold-iterate-slice` before approving."
+- Slice review freshness (stale) → "SLICE-### was modified after its last review/iterate log. Rerun `/scaffold-review-slice` and `/scaffold-iterate slice`."
+- Slice review freshness (missing) → "SLICE-### has no review or iterate log. Run `/scaffold-review-slice` and `/scaffold-iterate slice` before approving."
 - Phase index drift → "Add missing phase to `scaffold/phases/_index.md`" or "Remove stale row for deleted phase"
 - Phase roadmap sync → "Update `scaffold/phases/roadmap.md` Phase Overview to match `_index.md`, or vice versa"
 - Phase status-filename mismatch → "Rename file with `git mv` to match status, or update internal Status field"
 - Phase entry chain broken → "Entry criteria reference P#-### but that phase doesn't exist or isn't Complete — update entry criteria or complete the prerequisite"
 - Single active phase violation → "Phase P#-### is already Approved and not Complete. Complete it before approving another."
 - Phase system reference broken → "In Scope references SYS-### but no matching system file exists — update the In Scope list or create the system"
-- Phase review freshness (stale) → "P#-### was modified after its last iterate log. Rerun `/scaffold-fix-phase` and `/scaffold-iterate-phase`."
-- Phase review freshness (missing) → "P#-### has no iterate log. Run `/scaffold-iterate-phase` before approving."
+- Phase review freshness (stale) → "P#-### was modified after its last iterate log. Rerun `/scaffold-fix-phase` and `/scaffold-iterate phase`."
+- Phase review freshness (missing) → "P#-### has no iterate log. Run `/scaffold-iterate phase` before approving."
 - Design doc at template defaults → "Run `/scaffold-init-design` to populate the design document."
 - Design doc missing section group → "Design doc is missing the [Group] section group. Run `/scaffold-init-design --mode fill-gaps --sections [Group]`."
 - Design doc below 50% health → "Design doc is too incomplete for downstream work. Run `/scaffold-init-design --mode fill-gaps` to fill remaining sections."
@@ -1371,7 +1371,7 @@ For each failing check, suggest the specific edit needed:
 - Design glossary violation → "Design doc uses NOT-column term '[term]' — replace with canonical term '[canonical]' from glossary."
 - Design-ADR contradiction → "Design doc section [section] contradicts accepted ADR-###. Run `/scaffold-init-design --mode reconcile` to resolve."
 - Provisional markers remaining → "[N] PROVISIONAL markers remain in the design doc. Confirm or remove each before proceeding to Step 2+."
-- Design review freshness (stale) → "Design doc was modified after its last iterate log. Rerun `/scaffold-fix-design` and `/scaffold-iterate-design`."
+- Design review freshness (stale) → "Design doc was modified after its last iterate log. Rerun `/scaffold-fix-design` and `/scaffold-iterate design`."
 - Engine doc not in index → "Add `<filename>` to `scaffold/engine/_index.md` Documents table"
 - Engine file in index but missing → "Create the engine doc or remove the stale row from `scaffold/engine/_index.md`"
 - Engine missing header field → "Add `> **<Field>:** <value>` to the engine doc's blockquote header"
@@ -1394,8 +1394,8 @@ For each failing check, suggest the specific edit needed:
 - Engine template mapping missing → "Add the template mapping to the `_index.md` Templates table"
 - Engine seeded marker remaining → "Review the seeded content and remove the `<!-- SEEDED -->` marker"
 - Engine stale template comment → "Remove the template instruction comment — the section has authored content"
-- Engine review freshness (stale) → "Engine doc was modified after its last review log. Rerun `/scaffold-fix-engine` and `/scaffold-iterate-engine`"
-- Engine review freshness (missing, Approved) → "No review log exists for this Approved engine doc. Run `/scaffold-iterate-engine` before keeping Approved status"
+- Engine review freshness (stale) → "Engine doc was modified after its last review log. Rerun `/scaffold-fix-engine` and `/scaffold-iterate engine`"
+- Engine review freshness (missing, Approved) → "No review log exists for this Approved engine doc. Run `/scaffold-iterate engine` before keeping Approved status"
 - Engine topic overlap → "Two engine docs have overlapping Purpose scope. Clarify boundaries or merge into one doc. Check `_index.md` Topic column for uniqueness"
 - Engine Conforms-to missing links → "Add at least one `Conforms to` link to a Step 3 or design doc that this engine doc implements"
 - Engine template mapping mismatch → "The `_index.md` Templates table maps this doc to a different template than filename inference suggests. Update the Templates table to match the correct template"
@@ -1420,12 +1420,12 @@ For each failing check, suggest the specific edit needed:
 - Style single-channel critical → "Add a second feedback channel (audio or UI) for the critical event in the feedback-system Event-Response Table"
 - Style color-only state → "Add a non-color differentiator (icon, shape, text) for the gameplay state"
 - Style hover-only cue → "Add keyboard/gamepad alternative for the hover-dependent interaction in interaction-model"
-- Style review freshness (stale) → "Step 5 doc was modified after its last review log. Run `/scaffold-fix-style` and `/scaffold-iterate-style`"
-- Style review freshness (missing, Approved) → "No review log exists for this Approved Step 5 doc. Run `/scaffold-iterate-style` before keeping Approved status"
+- Style review freshness (stale) → "Step 5 doc was modified after its last review log. Run `/scaffold-fix-style` and `/scaffold-iterate style`"
+- Style review freshness (missing, Approved) → "No review log exists for this Approved Step 5 doc. Run `/scaffold-iterate style` before keeping Approved status"
 - Style ui-kit scope guard → "Remove screen map / scene hierarchy / HUD layout content from ui-kit — belongs in engine UI doc"
 - Style duplicate tokens → "Merge duplicate token entries in color-system, keeping the more complete version"
 - Style malformed hex → "Fix hex value to #RRGGBB or #RRGGBBAA format"
-- Style design intent misalignment → "Review style-guide tone vs design doc Core Fantasy. Run `/scaffold-fix-style` then `/scaffold-iterate-style --topics 1,7` to realign"
+- Style design intent misalignment → "Review style-guide tone vs design doc Core Fantasy. Run `/scaffold-fix-style` then `/scaffold-iterate style --topics 1,7` to realign"
 - Style unmapped interaction → "Add a UI affordance in ui-kit for the player action, or remove the action from interaction-model if it's not real"
 - Style orphan UI element → "Remove the UI element from ui-kit or add its interaction in interaction-model"
 - Style feedback signal overload → "Designate one channel as primary and others as supportive for the event in feedback-system"

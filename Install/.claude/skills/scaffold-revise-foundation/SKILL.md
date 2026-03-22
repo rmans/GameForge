@@ -200,7 +200,7 @@ Layer N revision → escalation pending?
 2. `/scaffold-fix-design`
    - **What:** Auto-fixes template text, governance format normalization, terminology drift, system index mismatches. Surfaces contradictions, drift, and layer violations.
    - **Why:** Revise-design may have changed sections — fix catches mechanical issues introduced by those changes.
-3. `/scaffold-iterate-design --sections "[changed groups]"`
+3. `/scaffold-iterate design --sections "[changed groups]"`
    - **What:** Adversarial review scoped to only the topics relevant to the changed sections, with early convergence stopping. Uses the `--sections` argument from revise-design's report (e.g., if revise-design changed Shape and Philosophy, iterate runs Topics 1, 2, 4, 5 — not all 5 topics). Section-to-topic mapping is defined in iterate-design's `--sections` argument. Default max 10 iterations, but stops early when no new issues are found.
    - **Why:** Revise + fix may have shifted section content. Scoped iterate catches coherence issues in the changed areas without re-reviewing untouched sections.
    - **When to skip:** If revise-design made no changes (only auto-updated references or found no drift), skip iterate to save cost.
@@ -220,7 +220,7 @@ Layer N revision → escalation pending?
 2. `/scaffold-fix-systems SYS-###-SYS-###`
    - **What:** Mechanical cleanup pass on affected systems. Normalizes structure, detects design signals.
    - **Why:** Revise-systems may have changed sections — fix catches mechanical issues introduced by those changes.
-3. `/scaffold-iterate-systems --topics "[affected topics]" SYS-###-SYS-###`
+3. `/scaffold-iterate systems --topics "[affected topics]" SYS-###-SYS-###`
    - **What:** Adversarial review scoped to affected topics and systems, with early convergence.
    - **Why:** Revise + fix may have shifted system content. Scoped iterate catches design issues in changed areas.
    - **When to skip:** If revise-systems made no changes (only found no drift), skip iterate.
@@ -241,7 +241,7 @@ Layer N revision → escalation pending?
    - **What:** Mechanical cleanup targeted at the specific doc(s) that were revised. Per-doc structural checks plus cross-doc consistency against all 9 Step 3 docs. Auto-fixes alignment issues. Detects design signals.
    - **Why:** Revise may have changed authority entries, interface contracts, or state names — fix-references catches mechanical inconsistencies introduced by those changes and propagates alignment fixes.
    - **Target selection:** If drift affected authority.md, target authority.md. If multiple docs affected, run without `--target` to fix all.
-3. `/scaffold-iterate-references --target [affected-doc.md] --topics "[affected topics]"`
+3. `/scaffold-iterate references --target [affected-doc.md] --topics "[affected topics]"`
    - **What:** Adversarial review scoped to the affected doc and relevant topics. Uses `--target` to auto-select topics.
    - **Why:** Fix-references catches mechanical issues; iterate-references catches conceptual drift, cross-doc contradictions, and design quality issues.
    - **When to skip:** If revise-references and fix-references found no issues and no design signals, skip iterate.
@@ -261,7 +261,7 @@ Layer N revision → escalation pending?
 2. `/scaffold-fix-engine` (if revise-engine made changes)
    - **What:** Mechanical cleanup after revision — cross-engine consistency, template structure, terminology.
    - **When to skip:** If revise-engine made no changes (only found no drift), skip fix.
-3. `/scaffold-iterate-engine --target [affected-doc] --topics "1,2"` (for specifically affected engine docs)
+3. `/scaffold-iterate engine --target [affected-doc] --topics "1,2"` (for specifically affected engine docs)
    - **What:** Adversarial review focused on architecture implementation fidelity and authority compliance for the revised doc(s).
    - **When to skip:** If revise-engine and fix-engine found no issues and no design signals, skip iterate.
 4. `/scaffold-validate --scope engine`
@@ -281,7 +281,7 @@ Layer N revision → escalation pending?
    - **What:** Mechanical cleanup targeted at the specific doc(s) that were revised. Per-doc structural checks plus cross-doc consistency across all 6 Step 5 docs. Auto-fixes alignment issues. Detects design signals.
    - **Why:** Revise may have added tokens, feedback entries, or interaction mappings — fix-style catches mechanical inconsistencies introduced by those changes and propagates alignment fixes.
    - **Target selection:** If drift affected a single doc, target it. If multiple docs affected, run without `--target` to fix all.
-3. `/scaffold-iterate-style --target [affected-doc.md] --topics "[affected topics]"`
+3. `/scaffold-iterate style --target [affected-doc.md] --topics "[affected topics]"`
    - **What:** Adversarial review focused on the revised areas of the affected Step 5 doc(s).
    - **Why:** Revise and fix catch mechanical issues; iterate catches conceptual drift in aesthetic direction, interaction design, and feedback coherence.
    - **When to skip:** If revise-style and fix-style found no issues and no design signals, skip iterate.
@@ -301,7 +301,7 @@ Layer N revision → escalation pending?
    - **When to skip:** If revise-input made no changes (only found no drift), skip iterate.
 2. `/scaffold-fix-input` (if revise-input made changes)
    - **What:** Mechanical cleanup after revision edits.
-3. `/scaffold-iterate-input --topics "[affected topics]"` (if revise-input surfaced design signals)
+3. `/scaffold-iterate input --topics "[affected topics]"` (if revise-input surfaced design signals)
    - **What:** Adversarial review of changed areas.
    - **When to skip:** If revise-input and fix-input made no changes.
 4. `/scaffold-validate --scope input`

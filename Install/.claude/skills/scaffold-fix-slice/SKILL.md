@@ -197,7 +197,7 @@ Continue the review-fix cycle until a stop condition is met.
 [Brief final review status — which checklist areas are now clean, which still have issues]
 
 ### Review Freshness
-**Invalidated by fixes** — rerun `/scaffold-review-slice` and `/scaffold-iterate-slice` before approval.
+**Invalidated by fixes** — rerun `/scaffold-review-slice` and `/scaffold-iterate slice` before approval.
 ```
 
 If no issues were found on the first pass:

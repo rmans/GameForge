@@ -68,8 +68,8 @@ These indicate missing pipeline prerequisites for the doc's current status.
 
 | Finding | Auto-Fix | Dispatch Action |
 |---------|----------|----------------|
-| Slice missing iterate log | No | "Run `/scaffold-iterate-slice SLICE-###` to create the missing review. Or revert to Draft if the slice was approved prematurely." |
-| Phase missing iterate log | No | "Run `/scaffold-iterate-phase P#-###` to create the missing review. Or revert to Draft." |
+| Slice missing iterate log | No | "Run `/scaffold-iterate slice SLICE-###` to create the missing review. Or revert to Draft if the slice was approved prematurely." |
+| Phase missing iterate log | No | "Run `/scaffold-iterate phase P#-###` to create the missing review. Or revert to Draft." |
 | Tasks approved before reorder | No | "Run `/scaffold-reorder-tasks SLICE-###` to fix ordering. Then re-run `/scaffold-approve-tasks SLICE-###`." |
 | Phase approved before predecessor Complete | No | "Complete P#-### first, or revert P#-### to Draft. Entry criteria require it." |
 | Complete phase missing from roadmap | Partial | Read the phase file and draft a Completed Phases entry. Present to user for confirmation. Run `/scaffold-revise-roadmap` if approved. |
@@ -108,11 +108,11 @@ These indicate upstream docs changed after downstream docs were stabilized.
 
 | Downstream Type | Restabilization Command |
 |----------------|------------------------|
-| Spec | `/scaffold-fix-spec SPEC-###` then `/scaffold-iterate-spec SPEC-###` |
-| Task | `/scaffold-fix-task TASK-###` then `/scaffold-iterate-task TASK-###` |
-| Engine doc | `/scaffold-fix-engine --target [stem]` then `/scaffold-iterate-engine --target [stem]` |
-| Roadmap | `/scaffold-fix-roadmap` then `/scaffold-iterate-roadmap` |
-| Slice | `/scaffold-fix-slice SLICE-###` then `/scaffold-iterate-slice SLICE-###` |
+| Spec | `/scaffold-fix-spec SPEC-###` then `/scaffold-iterate spec SPEC-###` |
+| Task | `/scaffold-fix-task TASK-###` then `/scaffold-iterate task TASK-###` |
+| Engine doc | `/scaffold-fix-engine --target [stem]` then `/scaffold-iterate engine --target [stem]` |
+| Roadmap | `/scaffold-fix-roadmap` then `/scaffold-iterate roadmap` |
+| Slice | `/scaffold-fix-slice SLICE-###` then `/scaffold-iterate slice SLICE-###` |
 
 ## Execution Flow
 
@@ -147,7 +147,7 @@ These indicate upstream docs changed after downstream docs were stabilized.
 |----|--------|--------|-------------------|
 | XC-001 | Resolved | Auto-filled TODO from architecture.md section [X] | — |
 | XC-002 | Deferred | Tracked in KI-### (genuine open question) | Design layer |
-| XC-003 | Still Open | Recommended: `/scaffold-iterate-slice SLICE-009` | Slice pipeline |
+| XC-003 | Still Open | Recommended: `/scaffold-iterate slice SLICE-009` | Slice pipeline |
 
 ### Blocking Findings
 [Findings that prevent pipeline progress — workflow violations, critical staleness, unresolved decision-closure on Approved docs. If none, omit this section.]

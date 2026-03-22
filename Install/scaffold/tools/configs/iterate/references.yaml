@@ -1,0 +1,321 @@
+# references.yaml — Iterate config for Step 3 reference/architecture docs
+# Multi-doc layer with per-doc tailored questions.
+# Each of the 9 docs gets its own L2 section questions. L1 is cross-doc consistency.
+
+layer: references
+display_name: "References & Architecture"
+target_docs:
+  - architecture.md
+  - authority.md
+  - interfaces.md
+  - state-transitions.md
+  - entity-components.md
+  - resource-definitions.md
+  - signal-registry.md
+  - balance-params.md
+  - enums-and-statuses.md
+target_type: multi_doc
+
+preflight:
+  required_files:
+    - design/design-doc.md
+  blocked_message: "Design doc required as context for reference review."
+
+context_files:
+  static:
+    - design/design-doc.md
+    - design/glossary.md
+    - scaffold/doc-authority.md
+    - design/systems/_index.md
+    - decisions/known-issues.md
+  conditional:
+    - file: design/architecture.md
+      when: exists
+    - file: design/authority.md
+      when: exists
+    - file: design/interfaces.md
+      when: exists
+  dynamic:
+    - pattern: "decisions/architecture-decision-record/ADR-*.md"
+      filter: "status: Accepted"
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# Per-Doc Review (L3 subsections + L2 sections)
+# ---------------------------------------------------------------------------
+
+per_doc:
+
+  architecture.md:
+    l3_sections:
+      "### System Representation":
+        parent: "## 1. Scene Tree Layout"
+        questions:
+          - "Does every registered system have a scene tree representation?"
+          - "Is the mapping from SYS-### to scene node clear?"
+      "### Tier Definitions":
+        parent: "## 2. System Dependency Graph"
+        questions:
+          - "Are tiers well-defined — what distinguishes each tier?"
+      "### Simulation Update Semantics":
+        parent: "## 3. Tick Processing Order"
+        questions:
+          - "Is the update model (fixed step, variable, event-driven) explicit?"
+          - "Are ordering guarantees clear enough for deterministic behavior?"
+      "### Forbidden Patterns":
+        parent: "## 5. Data Flow Rules"
+        questions:
+          - "Are forbidden patterns specific with examples?"
+          - "Would a developer recognize a violation?"
+      "### Boot Sequence":
+        parent: "## 6. Initialization & Boot Order"
+        questions:
+          - "Is boot order consistent with the dependency graph?"
+      "### Runtime Identity":
+        parent: "## 7. Entity Identity & References"
+        questions:
+          - "Is runtime identity unique and stable within a session?"
+      "### Persistent Identity":
+        parent: "## 7. Entity Identity & References"
+        questions:
+          - "Can entities survive save/load with correct identity?"
+    l2_sections:
+      "## 1. Scene Tree Layout":
+        questions:
+          - "Does the scene tree match registered systems in _index.md?"
+      "## 2. System Dependency Graph":
+        questions:
+          - "Are dependencies accurate — no phantom or missing dependencies?"
+          - "Are cycles documented as intentional feedback loops?"
+      "## 3. Tick Processing Order":
+        questions:
+          - "Is tick order consistent with the dependency graph?"
+          - "Could two developers implement the same tick ordering from this doc?"
+      "## 4. Signal Wiring Map":
+        questions:
+          - "Are all behavioral signals from system designs registered?"
+          - "Are wiring conventions unambiguous?"
+      "## 5. Data Flow Rules":
+        questions:
+          - "Are all 7 rules clear and non-contradictory?"
+          - "Is the single-writer rule enforceable from this doc?"
+      "## 6. Initialization & Boot Order":
+        questions:
+          - "Is the full boot-to-ready path clear?"
+      "## 7. Entity Identity & References":
+        questions:
+          - "Are all three identity types (runtime, persistent, content) well-defined?"
+          - "Could a developer implement entity references correctly?"
+      "## 8. Failure & Recovery Patterns":
+        questions:
+          - "Are all failure categories (missing dependency, stale reference, invalid state, corruption) covered?"
+      "## 9. Code Patterns":
+        questions:
+          - "Are patterns concrete enough to follow without guessing?"
+    l2_doc_question: "Do all architecture decisions form a coherent whole that serves the design doc's vision?"
+
+  authority.md:
+    l2_sections:
+      "## Authority Table":
+        questions:
+          - "Does every data entry have exactly one owning system?"
+          - "Are there any dual-write situations?"
+          - "Does ownership match what system designs' Owned State claims?"
+          - "Is every system's owned state represented?"
+      "## Relationship to Entity Components":
+        questions:
+          - "Does the authority table match entity-components.md's Authority columns?"
+      "## Conflict / TBD":
+        questions:
+          - "Are unresolved ownership conflicts tracked and actionable?"
+    l2_doc_question: "Is data ownership unambiguous — can every piece of state be traced to exactly one writer?"
+
+  interfaces.md:
+    l2_sections:
+      "## Interface Summary":
+        questions:
+          - "Does every cross-system interaction from system designs have a defined contract?"
+          - "Are contracts specific enough to implement — not just 'System A notifies System B'?"
+          - "Are contracts symmetric — if A→B is defined, is B's reception defined?"
+      "## Relationship to Other Documents":
+        questions:
+          - "Does this doc correctly reference signal-registry.md for signal-based contracts?"
+      "## Missing / TBD Contracts":
+        questions:
+          - "Are gaps tracked and prioritized?"
+    l2_doc_question: "Are cross-system contracts complete enough to implement against without guessing?"
+
+  state-transitions.md:
+    l2_sections:
+      "## State Machines":
+        questions:
+          - "Is every system with a State Lifecycle represented here?"
+          - "Are all transitions explicit with triggers?"
+          - "Are terminal states marked?"
+          - "Are illegal transitions listed?"
+          - "Are cross-system readers identified — who reads this state from other systems?"
+          - "Are invariants testable?"
+    l2_doc_question: "Are all state machines complete, consistent with system designs, and implementation-ready?"
+
+  entity-components.md:
+    l2_sections:
+      "## Entity Reference Convention":
+        questions:
+          - "Are reference conventions consistent with architecture.md's entity identity section?"
+      "## Singleton Conventions":
+        questions:
+          - "Are singleton rules clear — what gets a singleton, what doesn't?"
+      "## Derived / Cache Field Policy":
+        questions:
+          - "Is the boundary clear between authoritative state and derived/cached data?"
+      "## Entities":
+        questions:
+          - "Are all gameplay entities defined with complete component tables?"
+          - "Do Authority columns match authority.md?"
+          - "Are component field types precise enough for implementation?"
+    l2_doc_question: "Is the entity-component model complete and authority-aligned?"
+
+  resource-definitions.md:
+    l2_sections:
+      "## Tier Definitions":
+        questions:
+          - "Are tier boundaries clear and meaningful for gameplay?"
+      "## Storage Types":
+        questions:
+          - "Are all storage types defined (stockpile, inventory, global, etc.)?"
+      "## Resource Categories":
+        questions:
+          - "Are all game resources defined?"
+          - "Is the fungible/unique boundary clear?"
+      "## Production Chains":
+        questions:
+          - "Are multi-step transformations complete?"
+          - "Can you trace raw materials to final products?"
+      "## Production Stations":
+        questions:
+          - "Are all crafting/production stations defined?"
+    l2_doc_question: "Are all resources defined with clear categories, tiers, flow rules, and production chains?"
+
+  signal-registry.md:
+    l2_sections:
+      "## Signals":
+        questions:
+          - "Are all cross-system signals from system designs registered?"
+          - "Do emitters and consumers match system Upstream Dependencies and Downstream Consequences?"
+          - "Are payload schemas defined for every signal?"
+      "## Intent Objects":
+        questions:
+          - "Are all intent objects defined with complete payload schemas?"
+          - "Is the intent-to-handler mapping clear?"
+      "## Dispatch Timing Conventions":
+        questions:
+          - "Is it clear when signals fire relative to the tick cycle?"
+      "## Payload Schema Conventions":
+        questions:
+          - "Are schema conventions consistent — same types, same naming?"
+    l2_doc_question: "Are all signals and intents registered with correct emitters, consumers, and payloads?"
+
+  balance-params.md:
+    l2_sections:
+      "## Parameters":
+        questions:
+          - "Are all tunable parameters from system designs extracted?"
+          - "Do parameters have sensible defaults and defined ranges?"
+          - "Are parameters organized by system in SYS-### order?"
+      "## TBD / Unresolved Tuning":
+        questions:
+          - "Are unresolved parameters tracked and actionable?"
+    l2_doc_question: "Are all balance parameters defined, traceable to system behaviors, and ready for tuning?"
+
+  enums-and-statuses.md:
+    l2_sections:
+      "## Job / Task States":
+        questions:
+          - "Do job/task enums match state-transitions.md's task state machines?"
+      "## Construction States":
+        questions:
+          - "Do construction enums match the construction system's State Lifecycle?"
+      "## Colonist Activity States":
+        questions:
+          - "Do activity enums cover all colonist behaviors from system designs?"
+      "## Need / Vital States":
+        questions:
+          - "Do need states match the needs system's State Lifecycle?"
+      "## Alert / Severity Levels":
+        questions:
+          - "Do alert levels match feedback-system.md's priority hierarchy?"
+      "## Resource States":
+        questions:
+          - "Do resource states match resource-definitions.md's state variants?"
+    l2_doc_question: "Are all enums complete and consistent with state-transitions.md and system designs?"
+
+# ---------------------------------------------------------------------------
+# L1 — Cross-Doc Consistency Review
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Does authority.md ownership match system designs' Owned State sections?"
+  - "Does entity-components.md's Authority column match authority.md?"
+  - "Do signals in signal-registry.md match the contracts in interfaces.md?"
+  - "Do state machines in state-transitions.md match system designs' State Lifecycle sections?"
+  - "Do enums in enums-and-statuses.md match state-transitions.md's state machines?"
+  - "Are system names consistent across all 9 reference docs?"
+  - "Could an implementer build the simulation from these docs alone, without guessing?"
+  - "Where would two developers interpret these docs differently?"
+
+scope_guard:
+  upward: "design doc — game design decisions"
+  downward: "engine docs — implementation patterns"
+  tests:
+    - name: upward_leakage
+      question: "Does this change modify game design decisions that belong in the design doc?"
+      guidance: "Reference docs implement the design doc's decisions as concrete data structures and contracts."
+    - name: downward_leakage
+      question: "Does this change introduce engine-specific implementation patterns?"
+      guidance: "Reference docs define contracts and data models, not how to implement them."
+
+adjudication:
+  editable_files:
+    - design/architecture.md
+    - design/authority.md
+    - design/interfaces.md
+    - design/state-transitions.md
+    - reference/entity-components.md
+    - reference/resource-definitions.md
+    - reference/signal-registry.md
+    - reference/balance-params.md
+    - reference/enums-and-statuses.md
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-references-{target}-{date}.md"
+  final_questions:
+    - name: "Cross-Doc Inconsistencies"
+      prompt: "The most dangerous inconsistencies between reference docs."
+    - name: "Weakest Doc"
+      prompt: "Which reference doc is weakest and most likely to cause implementation problems?"
+    - name: "Fitness Assessment"
+      prompt: "Overall readiness for implementation."
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (ownership unclear, contracts missing, data model incomplete)"
+      2: "major issues (significant inconsistencies, missing contracts)"
+      3: "workable but soft (some gaps, minor inconsistencies)"
+      4: "solid references (good coverage, consistent, minor soft spots)"
+      5: "strong references (complete, consistent, implementation-ready)"
+
+rules:
+  - "Project documents and authority order win"
+  - "Only edit reference docs listed in editable_files"
+  - "Single-writer rule is non-negotiable"
+  - "Never blindly accept"
+  - "Pushback is expected and healthy"
+  - "Resolved issues are locked across iterations by root cause"

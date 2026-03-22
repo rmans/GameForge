@@ -195,7 +195,7 @@ For each confirmed candidate:
 
 ### Next Steps
 - Run `/scaffold-fix-phase P#-###-P#-###` to auto-fix mechanical issues
-- Run `/scaffold-iterate-phase P#-###-P#-###` for adversarial review
+- Run `/scaffold-iterate phase P#-###-P#-###` for adversarial review
 - Run `/scaffold-validate --scope phases` to check structural integrity
 - Run `/scaffold-approve-phases P#-###` to approve the first phase for slice seeding
 ```

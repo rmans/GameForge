@@ -1,0 +1,512 @@
+# design.yaml — Iterate config for design-doc.md (Step 1)
+# Three-pass review: L3 (subsections) → L2 (sections) → L1 (document)
+
+layer: design
+display_name: "Design Document"
+target: design/design-doc.md
+target_type: fixed
+
+preflight:
+  required_files:
+    - design/design-doc.md
+  min_content_pct: 50
+  check_governance: true
+  blocked_message: "No design doc to review. Run `/scaffold-init-design` first."
+  incomplete_message: "Design doc is too incomplete for adversarial review. Run `/scaffold-init-design --mode fill-gaps` to fill remaining sections, then `/scaffold-fix-design` to clean up mechanical issues."
+
+context_files:
+  static:
+    - design/design-doc.md
+    - design/glossary.md
+    - scaffold/doc-authority.md
+    - design/systems/_index.md
+    - decisions/known-issues.md
+  dynamic:
+    - pattern: "decisions/architecture-decision-record/ADR-*.md"
+      filter: "status: Accepted"
+    - pattern: "theory/*.md"
+      label: "Advisory — non-authoritative"
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L3 — Subsection Review (### level)
+# ---------------------------------------------------------------------------
+
+l3_sections:
+
+  # -- Identity --
+
+  "### Core Fantasy":
+    parent: "## Identity"
+    questions:
+      - "Is the fantasy specific enough that two developers would build the same game from it?"
+      - "Does it name a concrete player role, not just a genre?"
+      - "Could you explain this fantasy to a non-gamer in one sentence?"
+
+  "### Design Invariants":
+    parent: "## Identity"
+    questions:
+      - "Can each invariant be tested with a binary yes/no?"
+      - "Do invariants protect the Core Pillars? Is there at least one invariant guarding each pillar?"
+      - "Do any two invariants contradict each other in a realistic scenario?"
+      - "Are there 3-7 invariants? Too few = underspecified, too many = decision paralysis."
+
+  "### Elevator Pitch":
+    parent: "## Identity"
+    questions:
+      - "Does the pitch accurately summarize the game described in the rest of the document?"
+      - "Has the pitch drifted from what the sections actually describe?"
+
+  "### Core Pillars":
+    parent: "## Identity"
+    questions:
+      - "Does each pillar appear in at least one concrete section (a loop, a mechanic, a system domain)?"
+      - "Are pillars distinct from each other, or do they overlap?"
+      - "Are there pillars that exist only as aspirations with no mechanical expression?"
+
+  "### Core Design Tension":
+    parent: "## Identity"
+    questions:
+      - "Does the tension actually produce hard choices, or does one side always win?"
+      - "Do the loops, decisions, and failure philosophy force the player to navigate this tension?"
+      - "Can the player realistically choose either side?"
+
+  "### Unique Selling Points":
+    parent: "## Identity"
+    questions:
+      - "Are USPs traceable to specific mechanics or invariants?"
+      - "Do USPs describe actual differentiators, not genre conventions ('base building', 'survival mechanics')?"
+
+  # -- Shape --
+
+  "### Core Loop":
+    parent: "## Shape"
+    questions:
+      - "Is it a full cycle (input → action → feedback → new state → new decision)?"
+      - "Does it match the Player Control Model?"
+      - "If control is indirect but the loop describes direct actions, which is wrong?"
+
+  "### Secondary Loops":
+    parent: "## Shape"
+    questions:
+      - "Do secondary loops wrap around the Core Loop, or are they parallel tracks?"
+      - "Do they recontextualize core loop decisions, or just add content surface area?"
+
+  "### Session Shape":
+    parent: "## Shape"
+    questions:
+      - "Is the session length realistic for the decision density described?"
+      - "Does the session have a natural arc (opening, middle, wind-down)?"
+
+  "### Progression Arc":
+    parent: "## Shape"
+    questions:
+      - "Does it describe genuine capability growth, or just number inflation?"
+      - "'Unlock new building types' is growth. 'Buildings get +10% efficiency' is inflation."
+
+  "### Player Goals":
+    parent: "## Shape"
+    questions:
+      - "Do short-term, mid-term, and long-term goals build on each other?"
+      - "Are there disconnected goals that produce grind?"
+
+  "### Decision Types":
+    parent: "## Shape"
+    questions:
+      - "Do decision types match the loops? If loops produce tactical decisions but this claims strategic depth, where do strategic decisions emerge?"
+
+  "### Decision Density":
+    parent: "## Shape"
+    questions:
+      - "Does the cadence match the session shape?"
+      - "A 30-minute session with only 2 meaningful decisions is a watching game."
+
+  # -- Control --
+
+  "### Player Control Model":
+    parent: "## Control"
+    questions:
+      - "Is the control model specific and consistent with Core Fantasy?"
+      - "Does it match what Player Actions in system designs describe?"
+
+  "### Control Philosophy":
+    parent: "## Control"
+    questions:
+      - "Does the philosophy explain WHY the control model is this way?"
+      - "Is it consistent with the Core Design Tension?"
+
+  "### Player Verbs":
+    parent: "## Control"
+    questions:
+      - "Are verbs concrete actions, not abstractions?"
+      - "Does every verb trace to at least one system's Player Actions?"
+
+  "### Player Mental Model":
+    parent: "## Control"
+    questions:
+      - "Does it align with what the loops and systems actually produce?"
+      - "If the mental model says 'manage a living colony' but loops describe clicking timers, the player will feel deceived."
+
+  "### Feedback Loops":
+    parent: "## Control"
+    questions:
+      - "Does every player action have a described feedback path?"
+      - "Are positive and negative feedback loops balanced?"
+
+  # -- World --
+
+  "### Place & Time":
+    parent: "## World"
+    questions:
+      - "Is the setting specific enough to guide art and audio direction?"
+      - "Does it support the Core Fantasy?"
+
+  "### Tone":
+    parent: "## World"
+    questions:
+      - "Does the tone match the Core Fantasy? Grim tone + whimsical fantasy = dissonance."
+      - "Is it consistent across the document?"
+
+  "### Narrative Wrapper":
+    parent: "## World"
+    questions:
+      - "Does it carry gameplay weight, or is it only flavor?"
+      - "If factions exist in the narrative but have no mechanical expression, they're decoration."
+
+  "### Factions / Forces":
+    parent: "## World"
+    questions:
+      - "Do factions have mechanical impact described elsewhere (loops, systems, decisions)?"
+      - "Factions without mechanics are worldbuilding without gameplay."
+
+  # -- Presentation --
+
+  "### Camera":
+    parent: "## Presentation"
+    questions:
+      - "Does the camera perspective match the Player Control Model?"
+      - "Top-down suits oversight. Close third-person suits direct control."
+
+  "### Aesthetic Pillars":
+    parent: "## Presentation"
+    questions:
+      - "Do aesthetic pillars reinforce the Tone?"
+      - "Visual identity should amplify the emotional register, not contradict it."
+
+  "### Audio Direction":
+    parent: "## Presentation"
+    questions:
+      - "Does audio direction support the Place & Time?"
+      - "Audio that doesn't match the setting breaks immersion."
+
+  "### Player Information Model":
+    parent: "## Presentation"
+    questions:
+      - "Does the information model match the Simulation Transparency Policy?"
+      - "Does it enable the Decision Types described? If decisions require planning but info is hidden, the player can't plan."
+
+  # -- Content --
+
+  "### Content Structure":
+    parent: "## Content"
+    questions:
+      - "Does it support the Replayability Model?"
+
+  "### Content Categories":
+    parent: "## Content"
+    questions:
+      - "Are categories complete for the game described?"
+
+  "### Procedural vs Authored":
+    parent: "## Content"
+    questions:
+      - "Is the boundary explicit? Fuzzy boundaries create scope creep."
+
+  "### Replayability Model":
+    parent: "## Content"
+    questions:
+      - "Is the replay model supported by the content structure, or is it aspirational?"
+
+  # -- System Domains --
+
+  "### Major System Domains":
+    parent: "## System Domains"
+    questions:
+      - "Does the system list match registered systems in the index?"
+      - "Are all systems needed for a functional game identified?"
+
+  "### Major Mechanics":
+    parent: "## System Domains"
+    questions:
+      - "Do mechanics map to systems? Are there mechanics with no system owner?"
+
+  "### System Interaction Philosophy":
+    parent: "## System Domains"
+    questions:
+      - "Is the philosophy specific enough to guide system design?"
+
+  "### Simulation Depth Target":
+    parent: "## System Domains"
+    questions:
+      - "Does the depth target match the scope commitment?"
+      - "Does the doc acknowledge the depth-vs-breadth tradeoff?"
+
+  # -- Philosophy --
+
+  "### Failure Philosophy":
+    parent: "## Philosophy"
+    questions:
+      - "Does it describe what failure feels like, not just what triggers it?"
+      - "Is failure interesting (player agency during failure) or just punitive?"
+
+  "### Risk / Reward Philosophy":
+    parent: "## Philosophy"
+    questions:
+      - "Is the risk/reward balance consistent with the Core Design Tension?"
+
+  "### Simulation Transparency Policy":
+    parent: "## Philosophy"
+    questions:
+      - "Does it match the Player Information Model?"
+      - "If transparency promises 'players understand consequences' but the model hides state, they contradict."
+
+  "### Information Clarity Principle":
+    parent: "## Philosophy"
+    questions:
+      - "Does it enable the Decision Types described?"
+
+  "### Decision Anchors":
+    parent: "## Philosophy"
+    questions:
+      - "Does each anchor resolve a real ambiguity? Can you construct a plausible question where the anchor determines the answer?"
+      - "Do any two anchors contradict in a realistic scenario?"
+      - "Are there 3-5 anchors?"
+
+  "### Design Pressure Tests":
+    parent: "## Philosophy"
+    questions:
+      - "Is each scenario plausible? Tests against impossible conditions don't validate the design."
+      - "Do they stress the Core Design Tension?"
+      - "Are there 3-6 tests?"
+
+  "### Design Gravity":
+    parent: "## Philosophy"
+    questions:
+      - "Does gravity describe evolution directions distinct from Core Pillars?"
+      - "Are the directions achievable given the systems described?"
+      - "Are there 3-4 gravity directions?"
+
+  "### Design Boundaries":
+    parent: "## Philosophy"
+    questions:
+      - "Do boundaries name specific things the game is NOT?"
+      - "'Not a first-person shooter' is obvious. 'Not a game where the player directly commands colonists' is useful."
+
+  "### Learning Curve Strategy":
+    parent: "## Philosophy"
+    questions:
+      - "Does it match the actual complexity in the loops, decisions, and systems?"
+
+  # -- Scope --
+
+  "### Scope Reality Check":
+    parent: "## Scope"
+    questions:
+      - "Does it accurately reflect the document's ambition?"
+      - "Is the MVP described, and does it include the Core Loop?"
+
+  "### Target Platforms":
+    parent: "## Scope"
+    questions:
+      - "Do platforms impose constraints the design doesn't acknowledge?"
+
+  "### Accessibility Goals":
+    parent: "## Scope"
+    questions:
+      - "Do accessibility goals conflict with core mechanics?"
+
+  "### Performance Targets":
+    parent: "## Scope"
+    questions:
+      - "Are targets realistic given the simulation depth described?"
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Identity":
+    questions:
+      - "Do Core Fantasy, Invariants, Pillars, Tension, and USPs all describe the same game?"
+      - "Could someone reconstruct the game concept from this section alone?"
+      - "Is there a shadow identity — does this section describe one game while Shape describes another?"
+
+  "## Shape":
+    questions:
+      - "Do the loops produce the experience Identity describes?"
+      - "Is decision density calibrated to session shape?"
+      - "Does the progression arc build on the loops, not bypass them?"
+
+  "## Control":
+    questions:
+      - "Does the control model match what Identity claims the player does?"
+      - "Do Player Verbs, Mental Model, and Feedback Loops agree?"
+      - "If the player optimizes purely for efficiency, does the resulting play still resemble the intended experience?"
+
+  "## World":
+    questions:
+      - "Does the world make the player believe in the game, or fight against the mechanics?"
+      - "Do tone, narrative, and factions reinforce each other?"
+
+  "## Presentation":
+    questions:
+      - "Does camera, aesthetic, audio, and information model form a coherent presentation layer?"
+      - "Does the information model enable the decisions Shape describes?"
+
+  "## Content":
+    questions:
+      - "Is content scope honest? Does structure support replayability claims?"
+      - "Is the procedural/authored boundary clear?"
+
+  "## System Domains":
+    questions:
+      - "Is the system set complete for the game described in Identity and Shape?"
+      - "Does the simulation depth target match the scope commitment?"
+
+  "## Philosophy":
+    questions:
+      - "Do governance mechanisms actually resolve ambiguous downstream decisions?"
+      - "If a developer is tired and rushing, which mechanisms will still hold?"
+      - "Do invariants, anchors, pressure tests, gravity, and boundaries form a coherent governance system?"
+    skip_if: governance_empty
+
+  "## Scope":
+    questions:
+      - "Does scope honestly reflect what Shape + System Domains promise?"
+      - "Is the MVP real — does it include the Core Loop?"
+      - "Are there features that appear small but are structurally central and likely to expand?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "If five different developers each read only one section group, would they all build the same game?"
+  - "What player experience does this design accidentally create — based on loops, controls, and decisions, not the Core Fantasy claim?"
+  - "Which governance mechanism is weakest — most likely to fail in practice?"
+  - "What part of this design is most likely to be misbuilt even if the team follows the document in good faith?"
+  - "Does the design describe a game where interruption, stale targets, and continuous world churn are normal — or does it implicitly assume clean execution paths?"
+
+stress_test:
+  mode: interrogation
+  reviewer_instruction: "You are NOT checking documentation. You are trying to break the game design. Think as a player, a critic, and a rival designer simultaneously. Every issue must describe a concrete gameplay scenario, not a document structure concern."
+  adjudication_rules:
+    - "Issues are gameplay concerns, not document defects"
+    - "Classify as: design_risk (file KI or add pressure test), already_mitigated (cite section), or escalate"
+    - "Do NOT result in design doc edits unless user explicitly accepts"
+    - "Do not reject for being 'not a document problem' — that's the point"
+  questions:
+    - "Control model stress: construct a scenario where the player desperately wants direct control but cannot have it. Does the design provide enough indirect tools?"
+    - "Stable-state boredom: what does the player do for 10 uninterrupted minutes when nothing is going wrong?"
+    - "Irreversibility tipping point: at what point does the player feel locked out instead of invested?"
+    - "Cognitive load ceiling: at what point does transparency become overload?"
+    - "Dominant strategy search: what's the most efficient strategy a min-maxer would find? Does it bypass the core tension?"
+    - "Emotional failure mode: when does the game stop being tense and become exhausting? What recovery mechanism prevents this?"
+    - "Fantasy-mechanics convergence: what does the player actually spend 80% of their time doing? Does that match the Core Fantasy?"
+    - "New player cliff: when does 'unfamiliar tools' stop feeling fresh and start feeling like a missing feature?"
+
+identity_check:
+  questions:
+    - "If all downstream docs were lost, what game would this design doc cause the team to rebuild?"
+    - "What is the player actually spending most of their time doing, based on this document?"
+    - "What part of the game is mechanically load-bearing vs aspirational flavor?"
+    - "What design promise is most at risk of erosion during implementation?"
+    - "What would a new team member most likely misunderstand after reading this doc once?"
+
+design_choice_examination:
+  questions:
+    - "What major design choices define this game?"
+    - "What problem or experience goal does each choice solve?"
+    - "What tradeoff does each choice impose?"
+    - "Is any major choice unsupported by mechanics or governance?"
+    - "Which design choice most constrains the game's future evolution, and is that constraint intentional?"
+
+scope_guard:
+  upward: null
+  downward: "system designs, architecture, engine docs"
+  tests:
+    - name: layer_test
+      question: "Does this change introduce implementation detail that belongs in system designs, architecture, or engine docs?"
+      guidance: "The design doc defines what the game is and how it feels, not how systems work internally."
+    - name: abstraction_test
+      question: "Is this change written at the right level of abstraction for a design doc?"
+      examples:
+        correct: "colonists become unhappy when hungry"
+        wrong: "NeedsSystem decrements mood when hunger exceeds threshold"
+    - name: constraint_test
+      question: "Does this change lock implementation options that should remain open?"
+      guidance: "If the change would force a specific system decomposition, data model, or architectural pattern, it's implementation leakage."
+
+adjudication:
+  editable_files:
+    - design/design-doc.md
+  outcomes: [accept_edit, reject, escalate, ambiguous_intent]
+  rules:
+    - "Prefer fixing the design doc over escalating — most issues are clarity or consistency"
+    - "Never half-accept — choose exactly one outcome per issue"
+    - "If reviewer and Claude disagree after max-exchanges, escalate to user"
+    - "If multiple valid interpretations exist, flag ambiguous_intent for user decision"
+    - "Governance weakening always requires user confirmation"
+    - "Scope judgments are flagged, not imposed"
+    - "Do not invent missing mechanics — flag the gap"
+    - "Diagnose, don't prescribe"
+
+review_lock:
+  track_by: root_cause
+  examples:
+    - same: ["vision statement too vague", "core fantasy unclear"]
+    - same: ["player motivation loop missing", "no engagement driver defined"]
+
+report:
+  log_name_pattern: "ITERATE-design-{date}.md"
+  final_questions:
+    - name: "Biggest Internal Contradiction"
+      prompt: "Where does the document most fight against itself? If none, say so."
+    - name: "Accidental Player Experience"
+      prompt: "What will the player actually experience vs. what Core Fantasy claims?"
+    - name: "Weakest Governance Mechanism"
+      prompt: "Which invariant/anchor/test/gravity is most likely to fail in practice, and why?"
+    - name: "Most Likely Misbuilt"
+      prompt: "What part of this design is most likely to be misbuilt even if the team follows the document in good faith?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally incoherent (vision split, loops don't produce the fantasy, governance absent)"
+      2: "major issues (significant internal contradictions, weak governance, scope disconnected from reality)"
+      3: "workable but soft (some misalignment between sections, governance present but undertested)"
+      4: "solid design (internally consistent, governance works, minor soft spots)"
+      5: "strong design (sections reinforce the same vision, governance resolves real ambiguities, scope claims are honest)"
+
+rules:
+  - "Project documents and authority order win"
+  - "The design doc describes WHAT the game is, not HOW to build it"
+  - "Only edit the design doc"
+  - "Edits may clarify or tighten wording but must not change what the game is"
+  - "Do not invent missing mechanics — flag the gap"
+  - "Diagnose, don't prescribe"
+  - "Governance edits must preserve intent"
+  - "Never weaken governance without user confirmation"
+  - "Scope judgments are flagged, not imposed"
+  - "Stay at the design layer"
+  - "Theory observations are advisory, not authority"
+  - "Never blindly accept"
+  - "Pushback is expected and healthy"
+  - "Reappearing material issues escalate to user after 2 iterations"
+  - "Ambiguous design intent is not a defect — flag for user decision"
+  - "Practicality check: reject changes that increase rigidity without improving usability"
+  - "Resolved issues are locked across iterations by root cause"

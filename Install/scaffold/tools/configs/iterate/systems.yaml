@@ -1,0 +1,361 @@
+# systems.yaml — Iterate config for system design docs (Step 2)
+# Used by iterate.py to orchestrate adversarial review of system designs.
+# Three-pass review: L3 (subsections) → L2 (sections) → L1 (document)
+
+layer: systems
+display_name: "System Design"
+target_pattern: "design/systems/SYS-*.md"
+target_type: range                      # supports SYS-### and SYS-###-SYS-### ranges
+
+preflight:
+  required_files:
+    - design/design-doc.md
+  glob_pattern: "design/systems/SYS-*-*.md"
+  critical_sections: [Purpose, "Simulation Responsibility", "Player Actions", "Owned State"]
+  blocked_message: "Systems are too incomplete for adversarial review. Run `/scaffold-fix-systems` first to normalize structure."
+
+context_files:
+  static:
+    - design/design-doc.md
+    - design/glossary.md
+    - scaffold/doc-authority.md
+    - design/systems/_index.md
+    - decisions/known-issues.md
+  conditional:
+    - file: design/authority.md
+      when: exists
+    - file: design/interfaces.md
+      when: exists
+  dynamic:
+    - pattern: "decisions/architecture-decision-record/ADR-*.md"
+      filter: "status: Accepted"
+  per_target:
+    - type: interaction_partners
+      description: "Other system files that interact with the reviewed system (dependency/consequence targets)"
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L3 — Subsection Review (### level)
+# Each subsection is reviewed in isolation for internal quality.
+# ---------------------------------------------------------------------------
+
+l3_sections:
+
+  # -- Identity --
+
+  "### Purpose":
+    parent: "## Identity"
+    questions:
+      - "Is this one sentence that describes player-visible behavior, not implementation?"
+      - "Is it specific enough to distinguish this system from every other system?"
+      - "Does it name what the player experiences, not what the code does?"
+
+  "### Simulation Responsibility":
+    parent: "## Identity"
+    questions:
+      - "Does this name concrete state that only this system can own?"
+      - "If this system stopped running, what state would freeze? Is that answer clear from this section?"
+      - "Is the responsibility scoped tightly — or does it drift into adjacent systems' territory?"
+
+  "### Player Intent":
+    parent: "## Identity"
+    questions:
+      - "Does each bullet describe something the player is trying to accomplish?"
+      - "Are intents written from the player's perspective, not the system's?"
+      - "Would a player recognize these as their goals when using this system?"
+
+  "### Design Constraints":
+    parent: "## Identity"
+    questions:
+      - "Does each constraint reference a specific Invariant, Anchor, Boundary, or Control Model rule by name?"
+      - "Are constraints traceable to the design doc — not invented here?"
+      - "Are any relevant governance mechanisms missing?"
+
+  "### Non-Responsibilities":
+    parent: "## Identity"
+    questions:
+      - "Is each non-responsibility specific — naming what could plausibly be owned but isn't?"
+      - "Does it name which system DOES own the excluded behavior?"
+      - "Are there generic exclusions that add no value ('doesn't own rendering')?"
+
+  # -- Player Experience --
+
+  "### Visibility to Player":
+    parent: "## Player Experience"
+    questions:
+      - "Is every piece of system state classified as Visible, Partial, or Hidden?"
+      - "For each Hidden item — is it hidden intentionally, or is it a gap in the information model?"
+      - "Does the player have enough visible information to make the decisions this system requires?"
+
+  "### Player Actions":
+    parent: "## Player Experience"
+    questions:
+      - "Is each action a concrete, observable thing the player does (not an abstraction)?"
+      - "Are actions numbered in the order the player would actually perform them?"
+      - "Could a spec writer derive one atomic behavior spec per action?"
+      - "Are there obvious actions the system should support that aren't listed?"
+
+  "### System Resolution":
+    parent: "## Player Experience"
+    questions:
+      - "Does every Player Action have a corresponding resolution — what happens next?"
+      - "Are consequences player-visible and observable, not internal state changes?"
+      - "Does resolution describe what happens on failure, not just success?"
+      - "If the resolution says 'the system processes it' — that's too vague. Is every step concrete?"
+
+  "### Feel & Feedback":
+    parent: "## Player Experience"
+    questions:
+      - "Does this describe how the system should feel to use, not just what it does?"
+      - "Are feel requirements specific to this system (not generic 'should feel responsive')?"
+      - "Does it defer detailed visual/audio to the style and audio docs where appropriate?"
+
+  # -- State & Lifecycle --
+
+  "### Owned State":
+    parent: "## State & Lifecycle"
+    questions:
+      - "Is every entry genuinely this system's to write — could any belong elsewhere?"
+      - "Is each state entry a crisp simulation truth (not vague: 'current_status', 'processing_flag')?"
+      - "Does the Persistence column make sense — is saved/runtime/derived correct for each?"
+      - "Does the state table match what Simulation Responsibility claims?"
+
+  "### State Lifecycle":
+    parent: "## State & Lifecycle"
+    questions:
+      - "Does the lifecycle describe player-observable phases, not implementation state machines?"
+      - "Are all transitions clear — what causes each state change?"
+      - "Can you trace a complete lifecycle from creation to completion/destruction?"
+      - "Are there states mentioned elsewhere (Player Actions, Resolution) that don't appear here?"
+
+  "### Failure / Friction States":
+    parent: "## State & Lifecycle"
+    questions:
+      - "Does each failure state describe what the player sees, not just 'an error occurs'?"
+      - "Are failure states specific — 'resources insufficient for placement' not 'something goes wrong'?"
+      - "Is there a recovery path described for each failure, or is it a dead end?"
+      - "Are interruption scenarios covered (target destroyed mid-action, actor dies mid-task)?"
+
+  # -- Relationships --
+
+  "### Upstream Dependencies":
+    parent: "## Relationships"
+    questions:
+      - "Does each dependency represent a genuine functional requirement?"
+      - "Could this system work without any of its listed dependencies? If so, it's phantom."
+      - "Is 'What It Provides' specific enough to define the boundary?"
+
+  "### Downstream Consequences":
+    parent: "## Relationships"
+    questions:
+      - "Does this system acknowledge all the downstream effects its behavior creates?"
+      - "Are there consequences implied by Player Actions or System Resolution that aren't listed here?"
+      - "Is the boundary clear — who does what at each handoff?"
+
+  # -- Edge Cases & Open Questions --
+
+  "### Edge Cases & Ambiguity Killers":
+    parent: "## Edge Cases & Open Questions"
+    questions:
+      - "Do edge cases answer real questions a spec writer or implementer would ask?"
+      - "Are they specific ('what if the target tile is destroyed mid-construction?') not vague ('what if something unusual happens?')?"
+      - "Are there obvious questions a player would ask that aren't answered here?"
+
+  "### Open Questions":
+    parent: "## Edge Cases & Open Questions"
+    questions:
+      - "Are these genuinely unresolved, or have they been answered elsewhere?"
+      - "Is each question specific enough to act on?"
+
+  # -- Implementation Awareness --
+
+  "### Observability & Debug Surface":
+    parent: "## Implementation Awareness"
+    questions:
+      - "Are observability requirements framed as 'what needs to be visible' not 'how to implement logging'?"
+      - "Would these help diagnose real problems with this system?"
+
+  "### Performance Characteristics":
+    parent: "## Implementation Awareness"
+    questions:
+      - "Are these design-level awareness, not implementation prescriptions?"
+      - "Is the update frequency realistic for what this system does?"
+      - "Are scaling risks identified honestly?"
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# Each section is reviewed for internal coherence across its subsections.
+# Runs after L3 has cleaned up individual subsections.
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Identity":
+    questions:
+      - "Do Purpose, Simulation Responsibility, Player Intent, Design Constraints, and Non-Responsibilities all describe the same system?"
+      - "Does Non-Responsibilities match what Purpose and Simulation Responsibility exclude?"
+      - "If you only read this section, could you explain what this system is and isn't?"
+      - "Is Player Intent consistent with the Design Constraints — can the player actually accomplish these intents under these constraints?"
+
+  "## Player Experience":
+    questions:
+      - "Does Visibility give the player enough information to perform the Player Actions?"
+      - "Does every Player Action have a matching System Resolution?"
+      - "Does Feel & Feedback align with the kind of actions described — fast actions get fast feedback, deliberate actions get weighty feedback?"
+      - "Would a player recognize this section as describing their actual experience with this system?"
+
+  "## State & Lifecycle":
+    questions:
+      - "Does every Owned State entry appear somewhere in the State Lifecycle?"
+      - "Are Failure / Friction States reachable from the State Lifecycle?"
+      - "Does the state this system claims to own match what Identity > Simulation Responsibility says?"
+      - "Are there lifecycle states that imply owned state not listed in the table?"
+
+  "## Relationships":
+    questions:
+      - "Do dependencies and consequences form a coherent picture of this system's role in the simulation?"
+      - "Is every dependency justified — does the system actually need what each upstream provides?"
+      - "Are there consequences implied by Player Experience that don't appear here?"
+      - "If you replaced this system with a black box exposing the same inputs/outputs, would the rest of the simulation still work?"
+
+  "## Edge Cases & Open Questions":
+    questions:
+      - "Do edge cases cover the dangerous intersections between Identity claims and Player Experience reality?"
+      - "Are open questions genuinely open, or have they been implicitly answered by other sections?"
+
+  "## Implementation Awareness":
+    questions:
+      - "Does this section stay at the design level — informing implementation without prescribing it?"
+      - "Are observability requirements consistent with what State & Lifecycle tracks?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# The whole document is reviewed for cross-section coherence.
+# Runs after L2 has cleaned up section-level issues.
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Does this system own what it should — and only what it should? If you removed this system, what state would become unowned? Does that match what Identity claims?"
+  - "Could a spec writer produce complete behavioral specs from this document alone, without guessing?"
+  - "Does this system build the game described in the design doc, or a different game?"
+  - "Does this system interact correctly with other systems — are dependencies legitimate, consequences complete, boundaries clear?"
+  - "Does this system earn its existence in the simulation? What player-facing capability would be lost if it were deleted?"
+  - "Do the six sections tell one consistent story, or do they describe slightly different systems?"
+
+identity_check:
+  questions:
+    - "If this system stopped running entirely, what simulation state would become incorrect or frozen?"
+    - "What player decision does this system create or shape?"
+    - "What other systems must trust this system's state as authoritative?"
+    - "Which system is allowed to change this system's core state?"
+    - "What part of the game experience would feel different if this system were removed?"
+
+bias_pack:
+  - name: "Fake ownership clarity"
+    description: "Owned State table is filled out but the boundary is functionally soft. Multiple systems shape the same decision through technically non-overlapping but functionally tangled state."
+  - name: "Hidden two-step behavior gaps"
+    description: "Doc jumps from player input to final outcome, skipping the operational middle that specs will need. Missing: reservation, validation persistence, interruption handling."
+  - name: "Documentation furniture state"
+    description: "Owned State entries that are vague umbrella terms (current_status, processing_flag) rather than crisp simulation truth."
+  - name: "Policies pretending to be systems"
+    description: "A 'system' that is really a rule set, prioritization layer, tuning policy, or modifier framework."
+  - name: "One-way dependency lies"
+    description: "Dependency tables show neat one-directional flow, but the real conceptual dependency is bidirectional."
+  - name: "Internal section contradictions"
+    description: "Purpose says one thing, Player Actions imply another. Owned State doesn't match what Lifecycle describes."
+  - name: "Imaginary supporting infrastructure"
+    description: "The system only works because an unstated scheduler, resolver, priority arbiter, or state broker must exist."
+  - name: "False spec-readiness"
+    description: "The doc is well-written but not precise enough to derive specs from. Test: if two engineers independently wrote specs from this doc, would they write the same specs?"
+
+scope_guard:
+  upward: "design doc — game-level design decisions"
+  downward: "architecture, interfaces, engine docs — implementation details"
+  tests:
+    - name: upward_leakage
+      question: "Does this change introduce or modify game-level design decisions that belong in the design doc?"
+      guidance: "System designs implement the design doc's vision for a specific domain; they don't redefine the game."
+    - name: downward_leakage
+      question: "Does this change introduce architectural, interface, or implementation detail that belongs in Steps 3-4?"
+      guidance: "System designs describe behavior, not structure. No signals, methods, node names, class hierarchies."
+      test_phrase: "Does this read like 'the player sees X happen' (correct) or 'SystemA calls method Y on SystemB' (wrong layer)?"
+    - name: architecture_survival
+      question: "If the architecture changed how systems communicate tomorrow, would this system design still be valid?"
+      guidance: "If no, the system design is encoding an architecture assumption, not a behavioral description."
+
+adjudication:
+  editable_files_pattern: "design/systems/SYS-*.md"
+  outcomes:
+    - accept
+    - reject
+    - escalate
+    - ambiguous_intent
+  rules:
+    - "Prefer fixing system docs over escalating — most issues are system-level clarity"
+    - "If the issue depends on a missing or ambiguous design-doc decision, escalate or flag ambiguous"
+    - "If the issue is system-specific clarity or behavioral precision, accept and fix"
+    - "Ownership changes always require user confirmation"
+    - "Moving state between systems requires user confirmation"
+    - "Merging/splitting systems requires user confirmation"
+
+review_lock:
+  track_by: root_cause
+  examples:
+    - same: ["ownership boundary unclear", "system writes to another system's state"]
+    - same: ["behavior incomplete", "missing edge case handling"]
+
+report:
+  log_name_pattern: "ITERATE-systems-{target}-{date}.md"
+  single_target:
+    final_questions:
+      - name: "Biggest Ownership Problem"
+        prompt: "The boundary most likely to cause implementation confusion. If none, say so."
+      - name: "Primary Rework Risk"
+        prompt: "What part of this system is most likely to need significant rework during specs or implementation?"
+      - name: "Most Likely Spec Pain Point"
+        prompt: "Where will spec writers struggle because the system doc is insufficient or ambiguous?"
+  range:
+    final_questions:
+      - name: "Biggest Ownership Problem"
+        prompt: "The boundary most likely to cause implementation confusion or authority conflicts across the system set."
+      - name: "Weakest System"
+        prompt: "The system most likely to need significant rework during specs or implementation. Why?"
+      - name: "Merge/Split Recommendations"
+        prompt: "Systems that should merge or split based on review findings, or 'System boundaries look correct.'"
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (ownership unclear, behaviors undefined, governance ignored)"
+      2: "major issues (significant ownership overlaps, missing behaviors, governance violations)"
+      3: "workable but soft (some fuzzy boundaries, incomplete behavior coverage, minor governance gaps)"
+      4: "solid design (clear ownership, good behavioral coverage, governance respected)"
+      5: "strong design (ownership is unambiguous, behaviors are spec-ready, governance actively shapes the system)"
+    justification: "Ratings must be justified by the highest-severity accepted issues. A 4 or 5 requires no major unresolved ownership or governance problems."
+
+rules:
+  - "Project documents and authority order win"
+  - "Systems describe BEHAVIOR, not IMPLEMENTATION — reject signals, methods, nodes, class names"
+  - "Only edit system files in the reviewed range"
+  - "Edits are limited to clarification and restructuring"
+  - "Do not invent missing behavior to solve a review issue — flag the gap"
+  - "Ownership changes are always escalated"
+  - "Respect the formatter/reviewer boundary — fix-systems handles mechanical issues"
+  - "Design signals from fix-systems are prioritized when --signals provided"
+  - "Never blindly accept"
+  - "Pushback is expected and healthy"
+  - "Reappearing material issues escalate to user after 2 iterations"
+  - "Cross-topic soft weaknesses escalate if same issue degrades 2+ topics"
+  - "Ambiguous upstream design is not a system defect — flag for user decision"
+  - "Practicality check: reject changes that increase rigidity without improving implementability"
+  - "Resolved issues are locked across iterations by root cause"
+
+signal_topic_mapping:
+  ownership: [1, 4]
+  governance: [3]
+  behavioral_gaps: [2]
+  cross_system: [4]
+  fitness_granularity: [5]

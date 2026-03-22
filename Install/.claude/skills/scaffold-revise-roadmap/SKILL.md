@@ -175,7 +175,7 @@ Append to the Revision History section:
 ### Next Steps
 - Run `/scaffold-revise-phases P#-###` to update remaining phase files from feedback
 - Run `/scaffold-fix-phase P#-###` on the next phase
-- Run `/scaffold-iterate-phase P#-###` for adversarial review
+- Run `/scaffold-iterate phase P#-###` for adversarial review
 - Run `/scaffold-approve-phases P#-###` to approve the next phase
 ```
 

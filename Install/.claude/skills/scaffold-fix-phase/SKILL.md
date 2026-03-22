@@ -155,7 +155,7 @@ Compare issues with the previous pass:
 | ... | ... | ... | ... |
 
 ### Review Freshness
-**Invalidated by fixes** — rerun `/scaffold-iterate-phase` before approval.
+**Invalidated by fixes** — rerun `/scaffold-iterate phase` before approval.
 ```
 
 If no issues found:

@@ -232,7 +232,7 @@ Flag any remaining gaps:
 
 Remind the user of next steps. Only the first slice goes through the full pipeline initially:
 - Run `/scaffold-review-slice SLICE-###` on the first slice
-- Run `/scaffold-iterate-slice SLICE-###` for adversarial review
+- Run `/scaffold-iterate slice SLICE-###` for adversarial review
 - Run `/scaffold-validate --scope slices` to check structural integrity
 - Run `/scaffold-approve-slices SLICE-###` to approve the first slice for spec seeding
 - Then run `/scaffold-bulk-seed-specs` for the approved slice's specs

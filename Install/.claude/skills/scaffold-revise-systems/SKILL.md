@@ -267,7 +267,7 @@ After all actions (auto-updates, escalation resolutions), append a revision entr
 
 ### Next Steps
 - Run `/scaffold-fix-systems SYS-###-SYS-###` to clean up mechanical issues from updates
-- Run `/scaffold-iterate-systems --topics "[affected topics]" SYS-###-SYS-###` to review changed areas
+- Run `/scaffold-iterate systems --topics "[affected topics]" SYS-###-SYS-###` to review changed areas
 - Run `/scaffold-validate --scope systems` to confirm structural readiness
 ```
 

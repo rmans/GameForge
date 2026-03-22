@@ -182,7 +182,7 @@ Write `scaffold/phases/roadmap.md` with these sections:
 
 ### Next Steps
 - Run `/scaffold-fix-roadmap` to clean up any mechanical issues
-- Run `/scaffold-iterate-roadmap` for adversarial review
+- Run `/scaffold-iterate roadmap` for adversarial review
 - Run `/scaffold-validate --scope roadmap` to check structural integrity
 - Run `/scaffold-bulk-seed-phases` to create phase scope gate documents
 ```

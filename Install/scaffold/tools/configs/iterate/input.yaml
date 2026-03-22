@@ -1,0 +1,168 @@
+# input.yaml — Iterate config for Step 6 input docs
+# Multi-doc layer with per-doc tailored questions.
+# Input docs don't have templates with ### structure — review is at L2 and L1 level.
+
+layer: input
+display_name: "Input System"
+target_docs:
+  - action-map.md
+  - input-philosophy.md
+  - default-bindings-kbm.md
+  - default-bindings-gamepad.md
+  - ui-navigation.md
+target_type: multi_doc
+
+preflight:
+  required_files:
+    - design/design-doc.md
+  blocked_message: "Design doc required as context for input review."
+
+context_files:
+  static:
+    - design/design-doc.md
+    - design/glossary.md
+    - scaffold/doc-authority.md
+    - decisions/known-issues.md
+  conditional:
+    - file: design/interaction-model.md
+      when: exists
+    - file: design/ui-kit.md
+      when: exists
+  dynamic:
+    - pattern: "inputs/*.md"
+      label: "All input docs for cross-reference"
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# Per-Doc Review (L2 per document — tailored per doc)
+# ---------------------------------------------------------------------------
+
+per_doc:
+
+  action-map.md:
+    l2_sections:
+      "## Actions":
+        questions:
+          - "Does every player verb in the design doc have a corresponding action?"
+          - "Does every Player Action in system designs have a corresponding input action?"
+          - "Are there orphan actions that don't trace to any design doc or system need?"
+          - "Do action names use canonical glossary terms?"
+          - "Are action contexts (gameplay, menu, dialog, camera) clearly assigned?"
+          - "Is each action's semantic meaning unambiguous — could two developers interpret it the same way?"
+    l2_doc_question: "Is the action map complete, traceable to design intent, and unambiguous?"
+
+  input-philosophy.md:
+    l2_sections:
+      "## Philosophy":
+        questions:
+          - "Does the philosophy match the design doc's Player Control Model?"
+          - "Is the control-feel goal specific — not generic 'responsive and intuitive'?"
+          - "Are accessibility commitments from the design doc reflected?"
+          - "Does it explain WHY the input model is this way, not just WHAT it is?"
+          - "Are principles actionable — could a developer use them to resolve a binding ambiguity?"
+    l2_doc_question: "Does this philosophy connect the design doc's control model to concrete input decisions?"
+
+  default-bindings-kbm.md:
+    l2_sections:
+      "## Bindings":
+        questions:
+          - "Are there any binding collisions within the same input context?"
+          - "Are frequently-used actions on easily accessible keys (left-hand, no modifier required)?"
+          - "Are destructive actions protected (requiring confirmation or modifier)?"
+          - "Are camera controls on expected keys (WASD/arrows, scroll wheel)?"
+          - "Are input contexts (gameplay, menu, dialog) clearly defined with separate binding sets?"
+          - "Are modifier key conventions consistent (Shift = queue, Ctrl = select-add, etc.)?"
+          - "Is right-click behavior defined and consistent with interaction-model.md?"
+    l2_doc_question: "Are keyboard/mouse bindings usable, conflict-free, and ergonomically sound for extended play sessions?"
+
+  default-bindings-gamepad.md:
+    l2_sections:
+      "## Bindings":
+        questions:
+          - "Are there any binding collisions within the same input context?"
+          - "Are frequently-used actions on face buttons, not requiring triggers+bumpers?"
+          - "Is the D-pad vs analog stick distinction clear (navigation vs cursor)?"
+          - "Are destructive actions protected?"
+          - "Is camera control on the right stick (standard convention)?"
+          - "Are input contexts (gameplay, menu) clearly defined?"
+          - "Can the game be fully played with gamepad alone — no mouse fallback required?"
+    l2_doc_question: "Are gamepad bindings usable, conflict-free, and ergonomic for a management/colony sim?"
+
+  ui-navigation.md:
+    l2_sections:
+      "## Navigation":
+        questions:
+          - "Is every UI screen from ui-kit.md navigable?"
+          - "Can every screen be fully navigated with keyboard alone?"
+          - "Can every screen be fully navigated with gamepad alone?"
+          - "Is the focus/navigation flow logical — does tab order make sense?"
+          - "Are focus traps addressed — can the player always escape a modal?"
+          - "Is navigation consistent across screens — same patterns for same UI structures?"
+          - "Are nested panels navigable — can the player reach all interactive elements?"
+    l2_doc_question: "Can the player navigate every UI screen with every input method without getting stuck?"
+
+# ---------------------------------------------------------------------------
+# L1 — Cross-Doc Integration Review
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Does every action in the action map have bindings in BOTH binding docs (kbm and gamepad)?"
+  - "Do the actual bindings reflect the stated input philosophy — or do they contradict it?"
+  - "Do input docs match what interaction-model.md describes for selection, commands, and drag?"
+  - "Does ui-navigation.md cover all interactive components from ui-kit.md?"
+  - "Are input contexts (gameplay, menu, dialog) defined consistently across all docs?"
+  - "Could a developer wire input for a new system feature without guessing which action to use?"
+  - "Where would two developers wire input differently because these docs are ambiguous?"
+
+scope_guard:
+  upward: "design doc — game design decisions, interaction model"
+  downward: "engine docs — input system implementation"
+  tests:
+    - name: upward_leakage
+      question: "Does this change modify game design decisions or interaction model intent?"
+      guidance: "Input docs define bindings and navigation, not game mechanics."
+    - name: downward_leakage
+      question: "Does this change introduce engine-specific input system implementation?"
+      guidance: "Input docs define what the player does, not how the engine processes it."
+
+adjudication:
+  editable_files:
+    - inputs/action-map.md
+    - inputs/input-philosophy.md
+    - inputs/default-bindings-kbm.md
+    - inputs/default-bindings-gamepad.md
+    - inputs/ui-navigation.md
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-input-{target}-{date}.md"
+  final_questions:
+    - name: "Cross-Doc Inconsistencies"
+      prompt: "The most dangerous inconsistencies across input docs."
+    - name: "Developer Pitfalls"
+      prompt: "Where will developers struggle to wire input correctly?"
+    - name: "Weakest Doc"
+      prompt: "Which input doc is weakest?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (actions missing, bindings conflicting)"
+      2: "major issues (significant coverage gaps or conflicts)"
+      3: "workable but soft (some gaps, minor conflicts)"
+      4: "solid input system (good coverage, consistent, minor soft spots)"
+      5: "strong input system (complete coverage, conflict-free, developer-ready)"
+
+rules:
+  - "Project documents and authority order win"
+  - "Only edit input docs listed in editable_files"
+  - "Single-writer rule enforced via authority checks"
+  - "Never blindly accept"
+  - "Pushback is expected and healthy"
+  - "Resolved issues are locked across iterations by root cause"

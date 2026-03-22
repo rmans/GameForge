@@ -373,7 +373,7 @@ After applying all decisions, assess whether the task graph is stable:
 
 ### Next Steps
 - If **Stable**: Run `/scaffold-reorder-tasks SLICE-###` then `/scaffold-implement-task`
-- If **Needs another pass**: Run `/scaffold-fix-task` on new/modified tasks, then `/scaffold-iterate-task`, then `/scaffold-triage-tasks` again
+- If **Needs another pass**: Run `/scaffold-fix-task` on new/modified tasks, then `/scaffold-iterate task`, then `/scaffold-triage-tasks` again
 ```
 
 ## Rules

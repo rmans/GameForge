@@ -13,6 +13,8 @@
 | `review_config.json` | Configuration for doc-review.py (provider, model, temperature) |
 | `code-review.py` | Adversarial code review — multi-provider LLM review for implementation code |
 | `validate-refs.py` | Cross-reference validator — checks referential integrity across all scaffold docs |
+| `iterate.py` | Iterate orchestrator — manages adversarial review sessions for scaffold documents (used by `/scaffold-iterate`) |
+| `configs/iterate/*.yaml` | Per-layer review configs for iterate.py (topics, context files, scope guards, bias packs) |
 
 ## image-gen.py
 
@@ -340,3 +342,59 @@ python scaffold/tools/validate-refs.py --format text     # Human-readable text o
 ### Dependencies
 
 None — uses Python standard library only (`pathlib`, `re`, `json`, `argparse`).
+
+## iterate.py
+
+Iterate orchestrator that manages adversarial review sessions for scaffold documents. Coordinates between Claude (adjudicator) and doc-review.py (external LLM reviewer). Handles one document at a time — the calling skill handles range loops. Used by `/scaffold-iterate`.
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `preflight` | Check if a layer is ready for review |
+| `start` | Begin a topic review — calls doc-review.py, returns first issue |
+| `adjudicate` | Record Claude's decision on an issue, return next issue |
+| `respond` | Send pushback to the reviewer, return counter-argument |
+| `scope-check` | Run mechanical scope guard tests on a proposed change |
+| `apply` | Apply all accepted fixes for the current session |
+| `convergence` | Check if another iteration is needed |
+| `report` | Generate the review log and report summary |
+
+### Usage
+
+```
+python scaffold/tools/iterate.py preflight --layer design
+python scaffold/tools/iterate.py start --layer systems --target design/systems/SYS-005-construction.md --topic 1 --iteration 1
+python scaffold/tools/iterate.py adjudicate --session <id> --outcome accept --reasoning "Valid concern"
+python scaffold/tools/iterate.py respond --session <id> --message "Counter-argument here"
+python scaffold/tools/iterate.py scope-check --session <id> --change "proposed change description"
+python scaffold/tools/iterate.py apply --session <id>
+python scaffold/tools/iterate.py convergence --session <id>
+python scaffold/tools/iterate.py report --session <id>
+```
+
+### Layer Configs
+
+Per-layer YAML configs in `configs/iterate/` define topics, context files, scope guards, bias packs, identity checks, and report templates for each document layer:
+
+| Config | Layer | Target Type |
+|--------|-------|-------------|
+| `design.yaml` | Design document | Fixed (design-doc.md) |
+| `systems.yaml` | System designs | Range (SYS-###) |
+| `spec.yaml` | Behavior specs | Range (SPEC-###) |
+| `task.yaml` | Implementation tasks | Range (TASK-###) |
+| `roadmap.yaml` | Roadmap | Fixed (roadmap.md) |
+| `phase.yaml` | Phase scope gates | Range (P#-###) |
+| `slice.yaml` | Vertical slices | Range (SLICE-###) |
+| `references.yaml` | Reference/architecture docs | Multi-doc |
+| `style.yaml` | Style/UX docs | Multi-doc |
+| `input.yaml` | Input docs | Multi-doc |
+| `engine.yaml` | Engine convention docs | Multi-doc |
+
+### Session State
+
+Session state is saved to `.reviews/iterate/` as JSON files. Sessions track: layer, target, current topic/iteration, issues, adjudication results, review lock (resolved root causes), and changes to apply.
+
+### Dependencies
+
+None — uses Python standard library only (`json`, `subprocess`, `argparse`, `pathlib`, `re`). Calls `doc-review.py` as a subprocess.

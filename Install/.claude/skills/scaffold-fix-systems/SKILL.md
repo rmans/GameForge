@@ -191,7 +191,7 @@ For a single system:
 | # | Category | What Changed |
 |---|----------|-------------|
 | 1 | Terminology | Replaced "worker" with "colonist" |
-| 2 | Dependency symmetry | Added reciprocal entry in SYS-### Downstream Consequences |
+| 2 | Dependency symmetry | Added reciprocal entry in SYS-### Relationships > Downstream Consequences |
 | ... | ... | ... |
 
 ### User-Confirmed Actions Pending

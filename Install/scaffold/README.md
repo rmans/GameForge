@@ -186,7 +186,7 @@ Deferred issues with recorded decisions do not block stabilization.
 | `tasks/` | Execution | 9 | Implementation tasks tied to specs |
 | `engine/` | Implementation | 10 | Engine-specific constraints: coding, UI, input, scene, performance, simulation runtime, save/load, AI/task execution, data pipeline, localization, post-processing, implementation patterns |
 | `theory/` | Advisory | 11 | Game design principles, UX heuristics, architecture patterns — no authority |
-| `decisions/review/` | Tooling | — | Adversarial review logs from `/scaffold-iterate`, `/scaffold-iterate-roadmap` (ITERATE-roadmap-*), `/scaffold-iterate-phase` (ITERATE-phase-*), `/scaffold-iterate-slice` (ITERATE-slice-*), `/scaffold-iterate-spec`, `/scaffold-iterate-task` |
+| `decisions/review/` | Tooling | — | Adversarial review logs from `/scaffold-iterate`, `/scaffold-iterate roadmap` (ITERATE-roadmap-*), `/scaffold-iterate phase` (ITERATE-phase-*), `/scaffold-iterate slice` (ITERATE-slice-*), `/scaffold-iterate spec`, `/scaffold-iterate task` |
 | `art/` | Content | — | Generated art assets from art skills |
 | `audio/` | Content | — | Generated audio assets from audio skills |
 | `templates/` | Meta | — | Templates for all document types and engine docs |

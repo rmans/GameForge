@@ -264,7 +264,7 @@ When `--split-from SYS-###` was provided, update the parent system:
 
 ### Next Steps
 - Run `/scaffold-fix-systems SYS-###` to clean up mechanical issues
-- Run `/scaffold-iterate-systems SYS-###` to adversarially review the new system
+- Run `/scaffold-iterate systems SYS-###` to adversarially review the new system
 - Run `/scaffold-validate --scope systems` to confirm structural readiness
 - Update `design/interfaces.md` if the system interacts with others → `/scaffold-update-doc interfaces`
 ```

@@ -140,7 +140,7 @@ Auto-fixes template text, incomplete governance formats (invariants, pressure te
 ### 1c — Iterate (adversarial review)
 
 ```
-/scaffold-iterate-design
+/scaffold-iterate design
 ```
 
 Adversarial per-topic review by an external LLM across 5 topics: vision coherence, player experience model, world & presentation integrity, governance mechanism quality, scope & content realism. Catches structural design weaknesses self-review misses. A passing review sets the document's status to `Approved`.
@@ -196,7 +196,7 @@ Mechanical cleanup pass — normalizes structure, repairs terminology drift, fix
 ### 2c — Iterate (adversarial review)
 
 ```
-/scaffold-iterate-systems SYS-###-SYS-###
+/scaffold-iterate systems SYS-###-SYS-###
 ```
 
 Adversarial per-topic review via external LLM. Consumes design signals from fix-systems. Reviews system designs for ownership correctness, design governance compliance, cross-system coherence, and behavioral completeness. A passing review sets the document's status to `Approved`.
@@ -253,7 +253,7 @@ Mechanical cleanup pass for all 9 Step 3 docs. Per-doc checks (section structure
 ### 3c — Iterate (adversarial review)
 
 ```
-/scaffold-iterate-references
+/scaffold-iterate references
 ```
 
 Adversarial per-topic review via external LLM across 6 topics (architectural coherence, ownership & authority model, contract & interface quality, data model fitness, cross-doc consistency, simulation readiness). Consumes design signals from fix-references. Supports `--target doc.md` for single-doc focus and `--topics` for scoped review. A passing review sets the documents' status to `Approved`.
@@ -301,7 +301,7 @@ Mechanical cleanup pass for all 15 engine docs. Per-doc checks (section structur
 ### 4c — Iterate (adversarial review)
 
 ```
-/scaffold-iterate-engine [--target doc-stem] [--topics "1,2,5"] [--iterations N]
+/scaffold-iterate engine [--target doc-stem] [--topics "1,2,5"] [--iterations N]
 ```
 
 Adversarial per-topic review of all 15 engine docs via external LLM across 6 topics (architecture implementation fidelity, authority & contract compliance, engine convention quality, cross-engine consistency, implementation sufficiency, simulation-layer fitness). Consumes alignment signals from fix-engine. Reviews whether engine docs correctly implement Steps 1-3 decisions using sound engine patterns. Supports `--target` for single-doc focus and `--topics` for scoped review. A passing review sets the document's status to `Approved`.
@@ -403,7 +403,7 @@ Mechanical cleanup pass for all 6 Step 5 docs. Auto-fixes template text, termino
 ### 5c — Iterate (adversarial review)
 
 ```
-/scaffold-iterate-style
+/scaffold-iterate style
 ```
 
 Adversarial review of all 6 Step 5 docs using an external LLM. Each doc gets its own specialized review lens targeting its unique failure modes: (1) visual identity & readability, (2) color semantics & accessibility, (3) UI component model, (4) input clarity & command structure, (5) response coverage & priority logic, (6) audio tone & boundary discipline. Then Topic 7 checks the cross-doc seams — whether the 6 docs work together as one system. Topic 7 runs first when budget is tight. Supports `--target` for single-doc focus and `--topics` for scoped review. A passing review sets the document's status to `Approved`.
@@ -451,7 +451,7 @@ Mechanical cleanup pass for input docs. Auto-fixes action ID naming conventions,
 ### 6c — Iterate (adversarial review)
 
 ```
-/scaffold-iterate-input [--target doc.md] [--topics "1,3,6"] [--focus "concern"] [--iterations N]
+/scaffold-iterate input [--target doc.md] [--topics "1,3,6"] [--focus "concern"] [--iterations N]
 ```
 
 Adversarial per-topic review via external LLM. Consumes design signals from fix-input. Reviews across 6 topics: action coverage & traceability, philosophy & accessibility coherence, binding fitness & device parity, navigation model completeness, cross-doc consistency, and interaction readiness. Mandatory end-to-end interaction test and device parity test gate further per-doc reviews. A passing review sets the document's status to `Approved`.
@@ -563,7 +563,7 @@ Auto-fixes template text, vague phase goals, vision checkpoint drift, stale ADR 
 #### 8c — Adversarial review
 
 ```
-/scaffold-iterate-roadmap
+/scaffold-iterate roadmap
 ```
 
 Runs adversarial per-topic review via external LLM across 5 topics (vision coverage & scope alignment, phase sequencing & dependency logic, milestone quality & capability progression, risk distribution & ADR currency, player experience evolution). Produces a Roadmap Strength Rating (1–5).
@@ -601,7 +601,7 @@ Auto-fixes any mechanical issues introduced by the revision — stale ADR log en
 **8g — Iterate the revised roadmap**
 
 ```
-/scaffold-iterate-roadmap
+/scaffold-iterate roadmap
 ```
 
 Adversarial review on the revised roadmap. Particularly important after phases that produced HIGH friction or Decreased confidence — the roadmap structure may need strategic adjustment.
@@ -643,7 +643,7 @@ Auto-fixes mechanical issues (template text, vague criteria, broken system refer
 #### 9c — Iterate phases
 
 ```
-/scaffold-iterate-phase P#-###-P#-###
+/scaffold-iterate phase P#-###-P#-###
 ```
 
 Runs adversarial per-topic review via external LLM across 4 topics (scope quality & milestone clarity, entry/exit chain & sequencing, system coverage & authority, risk awareness & decision currency).
@@ -686,7 +686,7 @@ Auto-fixes mechanical issues in the revised phase before adversarial review.
 #### 9h — Iterate the next phase
 
 ```
-/scaffold-iterate-phase P#-###
+/scaffold-iterate phase P#-###
 ```
 
 Adversarial per-topic review on the revised phase.
@@ -738,12 +738,12 @@ Reviews the first slice, auto-fixes mechanical issues (template text, vague done
 #### 10c — Iterate the first slice
 
 ```
-/scaffold-iterate-slice SLICE-###
+/scaffold-iterate slice SLICE-###
 ```
 
 Runs adversarial per-topic review via external LLM across 5 topics (proof quality, boundary design, integration completeness, demo sufficiency, sequencing & transition). Catches blind spots review-slice misses: whether the slice is buying real certainty, whether boundaries are optimal, whether the demo is convincing proof.
 
-> `/scaffold-iterate` also works on slices (general-purpose monolithic review), but `/scaffold-iterate-slice` provides deeper per-topic analysis — recommended for the slice loop.
+> `/scaffold-iterate` also works on slices (general-purpose monolithic review), but `/scaffold-iterate slice` provides deeper per-topic analysis — recommended for the slice loop.
 
 #### 10d — Validate
 
@@ -783,7 +783,7 @@ Auto-fixes mechanical issues in the revised slice before adversarial review.
 #### 10h — Iterate the next slice
 
 ```
-/scaffold-iterate-slice SLICE-###
+/scaffold-iterate slice SLICE-###
 ```
 
 Adversarial per-topic review on the revised slice.
@@ -831,12 +831,12 @@ Reviews all specs, auto-fixes mechanical issues (vague ACs, missing sections, im
 #### 11c — Adversarial review
 
 ```
-/scaffold-iterate-spec SPEC-###-SPEC-###
+/scaffold-iterate spec SPEC-###-SPEC-###
 ```
 
 Runs adversarial per-topic review via external LLM across 6 topics (behavioral correctness, system & authority alignment, slice coverage, cross-system contracts, acceptance criteria quality, edge cases & known issues). Catches blind spots: determinism gaps, actor ambiguity, trigger/sequence issues, authority violations, missing failure paths, unabsorbed ADRs.
 
-> `/scaffold-iterate` also works on specs (general-purpose monolithic review), but `/scaffold-iterate-spec` provides deeper per-topic analysis with back-and-forth discussion — recommended for the stabilization loop.
+> `/scaffold-iterate` also works on specs (general-purpose monolithic review), but `/scaffold-iterate spec` provides deeper per-topic analysis with back-and-forth discussion — recommended for the stabilization loop.
 
 #### 11d — Triage human-required issues
 
@@ -907,12 +907,12 @@ Reviews all tasks, auto-fixes mechanical issues (vague objectives, weak verifica
 #### 12c — Adversarial review
 
 ```
-/scaffold-iterate-task TASK-###-TASK-###
+/scaffold-iterate task TASK-###-TASK-###
 ```
 
 Runs adversarial per-topic review via external LLM across 5 topics (spec coverage, architecture compliance, integration correctness, step executability, edge cases & safety). Catches blind spots: hidden assumptions, coverage gaps, architecture interpretation issues, dependency problems, overlooked edge cases.
 
-> `/scaffold-iterate` also works for tasks (it delegates to `/scaffold-iterate-task` internally), but calling the task-specific skill directly is clearer.
+> `/scaffold-iterate` also works for tasks (it delegates to `/scaffold-iterate task` internally), but calling the task-specific skill directly is clearer.
 
 #### 12d — Triage human-required issues
 

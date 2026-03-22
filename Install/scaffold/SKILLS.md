@@ -1,6 +1,6 @@
 # Skills Reference
 
-> Man-page reference for all 77 scaffold slash commands. Each entry shows synopsis, description, arguments, examples, and related skills.
+> Man-page reference for all 67 scaffold slash commands. Each entry shows synopsis, description, arguments, examples, and related skills.
 >
 > **When to use each skill** — see [WORKFLOW.md](WORKFLOW.md) for the step-by-step pipeline order.
 
@@ -32,7 +32,6 @@
 | **Fix** | | |
 | `/scaffold-fix-design` | `[--iterate N]` | Mechanical cleanup for design doc |
 | `/scaffold-fix-style` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for all 6 Step 5 visual/UX docs |
-| `/scaffold-iterate-style` | `[--target doc.md] [--topics "1,4,7"] [--focus "..."]` | Adversarial per-doc review of Step 5 visual/UX docs (7 topics) |
 | `/scaffold-fix-systems` | `[--target SYS-###] [--iterate N]` | Mechanical cleanup for system designs |
 | `/scaffold-fix-references` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for Step 3 reference/architecture docs |
 | `/scaffold-fix-engine` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for engine docs |
@@ -44,16 +43,7 @@
 | `/scaffold-fix-input` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for Step 6 input docs |
 | `/scaffold-fix-cross-cutting` | — | Resolve cross-document integrity findings |
 | **Iterate** | | |
-| `/scaffold-iterate-design` | `[--topic N] [--iterations N]` | Adversarial per-topic design doc review (5 structural + 1 design stress test) |
-| `/scaffold-iterate-systems` | `[SYS-### or SYS-###-SYS-###]` | Adversarial per-topic system design review |
-| `/scaffold-iterate-references` | `[--target doc.md] [--topic N]` | Adversarial per-topic Step 3 docs review |
-| `/scaffold-iterate-engine` | `[--target doc.md] [--topic N]` | Adversarial per-topic engine doc review |
-| `/scaffold-iterate-roadmap` | `[--topic N]` | Adversarial per-topic roadmap review |
-| `/scaffold-iterate-phase` | `[P#-###] [--topic N]` | Adversarial per-topic phase review |
-| `/scaffold-iterate-slice` | `[SLICE-###] [--topic N]` | Adversarial per-topic slice review |
-| `/scaffold-iterate-spec` | `[SPEC-### or range] [--topic N]` | Adversarial per-topic spec review |
-| `/scaffold-iterate-input` | `[--target doc.md] [--topics "1,3,6"] [--focus "..."]` | Adversarial per-topic input doc review (6 topics) |
-| `/scaffold-iterate-task` | `[TASK-### or range] [--topic N]` | Adversarial per-topic task review |
+| `/scaffold-iterate` | `<layer> [target] [--topics "1,3"] [--focus "..."] [--iterations N]` | Adversarial per-topic review for any layer (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine). Orchestrated by iterate.py with per-layer YAML configs. |
 | **Revise** | | |
 | `/scaffold-revise-design` | `[--source P#-###\|SLICE-###\|foundation-recheck]` | Detect design drift from implementation feedback |
 | `/scaffold-revise-systems` | `[--source SLICE-###]` | Detect system design drift from implementation feedback |
@@ -224,7 +214,7 @@ Creates a single system design at `design/systems/SYS-###-<name>_draft.md` with 
 
 **See Also**
 
-`/scaffold-bulk-seed-systems`, `/scaffold-fix-systems`, `/scaffold-iterate-systems`
+`/scaffold-bulk-seed-systems`, `/scaffold-fix-systems`, `/scaffold-iterate systems`
 
 ---
 
@@ -339,17 +329,17 @@ Formatter and linter for Step 5 docs: style-guide, color-system, ui-kit, interac
 
 **See Also**
 
-`/scaffold-bulk-seed-style`, `/scaffold-iterate-style`
+`/scaffold-bulk-seed-style`, `/scaffold-iterate style`
 
 ---
 
-### /scaffold-iterate-style
+### /scaffold-iterate style
 
 Adversarial per-topic review of all 6 Step 5 visual/UX docs.
 
 **Synopsis**
 
-    /scaffold-iterate-style [--target doc.md] [--topics "1,2,5"] [--focus "concern"] [--iterations N]
+    /scaffold-iterate style [--target doc.md] [--topics "1,2,5"] [--focus "concern"] [--iterations N]
 
 **Description**
 
@@ -367,10 +357,10 @@ Each of the 6 Step 5 docs gets its own specialized review lens targeting its uni
 
 **Examples**
 
-    /scaffold-iterate-style
-    /scaffold-iterate-style --target feedback-system.md
-    /scaffold-iterate-style --topics "5,7" --focus "priority hierarchy"
-    /scaffold-iterate-style --signals "tone mismatch, component gap"
+    /scaffold-iterate style
+    /scaffold-iterate style --target feedback-system.md
+    /scaffold-iterate style --topics "5,7" --focus "priority hierarchy"
+    /scaffold-iterate style --signals "tone mismatch, component gap"
 
 **See Also**
 
@@ -396,7 +386,7 @@ Reads the completed design doc and bulk-seeds the glossary and system design stu
 
 **See Also**
 
-`/scaffold-fix-systems`, `/scaffold-iterate-systems`
+`/scaffold-fix-systems`, `/scaffold-iterate systems`
 
 ---
 
@@ -418,7 +408,7 @@ Reads all completed system designs and bulk-populates 7 companion docs in order:
 
 **See Also**
 
-`/scaffold-fix-references`, `/scaffold-iterate-references`
+`/scaffold-fix-references`, `/scaffold-iterate references`
 
 ---
 
@@ -440,7 +430,7 @@ Asks which engine the project uses (Godot 4, Unity, Unreal 5, or custom), then c
 
 **See Also**
 
-`/scaffold-fix-engine`, `/scaffold-iterate-engine`
+`/scaffold-fix-engine`, `/scaffold-iterate engine`
 
 ---
 
@@ -566,7 +556,7 @@ For tasks: direct Complete (leaf nodes, no children check). For specs, slices, a
 
 **See Also**
 
-`/scaffold-iterate-task`, `/scaffold-complete`
+`/scaffold-iterate task`, `/scaffold-complete`
 
 ---
 
