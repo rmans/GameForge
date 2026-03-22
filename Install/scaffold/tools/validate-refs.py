@@ -240,13 +240,14 @@ def check_authority_entities(root, issues):
     auth_text, auth_lines = read_file(auth_path)
     ent_text, ent_lines = read_file(ent_path)
 
-    # Gather Owning System values from authority.md
-    auth_rows = parse_table_rows(auth_lines)
+    # Gather Owning System values from ALL tables in authority.md
+    auth_tables = find_all_tables(auth_lines)
     owning_systems = set()
-    for row in auth_rows:
-        val = row.get("Owning System", "").strip()
-        if val and val != "—":
-            owning_systems.add(val)
+    for table in auth_tables:
+        for row in table:
+            val = row.get("Owning System", "").strip()
+            if val and val != "—":
+                owning_systems.add(val)
 
     # Gather Authority values from entity-components.md tables
     ent_tables = find_all_tables(ent_lines)
@@ -408,6 +409,79 @@ def check_glossary_not_column(root, issues):
     if not forbidden:
         return
 
+    # Context-aware exclusion: if the NOT-term appears as part of a
+    # compound word, a known-legitimate phrase, or in a context where
+    # it's clearly not being used as a synonym for the canonical term,
+    # skip it. This prevents false positives like "wound" in "wound
+    # infection" (legitimate) vs "wound" meaning "Scar" (violation).
+    def is_false_positive(line_lower, bad_term, canonical, match_obj):
+        """Check if a NOT-term match is a false positive based on context."""
+        start = match_obj.start()
+        end = match_obj.end()
+
+        # 1. Skip if inside a camelCase or PascalCase compound (e.g., "SubRegion")
+        if start > 0 and line_lower[start - 1:start].isalpha():
+            return True  # preceded by letter without word boundary — shouldn't happen with \b, but safety check
+
+        # 2. Skip if the term appears in a heading definition (defining the term itself)
+        stripped = line_lower.strip()
+        if stripped.startswith("#") and bad_term in stripped:
+            return True
+
+        # 3. Skip if inside a markdown link target or code span
+        # Check if we're inside backticks
+        before = line_lower[:start]
+        if before.count("`") % 2 == 1:  # odd number of backticks = inside code span
+            return True
+
+        # 4. Context window check: look at surrounding words to see if the
+        # NOT-term is used in its literal/natural meaning vs as a synonym.
+        # Extract ~3 words before and after the match for context.
+        context_start = max(0, start - 40)
+        context_end = min(len(line_lower), end + 40)
+        context = line_lower[context_start:context_end]
+
+        # If the canonical term also appears on the same line, the author
+        # is likely distinguishing between them — not using one as synonym.
+        if canonical.lower() in line_lower:
+            return True
+
+        # 5. Skip if the NOT-term is part of a compound with a hyphen or
+        # adjacent qualifier that makes it a different concept.
+        # E.g., "wound infection" is not using "wound" as synonym for "Scar"
+        # E.g., "structural integrity" is not using "integrity" as synonym for "CCR"
+        # E.g., "rate modifier" is not using "modifier" as synonym for "Trait"
+        # Check for adjective + NOT-term or NOT-term + noun patterns
+        after_match = line_lower[end:end + 20].strip()
+        before_match = line_lower[max(0, start - 20):start].strip()
+
+        # If there's an adjective before (common compound pattern), likely legitimate
+        common_compound_indicators = [
+            "structural", "numeric", "rate", "damage", "speed", "mood",
+            "regional", "sub", "wound", "base", "total", "current",
+            "priority", "skill", "behavior", "behavioral",
+        ]
+        for indicator in common_compound_indicators:
+            if before_match.endswith(indicator):
+                return True
+            if after_match.startswith(indicator):
+                return True
+
+        # If the NOT-term is immediately followed by a noun that forms a
+        # compound concept (wound infection, wound healing, etc.), skip it
+        compound_followers = [
+            "infection", "healing", "treatment", "care", "type", "types",
+            "severity", "level", "levels", "system", "model", "value",
+            "values", "factor", "factors", "rate", "rates", "effect",
+            "effects", "check", "instability", "detection", "boundary",
+            "boundaries", "management", "based", "specific", "related",
+        ]
+        first_word_after = after_match.split()[0] if after_match.split() else ""
+        if first_word_after in compound_followers:
+            return True
+
+        return False
+
     # Directories to scan (exclude theory/)
     scan_dirs = [
         scaffold / "design",
@@ -440,7 +514,8 @@ def check_glossary_not_column(root, issues):
                 for bad_term, canonical in forbidden:
                     # Word-boundary check to avoid partial matches
                     pattern = r"\b" + re.escape(bad_term) + r"\b"
-                    if re.search(pattern, line_lower):
+                    match = re.search(pattern, line_lower)
+                    if match and not is_false_positive(line_lower, bad_term, canonical, match):
                         rel = md_file.relative_to(root)
                         issues.add(
                             check_name, "WARNING",
