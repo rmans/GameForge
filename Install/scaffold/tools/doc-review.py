@@ -37,14 +37,38 @@ from datetime import datetime
 # Configuration & Auth
 # ---------------------------------------------------------------------------
 
-def load_config():
-    """Load review_config.json from the same directory as this script."""
+def load_config(profile=None):
+    """Load review_config.json, optionally merging a named profile.
+
+    Profiles (e.g., "code_review") override provider, model, and fallback_order
+    settings from the top-level config. API keys are inherited from the top level.
+    """
     config_path = Path(__file__).parent / "review_config.json"
     if not config_path.exists():
         print(json.dumps({"error": "review_config.json not found", "path": str(config_path)}))
         sys.exit(1)
     with open(config_path, encoding="utf-8") as f:
-        return json.load(f)
+        base_config = json.load(f)
+
+    if not profile or profile not in base_config:
+        return base_config
+
+    # Merge profile into base config — profile overrides provider/model/fallback
+    profile_config = base_config[profile]
+    merged = dict(base_config)
+    if "provider" in profile_config:
+        merged["provider"] = profile_config["provider"]
+    if "fallback_order" in profile_config:
+        merged["fallback_order"] = profile_config["fallback_order"]
+    # Override per-provider model/max_tokens from profile
+    for provider_name in ["openai", "anthropic", "google"]:
+        if provider_name in profile_config:
+            if provider_name not in merged:
+                merged[provider_name] = {}
+            # Merge profile provider settings over base, keeping api_key_env from base
+            for key, val in profile_config[provider_name].items():
+                merged[provider_name][key] = val
+    return merged
 
 
 def get_api_key(config):
@@ -1026,7 +1050,7 @@ Only set false if a HIGH severity issue remains with genuinely inadequate reason
 
 def cmd_review(args):
     """Start a fresh review iteration. Creates conversation state."""
-    config = load_config()
+    config = load_config(getattr(args, 'profile', None))
     api_key = get_api_key(config)
 
     doc_path = Path(args.doc_path)
@@ -1126,7 +1150,7 @@ def cmd_review(args):
 
 def cmd_respond(args):
     """Continue the conversation within an iteration."""
-    config = load_config()
+    config = load_config(getattr(args, 'profile', None))
     api_key = get_api_key(config)
 
     state_path = conv_path(args.doc_path, args.iteration)
@@ -1187,7 +1211,7 @@ def cmd_respond(args):
 
 def cmd_consensus(args):
     """Ask reviewer for final consensus summary after discussion."""
-    config = load_config()
+    config = load_config(getattr(args, 'profile', None))
     api_key = get_api_key(config)
 
     state_path = conv_path(args.doc_path, args.iteration)
@@ -1224,7 +1248,7 @@ def cmd_consensus(args):
 
 def cmd_check_config(args):
     """Verify configuration, API key, and glossary availability."""
-    config = load_config()
+    config = load_config(getattr(args, 'profile', None))
     provider = config.get("provider", "openai")
     provider_config = config.get(provider, {})
     env_var = provider_config.get("api_key_env", "OPENAI_API_KEY")
@@ -1288,8 +1312,9 @@ def cmd_check_config(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Adversarial document reviewer — multi-provider (OpenAI / Anthropic)"
+        description="Adversarial document reviewer — multi-provider (OpenAI / Anthropic / Google)"
     )
+    parser.add_argument("--profile", default=None, help="Config profile to use (e.g., 'code_review'). Overrides provider/model from review_config.json.")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # review — start fresh iteration

@@ -44,18 +44,36 @@ from datetime import datetime
 # Configuration & Auth
 # ---------------------------------------------------------------------------
 
-def load_config():
-    """Load review_config.json from the same directory as this script.
+def load_config(profile=None):
+    """Load review_config.json, optionally merging a named profile.
 
     Uses the same config file as doc-review.py — both reviewers share
-    provider settings, temperature, and token limits.
+    provider settings, temperature, and token limits. Profiles (e.g.,
+    "code_review") override provider/model settings from the top level.
     """
     config_path = Path(__file__).parent / "review_config.json"
     if not config_path.exists():
         print(json.dumps({"error": "review_config.json not found", "path": str(config_path)}))
         sys.exit(1)
     with open(config_path, encoding="utf-8") as f:
-        return json.load(f)
+        base_config = json.load(f)
+
+    if not profile or profile not in base_config:
+        return base_config
+
+    profile_config = base_config[profile]
+    merged = dict(base_config)
+    if "provider" in profile_config:
+        merged["provider"] = profile_config["provider"]
+    if "fallback_order" in profile_config:
+        merged["fallback_order"] = profile_config["fallback_order"]
+    for provider_name in ["openai", "anthropic", "google"]:
+        if provider_name in profile_config:
+            if provider_name not in merged:
+                merged[provider_name] = {}
+            for key, val in profile_config[provider_name].items():
+                merged[provider_name][key] = val
+    return merged
 
 
 def get_api_key(config):
@@ -740,7 +758,7 @@ def cmd_review(args):
     Reads the code file (or multiple files), sends to the reviewer with the
     topic-specific prompt, and saves the conversation state for follow-up.
     """
-    config = load_config()
+    config = load_config("code_review")
     api_key = get_api_key(config)
 
     # Validate topic number
@@ -848,7 +866,7 @@ def cmd_respond(args):
     Loads Claude's evaluation of the reviewer's issues from a message or file,
     appends it to the conversation, and gets the reviewer's counter-response.
     """
-    config = load_config()
+    config = load_config("code_review")
     api_key = get_api_key(config)
 
     state_path = conv_path(args.code_path, args.topic, args.iteration)
@@ -915,7 +933,7 @@ def cmd_consensus(args):
     Appends the consensus request to the conversation, forces a JSON response,
     and saves the result.
     """
-    config = load_config()
+    config = load_config("code_review")
     api_key = get_api_key(config)
 
     state_path = conv_path(args.code_path, args.topic, args.iteration)
@@ -954,7 +972,7 @@ def cmd_consensus(args):
 
 def cmd_check_config(args):
     """Verify configuration, API key, and list available topics."""
-    config = load_config()
+    config = load_config("code_review")
     provider = config.get("provider", "openai")
     provider_config = config.get(provider, {})
     env_var = provider_config.get("api_key_env", "OPENAI_API_KEY")

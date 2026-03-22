@@ -16,6 +16,22 @@
     "api_key_env": "GOOGLE_API_KEY",
     "max_tokens": 65536
   },
+  "code_review": {
+    "provider": "openai",
+    "fallback_order": ["openai", "anthropic", "google"],
+    "openai": {
+      "model": "gpt-5.3-codex",
+      "max_tokens": 128000
+    },
+    "anthropic": {
+      "model": "claude-opus-4-6",
+      "max_tokens": 128000
+    },
+    "google": {
+      "model": "gemini-2.5-pro",
+      "max_tokens": 65536
+    }
+  },
   "temperature": 0.3,
   "max_tokens": 65536
 }
