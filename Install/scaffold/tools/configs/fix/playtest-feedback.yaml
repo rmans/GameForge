@@ -1,0 +1,56 @@
+# playtest-feedback.yaml — Fix config for playtest feedback entries
+
+layer: playtest-feedback
+display_name: "Playtest Feedback"
+target_pattern: "decisions/playtest-feedback/PF-*.md"
+target_type: range
+template: "scaffold/templates/playtest-feedback-entry-template.md"
+
+preflight:
+  required_files: []
+  glob_pattern: "decisions/playtest-feedback/PF-*.md"
+  blocked_message: "No PF files found."
+
+context_files:
+  static:
+    - design/glossary.md
+
+editable_files_pattern: "decisions/playtest-feedback/PF-*.md"
+
+defaults:
+  max_iterations: 3
+
+mechanical_checks:
+  completeness:
+    - id: missing_sections
+      description: "Section required by template is absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section heading with template comment"
+
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      patterns: ["<!-- TODO:", "*TODO:"]
+      auto_fix: true
+      fix_action: "Remove template text"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+judgment_checks:
+  quality:
+    - id: interpretation_not_observation
+      description: "Observation section contains interpretation instead of raw behavior"
+      section: "## Observation"
+      question: "Is this what the tester actually did/said, or is it an interpretation?"
+
+report:
+  log_name_pattern: "FIX-pf-{target}-{date}.md"
+
+rules:
+  - "Preserve raw tester observations — don't reinterpret"

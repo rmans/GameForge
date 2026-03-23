@@ -1,0 +1,55 @@
+# playtest-session.yaml — Fix config for playtest session logs
+
+layer: playtest-session
+display_name: "Playtest Session"
+target_pattern: "decisions/playtest-feedback/PT-*.md"
+target_type: range
+template: "scaffold/templates/playtest-session-template.md"
+
+preflight:
+  required_files: []
+  glob_pattern: "decisions/playtest-feedback/PT-*.md"
+  blocked_message: "No PT files found."
+
+context_files:
+  static:
+    - design/glossary.md
+
+editable_files_pattern: "decisions/playtest-feedback/PT-*.md"
+
+defaults:
+  max_iterations: 3
+
+mechanical_checks:
+  completeness:
+    - id: missing_sections
+      description: "Section required by template is absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section heading with template comment"
+
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      patterns: ["<!-- TODO:", "*TODO:"]
+      auto_fix: true
+      fix_action: "Remove template text"
+
+judgment_checks:
+  quality:
+    - id: summary_contradicts_observations
+      description: "Summary tells a different story than the observations"
+      section: "## Summary"
+      question: "Does the summary honestly reflect what the observations show?"
+
+    - id: missing_pf_entries
+      description: "Significant observations not promoted to PF entries"
+      section: "## Feedback Entries Created"
+      question: "Are there observations that deserve their own PF entry but didn't get one?"
+
+report:
+  log_name_pattern: "FIX-pt-{target}-{date}.md"
+
+rules:
+  - "Don't rewrite observations"
+  - "Dishonest summaries are the most important finding"

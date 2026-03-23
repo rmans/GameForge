@@ -1,0 +1,59 @@
+# glossary.yaml — Fix config for glossary
+
+layer: glossary
+display_name: "Glossary"
+target: design/glossary.md
+target_type: fixed
+
+preflight:
+  required_files:
+    - design/glossary.md
+  blocked_message: "No glossary found."
+
+context_files:
+  static:
+    - design/design-doc.md
+    - design/glossary.md
+
+editable_files:
+  - design/glossary.md
+
+defaults:
+  max_iterations: 5
+
+mechanical_checks:
+  completeness:
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      patterns: ["<!-- TODO:", "*TODO:"]
+      auto_fix: true
+      fix_action: "Remove template text"
+
+  structural_quality:
+    - id: term_table_format
+      description: "Terms table missing required columns"
+      detection: table_columns
+      section: "## Terms"
+      required_columns: [Term, Definition, NOT]
+      auto_fix: true
+      fix_action: "Add missing columns"
+
+judgment_checks:
+  quality:
+    - id: ambiguous_definition
+      description: "Term definition could be read two ways"
+      section: "## Terms"
+      question: "Could two people read this definition and disagree on what it means?"
+
+    - id: missing_not_entries
+      description: "Common synonyms not in the NOT column"
+      section: "## Terms"
+      question: "Are there obvious synonyms that developers would use but aren't in the NOT column?"
+
+report:
+  log_name_pattern: "FIX-glossary-{date}.md"
+
+rules:
+  - "Adding terms is safe — removing or redefining affects all docs"
+  - "NOT-column additions are high value"

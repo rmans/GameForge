@@ -1,0 +1,26 @@
+# playtest-feedback.yaml — Validate config for playtest feedback
+
+scope: playtest-feedback
+display_name: "Playtest Feedback"
+glob_pattern: "decisions/playtest-feedback/PF-*.md"
+
+activation:
+  required_files: []
+  skip_message: "No PF files found."
+
+checks:
+  deterministic:
+    - id: pf-structure
+      description: "Required sections present"
+      detection: section_structure
+      glob_pattern: "decisions/playtest-feedback/PF-*.md"
+      required_sections: [Observation, Context]
+      severity: FAIL
+
+    - id: pf-section-health
+      description: "Weighted section health"
+      detection: section_health
+      glob_pattern: "decisions/playtest-feedback/PF-*.md"
+      fail_threshold: 0.3
+      warn_threshold: 0.5
+      severity: WARN

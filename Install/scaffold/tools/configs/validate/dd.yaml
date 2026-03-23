@@ -1,0 +1,25 @@
+# dd.yaml — Validate config for Design Debt
+
+scope: dd
+display_name: "Design Debt"
+glob_pattern: "decisions/design-debt/DD-*.md"
+
+activation:
+  required_files: []
+  skip_message: "No DD files found."
+
+checks:
+  deterministic:
+    - id: dd-structure
+      description: "Required sections present"
+      detection: section_structure
+      glob_pattern: "decisions/design-debt/DD-*.md"
+      required_sections: [Compromise, "Why Accepted", "Payoff Plan"]
+      severity: FAIL
+
+    - id: dd-payoff-plan-populated
+      description: "Payoff Plan has When, How, Effort subsections"
+      detection: section_structure
+      glob_pattern: "decisions/design-debt/DD-*.md"
+      required_sections: [When, How, Effort]
+      severity: WARN

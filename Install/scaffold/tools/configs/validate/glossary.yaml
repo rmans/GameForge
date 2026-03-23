@@ -1,0 +1,39 @@
+# glossary.yaml — Validate config for glossary
+
+scope: glossary
+display_name: "Glossary"
+
+activation:
+  required_files:
+    - design/glossary.md
+  skip_message: "No glossary found."
+
+checks:
+  deterministic:
+    - id: glossary-exists
+      description: "Glossary file exists"
+      detection: file_exists
+      target_files: ["design/glossary.md"]
+      severity: FAIL
+
+    - id: glossary-structure
+      description: "Required sections present"
+      detection: section_structure
+      target_files: ["design/glossary.md"]
+      required_sections: [Purpose, Terms, Rules]
+      severity: FAIL
+
+    - id: glossary-section-health
+      description: "Weighted section health"
+      detection: section_health
+      target_files: ["design/glossary.md"]
+      fail_threshold: 0.4
+      warn_threshold: 0.65
+      severity: WARN
+
+    - id: glossary-review-freshness
+      description: "Review log post-dates file modification"
+      detection: review_freshness
+      target_files: ["design/glossary.md"]
+      review_pattern: "ITERATE-glossary-*"
+      severity: WARN

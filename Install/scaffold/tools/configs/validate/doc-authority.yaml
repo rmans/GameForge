@@ -1,0 +1,32 @@
+# doc-authority.yaml — Validate config for doc-authority.md
+
+scope: doc-authority
+display_name: "Document Authority"
+
+activation:
+  required_files:
+    - scaffold/doc-authority.md
+  skip_message: "No doc-authority.md found."
+
+checks:
+  deterministic:
+    - id: doc-authority-exists
+      description: "doc-authority.md exists"
+      detection: file_exists
+      target_files: ["scaffold/doc-authority.md"]
+      severity: FAIL
+
+    - id: doc-authority-structure
+      description: "Required sections present"
+      detection: section_structure
+      target_files: ["scaffold/doc-authority.md"]
+      required_sections: ["Precedence Chain (highest wins)", "Conflict Resolution", Rules]
+      severity: FAIL
+
+    - id: doc-authority-section-health
+      description: "Weighted section health"
+      detection: section_health
+      target_files: ["scaffold/doc-authority.md"]
+      fail_threshold: 0.5
+      warn_threshold: 0.75
+      severity: WARN
