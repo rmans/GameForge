@@ -587,6 +587,7 @@ def _extract_asset_requirements_from_specs(config):
         # Parse table rows for Status: Needed
         art_assets = []
         audio_assets = []
+        vague_assets = []  # entries too vague to synthesize a task
 
         for line in ar_section.splitlines():
             stripped = line.strip()
@@ -604,10 +605,18 @@ def _extract_asset_requirements_from_specs(config):
                 continue
 
             asset_type = cols[2].strip().lower()
+            description = cols[3].strip()
+
+            # Specificity gate: skip vague entries that can't produce a delivery table
+            # A description must be >10 chars and not just template/placeholder text
+            if len(description) < 10 or description in ("...", "—", "TODO", "TBD", ""):
+                vague_assets.append({"requirement": cols[1], "type": cols[2], "description": description, "spec": spec_id})
+                continue
+
             asset_entry = {
                 "requirement": cols[1],
                 "type": cols[2],
-                "description": cols[3],
+                "description": description,
                 "source_section": cols[4] if len(cols) > 4 else "",
             }
 
@@ -615,6 +624,14 @@ def _extract_asset_requirements_from_specs(config):
                 art_assets.append(asset_entry)
             elif asset_type in _AUDIO_TYPES:
                 audio_assets.append(asset_entry)
+
+        # Track vague assets for reporting
+        if vague_assets:
+            asset_candidates.append({
+                "_vague_warning": True,
+                "spec": spec_id,
+                "vague_assets": vague_assets,
+            })
 
         # Create art task candidate if needed
         if art_assets:

@@ -8,6 +8,100 @@
 > - `CLAUDE` = Claude handles this via sub-skill (judgment, creativity)
 > - `LLM` = external LLM (adversarial-review.py or code-review.py)
 > - `→` = writes action.json / `←` = writes result.json
+> - `✅` = implemented / `🔧` = planned, not yet wired end-to-end
+
+---
+
+## Reference: Document State Machine
+
+Every scaffold document follows this lifecycle:
+
+```
+Draft ──→ Review ──→ Approved ──→ Complete
+  │          │          │            │
+  │          │          ├→ Revised → (stays Approved, re-reviewed)
+  │          │          │
+  └──────────┴──────────┴→ Deprecated (via ADR)
+```
+
+| State | Set by | Meaning |
+|-------|--------|---------|
+| **Draft** | Template / seed skill | Created, not yet reviewed |
+| **Review** | User (manual) | Ready for adversarial review |
+| **Approved** | iterate.py (after convergence) | Passed adversarial review |
+| **Complete** | utils.py complete (with ripple) | Implementation done and verified |
+| **Deprecated** | ADR acceptance | No longer active (ID preserved) |
+
+ADRs use their own lifecycle: `Proposed → Accepted → Deprecated → Superseded`
+
+---
+
+## Reference: Context Precedence Rules ✅
+
+When resolving context for a review call, these rules apply in order:
+
+1. **Target doc first** — always included, never dropped
+2. **Direct upstream sections** — parent spec ACs, parent system Purpose/Owned State
+3. **Direct dependencies** — interface contracts, authority table for ownership questions
+4. **Authority/style/glossary** — only when the review question requires them
+5. **Peers** — only if consistency/comparison is the point (interaction partners)
+6. **Whole docs** — only when extracted headings are insufficient
+7. **Budget enforced** — if total exceeds budget, drop by priority (5→1), then by class (evidence → adjacent → constraint → upstream → canonical)
+
+---
+
+## Reference: Budget Overflow Behavior ✅
+
+Each config sets a char budget (default 50K). When exceeded:
+
+1. Keep target doc (always)
+2. Keep priority-1 extracted sections (essential)
+3. Drop priority-5 entries (nice-to-have: glossary, doc-authority)
+4. Drop priority-4 entries (on-demand: signal registry, entity components)
+5. Drop by class: evidence → adjacent → constraint → upstream
+6. Truncate oversized entries with `[...truncated by budget]`
+7. If required context alone exceeds budget → load truncated, no silent failure
+
+---
+
+## Reference: Convergence Rules ✅
+
+### Fix (local-review.py)
+
+- **Converged** = a re-run of mechanical checks produces zero auto-fixes AND zero remaining judgment checks (excluding already-rejected ones)
+- **Changes tracked per-iteration** — `changes_this_iteration` resets each pass, prevents false convergence from cumulative totals
+- **Rejected judgments excluded** — if user rejects a judgment check, it's never re-queued
+- **Max iterations** from config (default 10)
+
+### Iterate (iterate.py)
+
+- **Stable** = a verification pass of changed sections produces zero new issues not already in `resolved_root_causes`
+- **New issue** = different root cause than any previously resolved. Reworded duplicates deduped by `_extract_root_cause()`
+- **Verification scope** = only sections that had changes applied (not full re-review)
+- **Max iterations** from config (default 10)
+- **Escalation** = CRITICAL issues rejected twice → stop iteration, report as blocking 🔧
+
+### Issue Auto-Categorization ✅
+
+Not every issue needs full adjudication:
+
+| Category | Criteria | Flow |
+|----------|----------|------|
+| **Mechanical** | LOW severity + concrete suggestion, or `category: "mechanical"` | Auto-accept → batch apply (skip adjudication) |
+| **Quality** | MEDIUM/HIGH with suggestion | Adjudicate → scope-check → apply |
+| **Architecture-affecting** | Changes ownership, authority, contracts | Adjudicate → scope-check required |
+| **Ambiguous** | No suggestion, unclear fix | Escalate to user |
+
+---
+
+## Reference: Write Boundaries
+
+| Write type | Who does it | Examples |
+|------------|------------|---------|
+| **Authoritative content** | Claude via sub-skill | Spec behavior, system design, task steps |
+| **Derived bookkeeping** | Python (utils.py) | Index updates, status changes, file renames, upstream table rows |
+| **Safe generated sync** | Python → user review | Signal registry entries, entity properties (presented as suggestions, not auto-applied) |
+| **Architecture suggestions** | Python → user → ADR | Architecture changes from sync-refs are findings, NOT auto-writes |
 
 ---
 
@@ -509,13 +603,15 @@ PYTHON: seed.py next-action --layer tasks
     reads engine: extract_sections: ["## Conventions", "## Patterns", "## Rules"]
     reads architecture: extract_sections: ["## Foundation Areas", "## Core API Boundary", "## Tick Order"]
 
-  → _extract_asset_requirements_from_specs() ← NEW
+  → _extract_asset_requirements_from_specs() ✅
     scans each approved spec's ### Asset Requirements table
     finds rows with Status: Needed
-    groups: art assets (Sprite, Mesh, Icon...) vs audio assets (SFX, Music...)
+    SPECIFICITY GATE: skips vague entries (description <10 chars, "TODO", "TBD", "...")
+      → vague assets reported in confirm phase as warnings, not synthesized into tasks
+    groups specific entries: art assets (Sprite, Mesh, Icon...) vs audio assets (SFX, Music...)
     creates synthetic candidates:
       { name: "Wall Placement Art", task_type: "art", _synthetic: true,
-        assets: [{requirement: "Wall sprite", type: "Sprite", ...}],
+        assets: [{requirement: "Wall sprite", type: "Sprite", description: "32x32 sandstone wall tile..."}],
         prompt_context_docs: ["design/style-guide.md", "design/color-system.md"] }
 
   → session created with synthetic asset candidates pre-seeded in candidates list
@@ -758,11 +854,28 @@ If code review changed files:
   PYTHON: utils.py build-test → verify still passes
 ```
 
-**Phase 7: Sync docs (Python)**
+**Phase 7: Sync docs (Python → user review) ✅**
 ```
-PYTHON: utils.py sync-refs
-  → updates reference/signal-registry.md if new signals added
-  → updates design/architecture.md if new patterns emerged
+PYTHON: utils.py sync-refs → scans changed files for new signals, entities, properties
+  → returns findings (does NOT auto-edit docs)
+
+If findings > 0:
+  PYTHON → action.json: {
+    action: "sync_findings",
+    findings: [
+      { doc: "reference/signal-registry.md", type: "new_signal", detail: "Signal 'wall_placed' found in wall_validator.cpp but not in registry" },
+      { doc: "design/architecture.md", type: "new_pattern", detail: "New validation pattern in BuildingSystem" }
+    ],
+    message: "2 reference doc updates suggested. Review each: registries → apply directly. Architecture → file as drift finding or ADR."
+  }
+
+  CLAUDE: presents findings to user
+  USER: approves signal registry update, defers architecture change
+  CLAUDE ← result.json: { applied: ["signal-registry"], deferred: ["architecture"] }
+  PYTHON: resolve → phase: complete
+
+If findings == 0:
+  PYTHON: → phase: complete directly
 ```
 
 **Phase 8: Complete (Python)**

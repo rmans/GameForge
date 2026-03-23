@@ -15,6 +15,22 @@ Commands:
 Session state persists in .reviews/iterate/session-<id>.json.
 Temp files (action.json, result.json) are overwritten each exchange.
 No pip dependencies — uses Python standard library only.
+
+Convergence rules:
+  - "Stable" = a verification pass of changed sections produces zero new
+    issues that aren't already in resolved_root_causes.
+  - "New issue" = different root cause than any previously resolved issue.
+    Reworded issues with the same root cause are deduped by _extract_root_cause().
+  - Verification pass only re-reviews sections that had changes applied (not all sections).
+  - Max iterations cap prevents infinite loops (default 10).
+  - Escalation: issues with severity CRITICAL that are rejected twice → stop iteration, report as blocking.
+
+Issue categorization:
+  - Mechanical (LOW severity + concrete suggestion, or category:"mechanical"):
+    auto-accepted, skip adjudication, go straight to apply batch.
+  - Quality (MEDIUM/HIGH with suggestion): full adjudicate → scope-check → apply.
+  - Architecture-affecting (changes ownership, authority, contracts): adjudicate → scope-check required.
+  - Ambiguous (no suggestion, unclear fix): escalate to user.
 """
 
 import json
@@ -725,12 +741,36 @@ def _advance_and_write_action(session, config):
         })
         return
 
-    # Store issues and write adjudicate action for the first one
-    session["current_issues"] = filtered
+    # Categorize issues — mechanical issues auto-accept, others go to adjudicate
+    auto_accept = []
+    needs_adjudication = []
+    for issue in filtered:
+        severity = issue.get("severity", "MEDIUM").upper()
+        suggestion = issue.get("suggestion", "")
+        # Auto-accept: LOW severity with concrete suggestion (mechanical quality)
+        # Also auto-accept: issues tagged as "mechanical" by reviewer
+        if issue.get("category") == "mechanical" or (severity == "LOW" and suggestion):
+            auto_accept.append(issue)
+        else:
+            needs_adjudication.append(issue)
+
+    # Queue auto-accepted issues for direct apply (no adjudication round-trip)
+    if auto_accept:
+        session.setdefault("auto_accepted_issues", []).extend(auto_accept)
+
+    if not needs_adjudication:
+        # All issues were mechanical — skip straight to apply
+        session["queue_index"] = idx + 1
+        _save_session(session["session_id"], session)
+        _advance_and_write_action(session, config)
+        return
+
+    # Store issues needing adjudication and write action for the first one
+    session["current_issues"] = needs_adjudication
     session["current_issue_index"] = 0
     _save_session(session["session_id"], session)
 
-    _write_adjudicate_action(session, config, filtered[0], section_content, item)
+    _write_adjudicate_action(session, config, needs_adjudication[0], section_content, item)
 
 
 def _write_adjudicate_action(session, config, issue, section_content, queue_item):

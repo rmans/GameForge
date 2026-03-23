@@ -678,10 +678,38 @@ def _advance(session):
         _advance(session)
 
     elif phase == "sync":
-        # Run sync directly via utils — no sub-skill needed
+        # Run sync directly via utils — returns findings, does NOT auto-write
         from utils import sync_reference_docs
         sync_result = sync_reference_docs(session["file_manifest"])
-        session["results"]["sync_updates"] = sync_result.get("count", 0)
+        sync_count = sync_result.get("count", 0)
+        session["results"]["sync_updates"] = sync_count
+
+        if sync_count > 0:
+            # Present findings to user — these are suggestions, not auto-applied
+            session["phase"] = "sync_review"
+            _save_session(sid, session)
+            _write_action({
+                "action": "sync_findings",
+                "session_id": sid,
+                "findings": sync_result.get("updates", []),
+                "count": sync_count,
+                "message": (
+                    f"Found {sync_count} reference doc update(s) suggested by implementation. "
+                    f"Review each finding. For reference registries (signals, entities), apply directly. "
+                    f"For architecture docs, file as a drift finding or ADR instead of auto-editing."
+                ),
+            })
+        else:
+            session["phase"] = "complete"
+            _save_session(sid, session)
+            _advance(session)
+
+    elif phase == "sync_review":
+        # User reviewed sync findings — result says which to apply vs defer
+        applied = result.get("applied", [])
+        deferred = result.get("deferred", [])
+        session["results"]["sync_applied"] = len(applied)
+        session["results"]["sync_deferred"] = len(deferred)
         session["phase"] = "complete"
         _save_session(sid, session)
         _advance(session)
