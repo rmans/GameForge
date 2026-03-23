@@ -5,7 +5,7 @@ Fix orchestrator — manages mechanical fix sessions for scaffold documents.
 Runs mechanical checks (regex, pattern matching) in Python.
 Routes judgment checks to Claude via scaffold-review-adjudicate.
 Uses the same file-based exchange as iterate.py:
-  - action.json: fix.py writes the next instruction for Claude
+  - action.json: local-review.py writes the next instruction for Claude
   - result.json: Claude's sub-skill writes its response
 
 Commands:

@@ -157,7 +157,7 @@ See [Install/README.md](Install/README.md) for full installation details.
 | **Init** | `init-design` |
 | **Bulk seed (9)** | `bulk-seed-style`, `bulk-seed-systems`, `bulk-seed-references`, `bulk-seed-engine`, `bulk-seed-input`, `bulk-seed-phases`, `bulk-seed-slices`, `bulk-seed-specs`, `bulk-seed-tasks` |
 | **Create (6)** | `new-roadmap`, `new-phase`, `new-slice`, `new-spec`, `new-task`, `new-system` |
-| **Fix (1)** | `fix` — unified mechanical cleanup for all layers (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine, cross-cutting). Orchestrated by `fix.py` with per-layer YAML configs. |
+| **Fix (1)** | `fix` — unified mechanical cleanup for all layers (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine, cross-cutting). Orchestrated by `local-review.py` with per-layer YAML configs. |
 | **Iterate (1)** | `iterate` — unified adversarial review for all layers (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine). Orchestrated by `iterate.py` with per-layer YAML configs. |
 | **Revise (10)** | `revise-design`, `revise-systems`, `revise-references`, `revise-engine`, `revise-style`, `revise-input`, `revise-foundation`, `revise-roadmap`, `revise-phases`, `revise-slices` |
 | **Approve (4)** | `approve-phases`, `approve-slices`, `approve-specs`, `approve-tasks` |

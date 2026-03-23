@@ -126,7 +126,7 @@ The Python orchestrator owns all the logic the old 11 skills used to carry in th
 
 - **Pass sequencing** — L3 → apply → L2 → apply → L1 → apply
 - **Section iteration** — walks through each ### and ## in YAML config order
-- **Review calls** — calls doc-review.py, gets reviewer feedback
+- **Review calls** — calls adversarial-review.py, gets reviewer feedback
 - **Review lock** — tracks resolved root causes, filters duplicates
 - **Scope check routing** — after an accept, writes a scope_check action before confirming
 - **Convergence** — after all passes + applies, checks if changes were made; if yes, rebuilds the queue for a verification pass; if no new issues on verification, stops

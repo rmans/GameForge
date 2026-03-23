@@ -30,7 +30,7 @@
 | `/scaffold-bulk-seed-specs` | — | Seed spec stubs from slices + systems + states |
 | `/scaffold-bulk-seed-tasks` | — | Seed task stubs from specs + engine docs + signals |
 | **Fix** | | |
-| `/scaffold-fix` | `<layer> [target] [--sections "..."] [--iterations N]` | Mechanical cleanup for any layer (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine, cross-cutting). Orchestrated by fix.py with per-layer YAML configs. |
+| `/scaffold-fix` | `<layer> [target] [--sections "..."] [--iterations N]` | Mechanical cleanup for any layer (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine, cross-cutting). Orchestrated by local-review.py with per-layer YAML configs. |
 | **Iterate** | | |
 | `/scaffold-iterate` | `<layer> [target] [--topics "1,3"] [--focus "..."] [--iterations N]` | Adversarial per-topic review for any layer (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine). Orchestrated by iterate.py with per-layer YAML configs. |
 | **Revise** | | |

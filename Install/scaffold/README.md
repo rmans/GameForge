@@ -190,7 +190,7 @@ Deferred issues with recorded decisions do not block stabilization.
 | `art/` | Content | — | Generated art assets from art skills |
 | `audio/` | Content | — | Generated audio assets from audio skills |
 | `templates/` | Meta | — | Templates for all document types and engine docs |
-| `tools/` | Tooling | — | Scripts and utilities (validate-refs.py, doc-review.py, code-review.py) |
+| `tools/` | Tooling | — | Scripts and utilities (validate-refs.py, adversarial-review.py, code-review.py) |
 
 ## Decision Layer
 

@@ -1159,7 +1159,7 @@ def cmd_respond(args):
     if not conv_state:
         print(json.dumps({
             "error": f"No conversation found for iteration {args.iteration}",
-            "fix": f"Run 'review' first: python doc-review.py review {args.doc_path} --iteration {args.iteration}"
+            "fix": f"Run 'review' first: python adversarial-review.py review {args.doc_path} --iteration {args.iteration}"
         }))
         sys.exit(1)
 

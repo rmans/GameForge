@@ -2,7 +2,7 @@
 """
 Iterate orchestrator — manages adversarial review sessions for scaffold documents.
 
-Coordinates between Claude (via sub-skills) and doc-review.py (external LLM reviewer)
+Coordinates between Claude (via sub-skills) and adversarial-review.py (external LLM reviewer)
 using file-based message passing:
   - action.json: iterate.py writes the next instruction for Claude
   - result.json: Claude's sub-skill writes its response
@@ -37,7 +37,7 @@ TOOLS_DIR = Path(__file__).parent
 CONFIGS_DIR = TOOLS_DIR / "configs" / "iterate"
 SCAFFOLD_DIR = TOOLS_DIR.parent
 REVIEWS_DIR = SCAFFOLD_DIR / ".reviews" / "iterate"
-DOC_REVIEW_SCRIPT = TOOLS_DIR / "doc-review.py"
+DOC_REVIEW_SCRIPT = TOOLS_DIR / "adversarial-review.py"
 ACTION_FILE = REVIEWS_DIR / "action.json"
 RESULT_FILE = REVIEWS_DIR / "result.json"
 
@@ -610,7 +610,7 @@ def _advance_and_write_action(session, config):
         })
         return
 
-    # Review action — need to call doc-review.py and get issues
+    # Review action — need to call adversarial-review.py and get issues
     doc_content = target_abs.read_text(encoding="utf-8") if target_abs.exists() else ""
 
     if item["pass"] == "l3":
@@ -664,7 +664,7 @@ def _advance_and_write_action(session, config):
     session["_reviewer_calls"] = session.get("_reviewer_calls", 0) + 1
     _save_session(session["session_id"], session)
 
-    # Call doc-review.py for the review
+    # Call adversarial-review.py for the review
     context_files = resolve_context_files(config, target)
     issues = _call_reviewer(session, config, section_content, questions, context_files)
 
@@ -988,7 +988,7 @@ def cmd_resolve(args):
 # ---------------------------------------------------------------------------
 
 def _call_reviewer(session, config, section_content, questions, context_files):
-    """Call doc-review.py and return issues list."""
+    """Call adversarial-review.py and return issues list."""
     # Build prompt with questions
     prompt_parts = ["Review the following section:\n", section_content, "\n\nEvaluate against these questions:\n"]
     for q in questions:
@@ -1069,7 +1069,7 @@ def _run_doc_review(cmd):
     except subprocess.TimeoutExpired:
         return {"error": "Timed out after 300s"}
     except FileNotFoundError:
-        return {"error": f"doc-review.py not found at {DOC_REVIEW_SCRIPT}"}
+        return {"error": f"adversarial-review.py not found at {DOC_REVIEW_SCRIPT}"}
 
 
 # ---------------------------------------------------------------------------

@@ -74,7 +74,7 @@ When a skill processes a range (e.g., `SPEC-001-SPEC-010`, `TASK-001-TASK-020`),
 
 **Failure handling:** If an item fails during parallel processing, items that depend on it are skipped (they can't proceed). Independent items continue.
 
-**Rate limiting:** For skills that call external APIs (iterate-* skills using doc-review.py), add `sleep 10` between parallel batches to respect rate limits. Do not fire all API calls simultaneously.
+**Rate limiting:** For skills that call external APIs (iterate-* skills using adversarial-review.py), add `sleep 10` between parallel batches to respect rate limits. Do not fire all API calls simultaneously.
 
 **Sequential fallback:** If no dependency information exists (field is absent or all items say "—"), process sequentially in range order. Don't assume independence when dependency data is missing.
 

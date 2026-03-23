@@ -112,7 +112,7 @@ Follow the step-by-step recipe in `scaffold/WORKFLOW.md` for the full 24-step pi
 
 ## External Review Setup
 
-The `/scaffold-iterate` skill uses an external LLM for adversarial review via `scaffold/tools/iterate.py` (which calls `scaffold/tools/doc-review.py`). Configuration lives in `scaffold/tools/review_config.json`:
+The `/scaffold-iterate` skill uses an external LLM for adversarial review via `scaffold/tools/iterate.py` (which calls `scaffold/tools/adversarial-review.py`). Configuration lives in `scaffold/tools/review_config.json`:
 
 - **Primary provider:** Set `"provider"` (default: `"openai"`).
 - **Fallback chain:** Set `"fallback_order"` (default: `["openai", "anthropic"]`). If the primary provider fails with a billing/quota error, the script automatically tries the next provider. If all providers are exhausted, iterate skills fall back to self-review (Claude reviews directly, weaker but functional).

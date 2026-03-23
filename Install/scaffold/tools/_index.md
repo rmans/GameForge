@@ -9,14 +9,14 @@
 | `image-gen.py` | Image generator — DALL-E integration for the scaffold pipeline (shared by all 7 art skills) |
 | `audio-gen.py` | Audio generator — multi-provider audio integration for the scaffold pipeline (shared by all 4 audio skills) |
 | `audio_config.json` | Configuration for audio-gen.py (provider per audio type, model/voice defaults) |
-| `doc-review.py` | Adversarial document reviewer — multi-provider (OpenAI / Anthropic) |
-| `review_config.json` | Configuration for doc-review.py (provider, model, temperature) |
+| `adversarial-review.py` | Adversarial document reviewer — multi-provider (OpenAI / Anthropic) |
+| `review_config.json` | Configuration for adversarial-review.py (provider, model, temperature) |
 | `code-review.py` | Adversarial code review — multi-provider LLM review for implementation code |
 | `validate-refs.py` | Cross-reference validator — checks referential integrity across all scaffold docs |
 | `iterate.py` | Iterate orchestrator — manages adversarial review sessions for scaffold documents (used by `/scaffold-iterate`) |
-| `fix.py` | Fix orchestrator — runs mechanical checks and routes judgment calls for scaffold documents (used by `/scaffold-fix`) |
+| `local-review.py` | Local review orchestrator — runs mechanical checks (regex, patterns, template diffs) and routes judgment calls for scaffold documents (used by `/scaffold-fix`) |
 | `configs/iterate/*.yaml` | Per-layer review configs for iterate.py (topics, context files, scope guards, bias packs) |
-| `configs/fix/*.yaml` | Per-layer fix configs for fix.py (mechanical checks, judgment checks, signals) |
+| `configs/fix/*.yaml` | Per-layer fix configs for local-review.py (mechanical checks, judgment checks, signals) |
 
 ## image-gen.py
 
@@ -195,7 +195,7 @@ Provider configuration for `audio-gen.py`. Specifies which provider to use for e
 
 Each audio type (`tts`, `sfx`, `music`) has a `provider` field that selects which provider config to use. The `tts` subcommand also supports a `--provider` CLI flag to override at runtime.
 
-## doc-review.py
+## adversarial-review.py
 
 Adversarial document reviewer that sends scaffold documents to an external LLM for review, then supports multi-turn back-and-forth conversations until consensus. Used by `/scaffold-iterate`.
 
@@ -222,10 +222,10 @@ Outer Loop (iterations — fresh review of updated doc)
 ### Usage
 
 ```
-python scaffold/tools/doc-review.py review <path> --iteration 1 --context-files <file1> <file2>
-python scaffold/tools/doc-review.py respond <path> --iteration 1 --message-file <file>
-python scaffold/tools/doc-review.py consensus <path> --iteration 1
-python scaffold/tools/doc-review.py check-config
+python scaffold/tools/adversarial-review.py review <path> --iteration 1 --context-files <file1> <file2>
+python scaffold/tools/adversarial-review.py respond <path> --iteration 1 --message-file <file>
+python scaffold/tools/adversarial-review.py consensus <path> --iteration 1
+python scaffold/tools/adversarial-review.py check-config
 ```
 
 ### Doc Type Auto-Detection
@@ -284,7 +284,7 @@ python scaffold/tools/code-review.py check-config
 
 ### Configuration
 
-Uses `review_config.json` (shared with doc-review.py). Supports OpenAI and Anthropic providers. Conversation state is saved to `.reviews/` so exchanges can continue across calls.
+Uses `review_config.json` (shared with adversarial-review.py). Supports OpenAI and Anthropic providers. Conversation state is saved to `.reviews/` so exchanges can continue across calls.
 
 ### Dependencies
 
@@ -347,14 +347,14 @@ None — uses Python standard library only (`pathlib`, `re`, `json`, `argparse`)
 
 ## iterate.py
 
-Iterate orchestrator that manages adversarial review sessions for scaffold documents. Coordinates between Claude (adjudicator) and doc-review.py (external LLM reviewer). Handles one document at a time — the calling skill handles range loops. Used by `/scaffold-iterate`.
+Iterate orchestrator that manages adversarial review sessions for scaffold documents. Coordinates between Claude (adjudicator) and adversarial-review.py (external LLM reviewer). Handles one document at a time — the calling skill handles range loops. Used by `/scaffold-iterate`.
 
 ### Commands
 
 | Command | Description |
 |---------|-------------|
 | `preflight` | Check if a layer is ready for review |
-| `start` | Begin a topic review — calls doc-review.py, returns first issue |
+| `start` | Begin a topic review — calls adversarial-review.py, returns first issue |
 | `adjudicate` | Record Claude's decision on an issue, return next issue |
 | `respond` | Send pushback to the reviewer, return counter-argument |
 | `scope-check` | Run mechanical scope guard tests on a proposed change |
@@ -399,4 +399,4 @@ Session state is saved to `.reviews/iterate/` as JSON files. Sessions track: lay
 
 ### Dependencies
 
-None — uses Python standard library only (`json`, `subprocess`, `argparse`, `pathlib`, `re`). Calls `doc-review.py` as a subprocess.
+None — uses Python standard library only (`json`, `subprocess`, `argparse`, `pathlib`, `re`). Calls `adversarial-review.py` as a subprocess.

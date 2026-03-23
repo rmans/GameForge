@@ -1,6 +1,6 @@
 ---
 name: scaffold-fix
-description: "Mechanical document cleanup dispatcher. Routes between fix.py (Python orchestrator) and shared review sub-skills. Runs pattern-based checks in Python, routes judgment calls to Claude. Handles all document layers."
+description: "Mechanical document cleanup dispatcher. Routes between local-review.py (Python orchestrator) and shared review sub-skills. Runs pattern-based checks in Python, routes judgment calls to Claude. Handles all document layers."
 argument-hint: "<layer> [target] [--sections \"Identity,Player Experience\"] [--iterations N]"
 allowed-tools: Read, Write, Grep, Glob, Bash
 user-invocable: true
@@ -10,7 +10,7 @@ user-invocable: true
 
 Run mechanical cleanup on scaffold documents: **$ARGUMENTS**
 
-This skill is a **thin dispatcher**, identical in pattern to `/scaffold-iterate`. It routes between `fix.py` (Python orchestrator) and shared review sub-skills.
+This skill is a **thin dispatcher**, identical in pattern to `/scaffold-iterate`. It routes between `local-review.py` (Python orchestrator) and shared review sub-skills.
 
 The difference from iterate: fix runs **internal checklists** (regex, pattern matching) instead of calling an external LLM reviewer. Mechanical checks (missing sections, glossary violations, stale markers) are auto-fixed in Python. Judgment checks (is this section too vague?) route to Claude via the same `/scaffold-review-adjudicate` sub-skill.
 
@@ -32,7 +32,7 @@ The difference from iterate: fix runs **internal checklists** (regex, pattern ma
 ## How It Works
 
 ```
-fix.py runs mechanical checks (Python)
+local-review.py runs mechanical checks (Python)
   ├── Auto-fixable issues → apply directly (no adjudication)
   ├── Judgment issues → route to /scaffold-review-adjudicate
   └── Signals → collected and reported (never fixed)
@@ -49,17 +49,17 @@ Same as `/scaffold-iterate` — read `target_pattern` from the YAML config, glob
 ### Step 2 — Preflight
 
 ```bash
-python scaffold/tools/fix.py preflight --layer <layer> --target <relative-path>
+python scaffold/tools/local-review.py preflight --layer <layer> --target <relative-path>
 ```
 
 ### Step 3 — Dispatch Loop
 
 **Start the session:**
 ```bash
-python scaffold/tools/fix.py next-action --layer <layer> --target <relative-path> [--iterations N]
+python scaffold/tools/local-review.py next-action --layer <layer> --target <relative-path> [--iterations N]
 ```
 
-fix.py runs all mechanical checks, builds a queue (auto-apply → judgment checks → judgment-apply → convergence → report), and writes the first `action.json`.
+local-review.py runs all mechanical checks, builds a queue (auto-apply → judgment checks → judgment-apply → convergence → report), and writes the first `action.json`.
 
 Then loop:
 
@@ -70,15 +70,15 @@ loop:
 
     "apply":
       call /scaffold-review-apply
-      python fix.py resolve --session <id>
+      python local-review.py resolve --session <id>
 
     "adjudicate":
       call /scaffold-review-adjudicate
-      python fix.py resolve --session <id>
+      python local-review.py resolve --session <id>
 
     "report":
       call /scaffold-review-report
-      python fix.py resolve --session <id>
+      python local-review.py resolve --session <id>
 
     "done":
       break
@@ -91,7 +91,7 @@ loop:
 
 Display the fix report.
 
-## What fix.py Manages
+## What local-review.py Manages
 
 - **Mechanical checks** — regex, pattern matching, template comparison, glossary compliance, registration sync
 - **Auto-fix application** — queues auto-fixable issues for `/scaffold-review-apply`
@@ -132,8 +132,8 @@ Detected and collected for the iterate pass — never fixed:
 | File | Lifetime | Purpose |
 |------|----------|---------|
 | `.reviews/fix/session-<id>.json` | Full fix session | Durable session state |
-| `.reviews/fix/action.json` | One exchange | fix.py → sub-skill instruction |
-| `.reviews/fix/result.json` | One exchange | Sub-skill → fix.py response |
+| `.reviews/fix/action.json` | One exchange | local-review.py → sub-skill instruction |
+| `.reviews/fix/result.json` | One exchange | Sub-skill → local-review.py response |
 | `scaffold/decisions/review/FIX-*` | Permanent | Fix log output |
 
 ## Range Reviews
@@ -152,4 +152,4 @@ For ranges (e.g., `SYS-001-SYS-043`):
 - **Judgment fixes require Claude's evaluation.** They go through adjudication.
 - **Signals are never fixed.** They feed into `/scaffold-iterate`.
 - **Only edit files in the editable_files list** from the layer config.
-- **If fix.py errors**, report and stop.
+- **If local-review.py errors**, report and stop.
