@@ -5,7 +5,7 @@
 > **Implements:** SPEC-### (link to parent spec)
 > **Phase:** PHASE-### (link to parent phase)
 > **Depends on:** — (TASK-### IDs this task requires to be complete first, or "—")
-> **Task Type:** foundation / behavior / integration / UI / verification / wiring
+> **Task Type:** foundation / behavior / integration / UI / verification / wiring / art / audio
 > **Created:** YYYY-MM-DD
 > **Last Updated:** YYYY-MM-DD
 > **Status:** Draft
@@ -25,7 +25,40 @@
 
 <!-- What this task intentionally does not implement. Prevents task bloat. -->
 
+## Asset Delivery
+
+<!-- ONLY for Task Type: art or audio. Delete this section for code tasks.
+     Lists every asset this task must produce, with file paths, specs, and generation prompts.
+     The human creates these assets externally and places them at the listed paths.
+     Once all assets are delivered, a wiring task connects them to the codebase. -->
+
+<!--
+| Asset | Type | File Path | Dimensions / Duration | Prompt |
+|-------|------|-----------|----------------------|--------|
+
+Type: Sprite, Mesh, Icon, UI Element, Concept Art, Texture, Tileset, SFX, Music, Ambience, Voice
+Dimensions: e.g., 64x64, 1024x1024, 1792x1024 (art) or duration in seconds (audio)
+Prompt: Ready-to-use generation prompt incorporating style guide, color system, and design context.
+
+### Style Context
+
+Source docs read to build these prompts:
+- `design/style-guide.md` — [relevant sections]
+- `design/color-system.md` — [relevant tokens/palette]
+- `design/audio-direction.md` — [relevant direction] (audio tasks only)
+
+### Delivery Checklist
+
+- [ ] All assets created and placed at listed file paths
+- [ ] Assets match style guide direction
+- [ ] Assets match specified dimensions/duration
+- [ ] Asset naming follows kebab-case convention
+-->
+
 ## Implementation
+
+<!-- ONLY for code tasks (foundation/behavior/integration/UI/verification/wiring).
+     Delete the Asset Delivery section above for code tasks. -->
 
 ### Steps
 

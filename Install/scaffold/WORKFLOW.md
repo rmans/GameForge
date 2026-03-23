@@ -785,6 +785,8 @@ This step uses a multi-pass planning loop to produce implementation-ready tasks.
 
 Creates initial task stubs from the slice's specs, engine docs, and architecture context. Tasks describe HOW to implement spec behavior in the target engine.
 
+**Art/audio asset tasks:** When a spec has Asset Requirements with `Status: Needed`, seeding creates dedicated `art` or `audio` tasks (suffixed `_art` / `_audio`). These tasks list every required asset with file paths, dimensions/duration, and ready-to-use generation prompts built from the style guide and color system (art) or audio direction (audio). The user creates these assets externally and places them at the listed paths. Wiring tasks that connect assets to code depend on the art/audio tasks that produce them.
+
 > To create a single task interactively: `/scaffold-seed tasks --single [task-name]`
 
 #### 12b — Review tasks
@@ -875,10 +877,9 @@ Runs the full implementation pipeline for a single task or a range (`TASK-###-TA
 
 The pipeline stops on failure — build errors, test failures, or unresolvable review issues must be fixed before proceeding. For ranges, later tasks are skipped if an earlier task fails (they may depend on it).
 
-> **ADRs during implementation:** When a conflict or ambiguity arises during implementation, create `decisions/ADR-###.md` using `templates/decision-template.md`. ADRs are permanent records that feed back into upcoming phases, specs, and tasks. This happens naturally during implementation — it's not a separate step.
+> **Art/audio tasks:** `/scaffold-implement` skips `art` and `audio` task types — these require the user to create assets externally. The task's Asset Delivery section lists every asset with file paths, dimensions/duration, and generation prompts. Once all assets are placed at the listed paths, mark the task Complete with `python scaffold/tools/utils.py complete tasks/TASK-###-name.md`. Wiring tasks that depend on the art/audio task will then unblock.
 
-> **Asset review:** If art or audio assets have been generated, run `/scaffold-review-art` and
-> `/scaffold-review-audio` to audit visual consistency, prompt quality, and coverage gaps.
+> **ADRs during implementation:** When a conflict or ambiguity arises during implementation, create `decisions/ADR-###.md` using `templates/decision-template.md`. ADRs are permanent records that feed back into upcoming phases, specs, and tasks. This happens naturally during implementation — it's not a separate step.
 
 ### Step 14 — Repeat (the two-loop cycle)
 
@@ -1022,7 +1023,7 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 
 | Skill | What | Why | How |
 |-------|------|-----|-----|
-| `implement-task` | Build it | End-to-end task execution | Code → tests → build → code review → doc sync → mark complete |
+| `implement-task` | Build it | End-to-end task execution | Code → tests → build → code review → doc sync → mark complete. Skips art/audio tasks (human-delivered). |
 | `add-regression-tests` | Test coverage | Ensure implementation correctness | Adds tests to regression harness from implementation files |
 | `build-and-test` | Verification gate | Confirm build + tests pass | Build, lint, regression, GUT suite |
 | `code-review` | Code quality | Adversarial review of code | 7 topics via external LLM. File-scope (pipeline) or system-scope (manual) |

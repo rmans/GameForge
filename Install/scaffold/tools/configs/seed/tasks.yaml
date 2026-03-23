@@ -51,9 +51,45 @@ dependency_checks:
     inventory_key: "game/translations"
     creates_if_missing: "Foundation task: set up localization pipeline"
 
+asset_task_rules:
+  trigger: "Spec has Asset Requirements with Status: Needed"
+  task_type_art: "art"
+  task_type_audio: "audio"
+  name_suffix_art: "_art"
+  name_suffix_audio: "_audio"
+  asset_types_art:
+    - Sprite
+    - Mesh
+    - Icon
+    - UI Element
+    - Concept Art
+    - Texture
+    - Tileset
+  asset_types_audio:
+    - SFX
+    - Music
+    - Ambience
+    - Voice
+  prompt_context_docs:
+    art:
+      - "design/style-guide.md"
+      - "design/color-system.md"
+    audio:
+      - "design/style-guide.md"
+      - "design/audio-direction.md"
+  rules:
+    - "One art task per spec that has Needed art assets"
+    - "One audio task per spec that has Needed audio assets"
+    - "Art/audio tasks precede wiring tasks in dependency order"
+    - "Asset Delivery table lists every asset with file path, dimensions/duration, and generation prompt"
+    - "Prompts incorporate style-guide and color-system (art) or audio-direction (audio) context"
+    - "Wiring task depends on the art/audio task that produces its assets"
+
 coverage_rules:
   - "Every spec AC maps to at least one task step"
   - "Every task has a verification mapping to its spec"
   - "No task assumes infrastructure that no other task creates"
   - "Every task references the correct engine patterns"
   - "Foundation tasks precede behavior tasks in dependency order"
+  - "Every spec with Needed assets has a corresponding art and/or audio task"
+  - "Every wiring task that references assets depends on the art/audio task that produces them"

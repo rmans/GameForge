@@ -343,6 +343,22 @@ def cmd_preflight(args):
         _output({"status": "blocked", "message": f"{args.task} has status '{status}' — must be Draft or Approved."})
         return
 
+    # Check task type — art/audio tasks are human-delivered, not code-implemented
+    type_match = re.search(r">\s*\*\*Task Type:\*\*\s*(.+)", content)
+    if type_match:
+        tt = type_match.group(1).strip().lower()
+        if tt in ("art", "audio"):
+            _output({
+                "status": "blocked",
+                "message": (
+                    f"{args.task} is a {tt} task — assets must be created externally by the user. "
+                    f"Review the Asset Delivery section for file paths, specs, and prompts. "
+                    f"Once all assets are placed, mark the task Complete with: "
+                    f"python scaffold/tools/utils.py complete {task_file}"
+                ),
+            })
+            return
+
     # Check dependencies
     dep_match = re.search(r">\s*\*\*Depends on:\*\*\s*(.+)", content)
     if dep_match:
