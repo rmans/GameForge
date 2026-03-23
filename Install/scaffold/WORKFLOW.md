@@ -17,13 +17,15 @@ OUTER LOOP (architecture stability)
 │
 ├─ INNER LOOP (planning + implementation)
 │   │
-│   ├─ Planning: Roadmap (Step 8: create→fix→iterate→validate)
-│   │            → Phases (Step 9: seed→fix→iterate→validate→approve)
-│   │                         → Slices (seed→fix→iterate→validate→approve)
-│   │                         → Specs (seed→fix→iterate→triage→validate→approve)
-│   │                         → Tasks (seed→fix→iterate→triage→validate→reorder→approve)
+│   ├─ Planning: Roadmap (Step 8: create→review→validate)
+│   │            → Phases (Step 9: seed→review→validate→approve)
+│   │                         → Slices (seed→review→validate→approve)
+│   │                         → Specs (seed→review→triage→validate→approve)
+│   │                         → Tasks (seed→review→triage→validate→reorder→approve)
 │   ├─ Building: Implement → Test → Review → Complete
 │   └─ Feedback: ADRs, known issues, triage logs
+│
+│   review = /scaffold-review (fix then iterate, chained)
 │
 ├─ Feedback Absorption (Step 14, outer loop)
 │   Revise roadmap → revise phases → review ADRs, triage logs, playtest patterns
@@ -127,25 +129,21 @@ Each step feeds the gate:
 
 Ingests existing project material, classifies each design doc section (Complete/Partial/Conflicted/Missing), pre-fills what can be inferred from other docs, and only interviews for genuine gaps. Supports 4 modes: `seed` (first time), `fill-gaps` (incomplete sections), `reconcile` (contradiction resolution), `refresh` (rethink specific sections). This is the highest-authority document — everything else flows from it.
 
-### 1b — Fix (mechanical cleanup)
+### 1b — Review (fix + iterate)
 
 ```
-/scaffold-fix design
+/scaffold-review design
 ```
 
-Auto-fixes template text, incomplete governance formats (invariants, pressure tests), terminology drift, system index mismatches, and missing section stubs. Surfaces strategic issues (contradictions, invariant violations from downstream, unescalated mechanics, layer violations, philosophy drift) for human decision.
+Runs the full review pipeline: mechanical cleanup (fix) then adversarial review (iterate), chained automatically.
 
-> `/scaffold-review-design` provides a read-only audit at any time.
+**Fix phase:** Auto-fixes template text, incomplete governance formats (invariants, pressure tests), terminology drift, system index mismatches, and missing section stubs. Surfaces strategic issues (contradictions, invariant violations, layer violations) for human decision.
 
-### 1c — Iterate (adversarial review)
+**Iterate phase:** Three-pass adversarial review by an external LLM — L3 (subsections), L2 (sections), L1 (whole document). Catches structural design weaknesses self-review misses.
 
-```
-/scaffold-iterate design
-```
+A passing iterate review sets the document's status to `Approved`.
 
-Adversarial per-topic review by an external LLM across 5 topics: vision coherence, player experience model, world & presentation integrity, governance mechanism quality, scope & content realism. Catches structural design weaknesses self-review misses. A passing review sets the document's status to `Approved`.
-
-> The generic `/scaffold-iterate design/design-doc.md` also works but lacks the design-specific topic structure, governance checks, and final questions (biggest contradiction, accidental player experience, weakest governance mechanism).
+> Run `/scaffold-fix design` or `/scaffold-iterate design` independently when you only need one phase.
 
 ### 1d — Validate (structural gate)
 
@@ -161,7 +159,7 @@ Deterministic structural gate: 13 checks covering existence, section structure (
 /scaffold-revise-design [--source P#-###|SLICE-###|foundation-recheck]
 ```
 
-Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 1 drift. Reads ADRs, known issues, playtest patterns, and downstream friction. Classifies drift as design-led (intentional) vs implementation-led (unapproved divergence). Auto-updates safe mechanical changes; dispatches to `init-design --mode reconcile/refresh` for design decisions; escalates governance impacts to the user. After revise-design runs, re-run the stabilization loop: **revise-design → fix-design (1b) → iterate-design (1c) → validate --scope design (1d)**.
+Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 1 drift. Reads ADRs, known issues, playtest patterns, and downstream friction. Classifies drift as design-led (intentional) vs implementation-led (unapproved divergence). Auto-updates safe mechanical changes; dispatches to `init-design --mode reconcile/refresh` for design decisions; escalates governance impacts to the user. After revise-design runs, re-run the stabilization loop: **revise-design → `/scaffold-review design` (1b) → validate --scope design (1c)**.
 
 ---
 
@@ -185,21 +183,21 @@ To add a single system after initial seeding (e.g., when `revise-systems` detect
 
 Performs the same overlap/authority/invariant audit as bulk-seed but for one system. When `--split-from` is provided, also updates the parent system's Non-Responsibilities and dependency tables.
 
-### 2b — Fix (mechanical cleanup)
+### 2b — Review (fix + iterate)
 
 ```
-/scaffold-fix systems SYS-###-SYS-###
+/scaffold-review systems SYS-###-SYS-###
 ```
 
-Mechanical cleanup pass — normalizes structure, repairs terminology drift, fixes registration gaps, detects dependency asymmetry. Detects design signals (invariant violations, ownership conflicts, layer breaches) and reports them for adversarial review. All individual fix loops run in parallel; a cross-system pass runs after to catch inter-system issues.
+Runs the full review pipeline on each system: mechanical cleanup (fix) then adversarial review (iterate), chained automatically.
 
-### 2c — Iterate (adversarial review)
+**Fix phase:** Normalizes structure, repairs terminology drift, fixes registration gaps, detects dependency asymmetry. Detects design signals (invariant violations, ownership conflicts, layer breaches) and reports them for the iterate phase.
 
-```
-/scaffold-iterate systems SYS-###-SYS-###
-```
+**Iterate phase:** Three-pass adversarial review (L3 subsections → L2 sections → L1 document) covering ownership correctness, behavioral completeness, design governance, cross-system coherence, and simulation fitness.
 
-Adversarial per-topic review via external LLM. Consumes design signals from fix-systems. Reviews system designs for ownership correctness, design governance compliance, cross-system coherence, and behavioral completeness. A passing review sets the document's status to `Approved`.
+A passing iterate review sets the document's status to `Approved`.
+
+> Run `/scaffold-fix systems SYS-###` or `/scaffold-iterate systems SYS-###` independently when you only need one phase.
 
 ### 2c-ii — Manual Review (human pass)
 
@@ -210,7 +208,7 @@ After iterate-systems completes, manually review two sections in each system doc
 
 **If this review changes your understanding of the design** — for example, an edge case reveals a gap in the design doc's failure philosophy, or an open question exposes an unaddressed control model ambiguity — update `design/design-doc.md` to reflect the clarification. The design doc is the highest authority; system docs derive from it. If the system review surfaced something the design doc should have addressed, fix it upstream.
 
-After manual review, proceed to validate. If the design doc was updated, re-run the Step 1 stabilization loop (`fix-design → iterate-design → validate --scope design`) before continuing.
+After manual review, proceed to validate. If the design doc was updated, re-run the Step 1 stabilization loop (``/scaffold-review design` → validate --scope design`) before continuing.
 
 ### 2d — Validate (structural gate)
 
@@ -226,7 +224,7 @@ Deterministic structural gate: 16 checks covering index registration, design-doc
 /scaffold-revise-systems [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword]
 ```
 
-Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 2 drift. Reads ADRs, known issues, spec/task friction, and code review findings. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (dependency entries, edge cases, stale references); escalates ownership shifts, authority violations, and behavior gaps. After revise-systems runs, re-run the stabilization loop: **revise-systems → fix-systems (2b) → iterate-systems (2c) → validate --scope systems (2d)**.
+Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 2 drift. Reads ADRs, known issues, spec/task friction, and code review findings. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (dependency entries, edge cases, stale references); escalates ownership shifts, authority violations, and behavior gaps. After revise-systems runs, re-run the stabilization loop: **revise-systems → `/scaffold-review systems` (2b) → validate --scope systems (2c)**.
 
 ---
 
@@ -242,21 +240,15 @@ Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode
 
 Reads all system designs and bulk-populates: architecture (foundation area definitions derived from system patterns), authority table, interface contracts, state transitions, entity components (including identity semantics — handle format, invalidation, persistence mapping), resource definitions, signal registry (with event-level taxonomy: gameplay/domain/engine), balance parameters, and shared enums/statuses. These docs surface the cross-cutting architecture assumptions that must be locked in Step 7.
 
-### 3b — Fix (mechanical cleanup)
+### 3b — Review (fix + iterate)
 
 ```
-/scaffold-fix references
+/scaffold-review references
 ```
 
-Mechanical cleanup pass for all 9 Step 3 docs. Per-doc checks (section structure, table columns, terminology, registration) followed by cross-doc consistency pass (authority→entity-components, interfaces→signals, state-transitions→enums, architecture→scene tree). Auto-fixes alignment issues and detects design signals for adversarial review. Supports `--target doc.md` for single-doc focus (used by revise-foundation when only one doc was revised).
+Full review pipeline for all 9 Step 3 docs. Fix phase: per-doc structural checks, table columns, terminology, cross-doc consistency (authority→entity-components, interfaces→signals, state-transitions→enums). Iterate phase: three-pass adversarial review covering architectural coherence, ownership model, contract quality, data model fitness, cross-doc consistency, simulation readiness. Supports `--target doc.md` for single-doc focus. A passing iterate review sets the documents' status to `Approved`.
 
-### 3c — Iterate (adversarial review)
-
-```
-/scaffold-iterate references
-```
-
-Adversarial per-topic review via external LLM across 6 topics (architectural coherence, ownership & authority model, contract & interface quality, data model fitness, cross-doc consistency, simulation readiness). Consumes design signals from fix-references. Supports `--target doc.md` for single-doc focus and `--topics` for scoped review. A passing review sets the documents' status to `Approved`.
+> Run `/scaffold-fix references` or `/scaffold-iterate references` independently when needed.
 
 ### 3d — Validate
 
@@ -272,7 +264,7 @@ Deterministic checks in two layers: (1) Python script — system IDs, authority 
 /scaffold-revise-references [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword] [--target doc.md]
 ```
 
-Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 3 drift. Reads ADRs, known issues, system doc changes, spec/task friction, and code review findings. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (missing registrations, stale references, column updates); escalates authority changes, architecture changes, contract changes, and state machine changes. Respects canonical direction (authority→entity-components, interfaces→signal-registry, state-transitions→enums). After revise-references runs, re-run the stabilization loop: **revise-references → fix-references (3b) → iterate-references (3c) → validate --scope refs (3d)**.
+Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 3 drift. Reads ADRs, known issues, system doc changes, spec/task friction, and code review findings. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (missing registrations, stale references, column updates); escalates authority changes, architecture changes, contract changes, and state machine changes. Respects canonical direction (authority→entity-components, interfaces→signal-registry, state-transitions→enums). After revise-references runs, re-run the stabilization loop: **revise-references → `/scaffold-review references` → validate --scope refs (3d)**.
 
 ---
 
@@ -322,7 +314,7 @@ Deterministic validation of engine doc structural integrity: index registration,
 /scaffold-revise-engine [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,REFS:doc-stem] [--target doc-stem]
 ```
 
-Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 4 drift. Reads ADRs, known issues, spec/task friction, code review findings, and Step 3 doc changes to identify when engine docs no longer match what was actually built or what Steps 1-3 now define. Signal-driven with explicit resolution table. Classifies drift as design-led (Step 3 changed, engine follows) vs implementation-led (code diverged without authority). Auto-updates safe changes (stale references, Step 3 alignment, constrained TODO resolution, new implementation patterns). Escalates convention changes, performance budget revisions, and architecture implementation changes with CRITICAL/HIGH/MEDIUM priority weighting. Includes early exit when no engine-impacting signals remain, repeated divergence escalation (forced decision at 2+ runs), duplicate pattern guard for implementation-patterns.md, partial Step 3 instability suppression, and post-edit reference integrity check. After revise-engine runs, re-run the stabilization loop: **fix-engine (4b) → iterate-engine (4c) → validate --scope engine (4d)**.
+Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 4 drift. Reads ADRs, known issues, spec/task friction, code review findings, and Step 3 doc changes to identify when engine docs no longer match what was actually built or what Steps 1-3 now define. Signal-driven with explicit resolution table. Classifies drift as design-led (Step 3 changed, engine follows) vs implementation-led (code diverged without authority). Auto-updates safe changes (stale references, Step 3 alignment, constrained TODO resolution, new implementation patterns). Escalates convention changes, performance budget revisions, and architecture implementation changes with CRITICAL/HIGH/MEDIUM priority weighting. Includes early exit when no engine-impacting signals remain, repeated divergence escalation (forced decision at 2+ runs), duplicate pattern guard for implementation-patterns.md, partial Step 3 instability suppression, and post-edit reference integrity check. After revise-engine runs, re-run the stabilization loop: **`/scaffold-review engine` → validate --scope engine (4d)**.
 
 ---
 
@@ -470,7 +462,7 @@ Deterministic structural gate: action ID conventions, traceability (Source colum
 /scaffold-revise-input [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword,STYLE:doc-changed]
 ```
 
-Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 6 drift. Reads ADRs, known issues, spec/task friction, code review findings, interaction model changes, and ui-kit changes. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (stale references, missing actions from upstream, orphan bindings, terminology drift); escalates philosophy violations, navigation model changes, device parity gaps, and accessibility changes. After revise-input runs, re-run the stabilization loop: **revise-input → fix-input (6b) → iterate-input (6c) → validate --scope input (6d)**.
+Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 6 drift. Reads ADRs, known issues, spec/task friction, code review findings, interaction model changes, and ui-kit changes. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (stale references, missing actions from upstream, orphan bindings, terminology drift); escalates philosophy violations, navigation model changes, device parity gaps, and accessibility changes. After revise-input runs, re-run the stabilization loop: **revise-input → `/scaffold-review input` → validate --scope input (6d)**.
 
 ---
 
@@ -503,7 +495,7 @@ The purpose is not to finalize every low-level implementation detail — it's to
 
 **Initial mode** (first pass): Verifies Steps 1–6 each completed their Create → Review → Iterate pipeline. Reports readiness per doc layer. No revisions needed — nothing has been implemented yet. Proceeds to 7b.
 
-**Recheck mode** (outer loop, after phase completion): Reads implementation feedback (ADRs, KIs, triage logs, playtest patterns, revision logs, code review findings). Identifies which foundation areas drifted and which Step 1–6 docs need updating. Dispatches revision loops (revise → fix → iterate → validate) to affected docs only. After dispatched revisions complete, proceeds to 7b for foundation validation gate.
+**Recheck mode** (outer loop, after phase completion): Reads implementation feedback (ADRs, KIs, triage logs, playtest patterns, revision logs, code review findings). Identifies which foundation areas drifted and which Step 1–6 docs need updating. Dispatches revision loops (revise → review → validate) to affected docs only. After dispatched revisions complete, proceeds to 7b for foundation validation gate.
 
 ### 7b — Validate (gate)
 
@@ -614,7 +606,7 @@ Adversarial review on the revised roadmap. Particularly important after phases t
 
 Structural integrity check after revision. Ensures all 13 checks pass before proceeding to phase revision.
 
-> **Key principle:** The roadmap is a living document. It's revised after every phase completion — not just once at project start. The full loop (revise → fix → iterate → validate) ensures the roadmap stays structurally sound as it evolves. `revise-roadmap` handles the macro view (roadmap document updates), while `revise-phases` (Step 9f) handles the micro view (remaining phase file adjustments).
+> **Key principle:** The roadmap is a living document. It's revised after every phase completion — not just once at project start. The full loop (revise → review → validate) ensures the roadmap stays structurally sound as it evolves. `revise-roadmap` handles the macro view (roadmap document updates), while `revise-phases` (Step 9f) handles the micro view (remaining phase file adjustments).
 
 ### Step 9 — Define and manage phases
 
@@ -1013,8 +1005,8 @@ The pipeline stops on failure — build errors, test failures, or unresolvable r
 
 After all slices in a phase are complete:
 
-6. **Run the foundation architecture pipeline (Step 7a–7b in recheck mode):** `/scaffold-revise-foundation --mode recheck` detects drift and dispatches doc revisions — including `/scaffold-revise-design` (Step 1 drift), `/scaffold-revise-systems` (Step 2 drift), `/scaffold-revise-references` (Step 3 drift), `/scaffold-revise-engine` (Step 4 drift), `/scaffold-revise-style` (Step 5 drift), and `/scaffold-revise-input` (Step 6 drift). Then `validate --scope foundation` gates, and `fix-cross-cutting` resolves any cross-cutting findings. If revise-design was dispatched, re-run the Step 1 stabilization loop. If revise-engine was dispatched, re-run: fix-engine → iterate-engine → validate --scope engine. If revise-style was dispatched, re-run: fix-style → iterate-style → validate --scope style. If revise-input was dispatched, re-run: fix-input → iterate-input → validate --scope input. If no drift, proceeds directly.
-7. **Revise the roadmap (Steps 8e–8h):** revise-roadmap → fix-roadmap → iterate-roadmap → validate --scope roadmap. Full stabilization loop on the revised roadmap before phase revision, so remaining phases are adjusted against the latest roadmap state rather than a stale macro plan.
+6. **Run the foundation architecture pipeline (Step 7a–7b in recheck mode):** `/scaffold-revise-foundation --mode recheck` detects drift and dispatches doc revisions — including `/scaffold-revise-design` (Step 1 drift), `/scaffold-revise-systems` (Step 2 drift), `/scaffold-revise-references` (Step 3 drift), `/scaffold-revise-engine` (Step 4 drift), `/scaffold-revise-style` (Step 5 drift), and `/scaffold-revise-input` (Step 6 drift). Then `validate --scope foundation` gates, and `fix-cross-cutting` resolves any cross-cutting findings. If revise-design was dispatched, re-run the Step 1 stabilization loop. If revise-engine was dispatched, re-run: `/scaffold-review engine` → validate --scope engine. If revise-style was dispatched, re-run: `/scaffold-review style` → validate --scope style. If revise-input was dispatched, re-run: `/scaffold-review input` → validate --scope input. If no drift, proceeds directly.
+7. **Revise the roadmap (Steps 8e–8h):** revise-roadmap → `/scaffold-review roadmap` → validate --scope roadmap. Full stabilization loop on the revised roadmap before phase revision, so remaining phases are adjusted against the latest roadmap state rather than a stale macro plan.
 8. **Revise remaining phases:** `/scaffold-revise-phases P#-###` (Step 9f) — reads ADRs, KIs, playtest patterns, triage logs, foundation recheck results, slice review logs, implementation friction signals. Four-tier classification with direct-apply path. Approved phases stay Approved.
 9. Fix, iterate, validate, and approve the next phase (Steps 9g–9j).
 10. Seed slices for the newly approved phase (Step 10) and return to the inner loop.
