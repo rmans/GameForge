@@ -111,7 +111,7 @@ Note: The slice's Tasks table stores status, not filenames. Filename references 
 [List tasks that were skipped with reason. If none, write "None."]
 
 ### Next Steps
-- Run `/scaffold-implement-task TASK-###-TASK-###` in the order from `/scaffold-reorder-tasks`
+- Run `/scaffold-implement TASK-###-TASK-###` in the order from `/scaffold-reorder-tasks`
 - If blocked tasks need resolving, address their blockers then re-run `/scaffold-approve-tasks`
 ```
 

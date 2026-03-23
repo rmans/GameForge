@@ -254,7 +254,7 @@ Update `scaffold/decisions/code-review/_index.md`.
 - **Claude is the authority on this codebase.** Ties go to Claude. The reviewer is an outsider with no project context beyond what's provided.
 - **Edit boundary is enforced.** File scope: target file only. System scope: resolved file set only. Never edit context files, test files, docs, or out-of-system files. Log out-of-boundary needs instead of applying.
 - **Never blindly accept.** Evaluate every issue against project context using the AGREE/PUSHBACK/PARTIAL criteria.
-- **Build verification is the caller's responsibility.** This skill applies edits but does not rebuild or run tests. The parent skill (`/scaffold-implement-task` Step 7) handles post-review verification.
+- **Build verification is the caller's responsibility.** This skill applies edits but does not rebuild or run tests. The parent skill (`/scaffold-implement` Step 7) handles post-review verification.
 - **Pushback is expected and healthy.** The value is in the discussion, not automatic acceptance.
 - **One topic at a time.** Complete the full review → discuss → consensus cycle before moving on.
 - **Early stop on stability.** If a pass produces no code changes, do not run additional passes regardless of remaining iteration budget.

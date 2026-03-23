@@ -22,6 +22,7 @@
 | `seed.py` | Seed orchestrator — dependency-aware document generation from upstream context (used by `/scaffold-seed`) |
 | `configs/validate/*.yaml` | Per-scope validation configs for validate.py (checks, thresholds, activation rules) |
 | `configs/seed/*.yaml` | Per-layer seed configs for seed.py (upstream sources, dependency checks, coverage rules) |
+| `implement.py` | Implement orchestrator — step-by-step task implementation with file manifest tracking (used by `/scaffold-implement`) |
 
 ## image-gen.py
 

@@ -124,7 +124,7 @@ For each approved phase:
 /scaffold-seed tasks            ← seed implementation tasks from specs
 /scaffold-approve-specs              ← lifecycle gate
 /scaffold-approve-tasks              ← lifecycle gate
-/scaffold-implement-task             ← code, test, review, complete
+/scaffold-implement             ← code, test, review, complete
 ```
 
 See `scaffold/WORKFLOW.md` for the full 24-step recipe.

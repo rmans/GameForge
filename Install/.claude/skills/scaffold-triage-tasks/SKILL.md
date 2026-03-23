@@ -372,7 +372,7 @@ After applying all decisions, assess whether the task graph is stable:
 - Upstream actions do NOT block task implementation unless they change acceptance criteria
 
 ### Next Steps
-- If **Stable**: Run `/scaffold-reorder-tasks SLICE-###` then `/scaffold-implement-task`
+- If **Stable**: Run `/scaffold-reorder-tasks SLICE-###` then `/scaffold-implement`
 - If **Needs another pass**: Run `/scaffold-fix task` on new/modified tasks, then `/scaffold-iterate task`, then `/scaffold-triage-tasks` again
 ```
 

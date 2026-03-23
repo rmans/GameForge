@@ -162,7 +162,7 @@ See [Install/README.md](Install/README.md) for full installation details.
 | **Revise (10)** | `revise-design`, `revise-systems`, `revise-references`, `revise-engine`, `revise-style`, `revise-input`, `revise-foundation`, `revise-roadmap`, `revise-phases`, `revise-slices` |
 | **Approve (4)** | `approve-phases`, `approve-slices`, `approve-specs`, `approve-tasks` |
 | **Triage (3)** | `triage-specs`, `triage-tasks`, `reorder-tasks` |
-| **Implement (4)** | `implement-task`, `build-and-test`, `code-review`, `add-regression-tests` |
+| **Implement (4)** | `implement` (step-by-step via implement.py), `build-and-test`, `code-review`, `add-regression-tests` |
 | **Complete (1)** | `complete` |
 | **Edit (3)** | `update-doc`, `sync-reference-docs`, `sync-glossary` |
 | **Validate (1)** | `validate` |

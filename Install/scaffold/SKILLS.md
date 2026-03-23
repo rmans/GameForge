@@ -46,7 +46,7 @@
 | `/scaffold-triage-tasks` | `[SLICE-###]` | Resolve task-level issues from iterate-task |
 | `/scaffold-reorder-tasks` | `[SLICE-###]` | Reorder tasks by dependency and implementation sequence |
 | **Implement** | | |
-| `/scaffold-implement-task` | `[TASK-### or range]` | Implement task(s) end-to-end: code, tests, review, sync |
+| `/scaffold-implement` | `<TASK-###> [--max-retries N] [--cri N]` | Implement task end-to-end: plan, code (one step at a time), test, build, review, sync, complete. Orchestrated by implement.py with file manifest tracking. |
 | `/scaffold-build-and-test` | `[--files file...] [--skip-unit] [--skip-lint]` | Pure verification gate: build, lint, tests |
 | `/scaffold-code-review` | `[file or system scope]` | Adversarial code review via external LLM (7 topics) |
 | `/scaffold-add-regression-tests` | `[TASK-###]` | Add regression tests using 6-layer model |

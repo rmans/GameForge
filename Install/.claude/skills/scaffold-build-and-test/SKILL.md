@@ -104,7 +104,7 @@ If the verdict is FAIL, include the relevant error output (build errors, lint is
 
 ## Rules
 
-- **This skill is a verification gate, not a repair tool.** It runs checks and reports results. It never modifies code, fixes bugs, or retries failing steps. The caller (typically `/scaffold-implement-task`) is responsible for fixing issues and re-invoking this skill.
+- **This skill is a verification gate, not a repair tool.** It runs checks and reports results. It never modifies code, fixes bugs, or retries failing steps. The caller (typically `/scaffold-implement`) is responsible for fixing issues and re-invoking this skill.
 - **Build failure is a hard stop.** If the build fails, skip all subsequent steps — they cannot produce meaningful results without a successful build.
 - **Missing test harness is a failure, not a skip.** The test suite is a core verification dependency. If the harness doesn't exist, the gate cannot verify correctness.
 - **Report raw results.** Do not interpret whether failures are "pre-existing" or "new." Report what happened. The caller has the context to make that judgment.

@@ -118,7 +118,7 @@ Pattern-based with clear rules. Labeled `[ADVISORY]`.
 ## Rules
 
 - **This skill never edits files.** It is read-only.
-- **FAIL blocks progression.** `/scaffold-approve-*`, `/scaffold-implement-task`, and `/scaffold-complete` check validation status.
+- **FAIL blocks progression.** `/scaffold-approve-*`, `/scaffold-implement`, and `/scaffold-complete` check validation status.
 - **Scopes are independent.** `--scope systems` only runs system checks.
 - **`--scope all` includes cross-cutting and cross-layer checks** that don't run on individual scopes.
 - **Heuristic checks are advisory.** They may produce false positives — labeled `[ADVISORY]`.

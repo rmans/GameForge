@@ -218,7 +218,7 @@ If no triage log exists for this slice, skip this step.
 ### Next Steps
 - If issues were found: resolve them before implementation
 - If upstream actions are pending: address them via `/scaffold-update-doc` before implementation, unless they don't affect acceptance criteria
-- If clean: Run `/scaffold-approve-tasks SLICE-###` to mark tasks Approved, then `/scaffold-implement-task TASK-###-TASK-###` in the proposed order
+- If clean: Run `/scaffold-approve-tasks SLICE-###` to mark tasks Approved, then `/scaffold-implement TASK-###-TASK-###` in the proposed order
 ```
 
 ## Rules
@@ -231,7 +231,7 @@ If no triage log exists for this slice, skip this step.
 - **Respect explicit annotations.** "Depends on: TASK-###" in the task header and "depends on TASK-###" in task Notes are hard constraints — never reorder against them.
 - **Spec ordering requires evidence.** Only create dependency edges from explicit precondition text in specs or dependency notes. Never infer spec order from names or perceived importance.
 - **File overlap: edge or issue, never both.** If the dependency direction is clear from the tasks' content, add an edge. If ambiguous, flag as an issue. Don't do both.
-- **Parallelism is informational.** Note which tasks can run in parallel, but the Order column is still sequential (for `/scaffold-implement-task` range execution).
+- **Parallelism is informational.** Note which tasks can run in parallel, but the Order column is still sequential (for `/scaffold-implement` range execution).
 - **Pre-blocker tasks stay first.** Tasks with order `0*` are pre-blockers and should not be reordered into the main sequence. If dependency analysis implies a non-`0*` task must precede a pre-blocker task, flag this as a **pre-blocker ordering conflict** and stop — the pre-blocker designation or the dependency is wrong and needs human resolution.
 - **Integration tests stay last.** Integration and verification tasks should remain at the end of the order.
 - **Reorder synchronizes planning views.** The slice Tasks table and task index are derived artifacts. Reorder republishes the authoritative task file set into these views so `/scaffold-approve-tasks` and `/scaffold-complete` operate on current structure.

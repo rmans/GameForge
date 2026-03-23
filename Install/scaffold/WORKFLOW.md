@@ -859,7 +859,7 @@ This is the final gate before implementation — tasks must have passed through 
 ### Step 13 — Implement tasks
 
 ```
-/scaffold-implement-task TASK-### [--CRI N]
+/scaffold-implement TASK-### [--CRI N]
 ```
 
 Runs the full implementation pipeline for a single task or a range (`TASK-###-TASK-###`):
