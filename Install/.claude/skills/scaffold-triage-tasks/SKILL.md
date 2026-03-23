@@ -269,7 +269,7 @@ For each decision the user makes:
 5. Add to the slice's Tasks table (order TBD — noted for reorder step).
 
 ### Spec Conflict — Task is Right
-1. Note the change needed in the spec. **Do not edit the spec directly** — flag it for the user to update via `/scaffold-update-doc`.
+1. Note the change needed in the spec. **Do not edit the spec directly** — flag it for the user to update via direct file editing.
 
 ### Spec Conflict — Spec is Right
 1. Update the task to align with the spec.
@@ -317,7 +317,7 @@ This file records every decision made during triage so the trail is not lost whe
 
 ## Upstream Actions Required
 
-Decisions that require changes to non-task documents. Triage does NOT apply these — they must be handled explicitly by the user via `/scaffold-update-doc` or by filing ADRs.
+Decisions that require changes to non-task documents. Triage does NOT apply these — they must be handled explicitly by the user via direct file editing or by filing ADRs.
 
 | # | Source Decision | Target Document | Action | Reason | Status |
 |---|----------------|----------------|--------|--------|--------|
@@ -368,7 +368,7 @@ After applying all decisions, assess whether the task graph is stable:
 - Some decisions depend on other decisions not yet made
 
 ### Upstream Actions
-- If upstream actions are pending, list them with suggested next steps (e.g., "Run `/scaffold-update-doc SYS-024` to update ownership")
+- If upstream actions are pending, list them with suggested next steps (e.g., "Run `direct file editing SYS-024` to update ownership")
 - Upstream actions do NOT block task implementation unless they change acceptance criteria
 
 ### Next Steps

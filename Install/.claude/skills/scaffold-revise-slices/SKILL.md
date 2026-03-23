@@ -288,7 +288,7 @@ If no proposals were rejected, write: "None — all proposals accepted."
 - Run `/scaffold-approve-slices SLICE-###` to approve the next slice for spec seeding
 
 **If Conditional:**
-- Resolve pending upstream actions via `/scaffold-update-doc` or file ADRs
+- Resolve pending upstream actions via direct file editing or file ADRs
 - Then follow the Complete steps above
 
 **If Report-Only:**

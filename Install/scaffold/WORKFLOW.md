@@ -129,7 +129,7 @@ Each step feeds the gate:
 
 Scans the project (engine, languages, test frameworks, build system, CI, dependencies), presents findings for confirmation, then interviews the user one section group at a time (Identity, Shape, Control, World, Presentation, Content, System Domains, Philosophy, Scope). Technical Stack is pre-filled from the scan. The design doc is the highest-authority document — everything else flows from it.
 
-> For an existing design doc that needs updates: `/scaffold-init-design --mode fill-gaps|reconcile|refresh`
+> For an existing design doc that needs updates: `/scaffold-seed design --mode fill-gaps|reconcile|refresh`
 
 ### 1b — Review (fix + iterate)
 
@@ -804,7 +804,7 @@ Full review pipeline. Fix phase: vague objectives, weak verification, missing fi
 
 Collects all unresolved human-required issues from fix-task and iterate runs, plus cross-cutting checks: integration gaps, execution path validation, data ownership violations, state transition coverage, persistence gaps, weak verification, and file overlap conflicts. Presents them as a decision checklist: splits, merges, scope changes, new tasks, spec conflicts, blockers, deferrals, ownership. Applies the user's decisions to task files.
 
-Writes a persistent decision log to `decisions/triage-logs/TRIAGE-SLICE-###.md` with two sections: **Decisions** (task-level changes applied) and **Upstream Actions Required** (non-task doc changes that triage identified but did NOT apply — these must be handled via `/scaffold-update-doc` or ADRs). The triage decision log becomes the authoritative record of planning decisions and upstream changes required before implementation. Both `/scaffold-reorder-tasks` and `/scaffold-approve-tasks` read this log downstream.
+Writes a persistent decision log to `decisions/triage-logs/TRIAGE-SLICE-###.md` with two sections: **Decisions** (task-level changes applied) and **Upstream Actions Required** (non-task doc changes that triage identified but did NOT apply — these must be handled via direct file editing or ADRs). The triage decision log becomes the authoritative record of planning decisions and upstream changes required before implementation. Both `/scaffold-reorder-tasks` and `/scaffold-approve-tasks` read this log downstream.
 
 #### 12e — Repeat until stable
 
@@ -867,11 +867,11 @@ Runs the full implementation pipeline for a single task or a range (`TASK-###-TA
 1. **Read** — task, spec, system design, architecture, engine docs, ADRs, existing code
 2. **Plan** — output a brief implementation plan for review
 3. **Implement** — write the code following the task's Steps section
-4. **Add tests** — regression tests via `/scaffold-add-regression-tests`
+4. **Add tests** — regression tests via implement.py test phase
 5. **Build and test** — verification gate via `utils.py build-test`
 6. **Code review** — adversarial review via `iterate.py --reviewer code` (file-scope per changed file, optional system-scope coherence pass). `--CRI N` sets max review iterations (default: 10, stops early when stable).
 7. **Rebuild and retest** — if code review applied changes, re-verify
-8. **Sync docs** — update reference and architecture docs via `/scaffold-sync-reference-docs`
+8. **Sync docs** — update reference and architecture docs via `utils.py sync-refs`
 9. **Complete** — mark task done and ripple upward via `utils.py complete`
 
 The pipeline stops on failure — build errors, test failures, or unresolvable review issues must be fixed before proceeding. For ranges, later tasks are skipped if an earlier task fails (they may depend on it).

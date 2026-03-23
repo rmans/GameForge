@@ -203,7 +203,7 @@ Display what was created, the dependency graph, and any remaining assumptions.
 5. **Verifies** — all sections filled, governance populated, scope honest
 6. **Reviews** — fix + iterate + validate
 
-This replaces `/scaffold-init-design`. The Technical Stack section becomes the authoritative source for what tools the project uses — all downstream seeds read it instead of guessing.
+This replaces `/scaffold-seed design`. The Technical Stack section becomes the authoritative source for what tools the project uses — all downstream seeds read it instead of guessing.
 
 ## Rules
 

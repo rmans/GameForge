@@ -1,6 +1,6 @@
 # Skills Reference
 
-> Man-page reference for all 44 scaffold slash commands. Each entry shows synopsis, description, arguments, examples, and related skills.
+> Man-page reference for all 39 scaffold slash commands. Each entry shows synopsis, description, arguments, examples, and related skills.
 >
 > **When to use each skill** — see [WORKFLOW.md](WORKFLOW.md) for the step-by-step pipeline order.
 
@@ -10,8 +10,6 @@
 
 | Skill | Arguments | What it does |
 |-------|-----------|-------------|
-| **Init** | | |
-| `/scaffold-init-design` | `[--mode seed\|fill-gaps\|reconcile\|refresh]` | Initialize or update design document |
 | **Create** | | |
 | `/scaffold-new-roadmap` | — | Create the project roadmap |
 | `/scaffold-new-phase` | `[phase-name]` | Create a phase scope gate with auto PHASE-### ID |
@@ -45,13 +43,7 @@
 | `/scaffold-triage-specs` | `[SLICE-###]` | Resolve spec-level issues from iterate-spec |
 | `/scaffold-triage-tasks` | `[SLICE-###]` | Resolve task-level issues from iterate-task |
 | **Implement** | | |
-| `/scaffold-implement` | `<TASK-###> [--max-retries N] [--cri N]` | Implement task end-to-end: plan, code (one step at a time), test, build, review, sync, complete. Orchestrated by implement.py. Build/test/complete/reorder handled in Python (utils.py). Code review via iterate.py --reviewer code. |
-| `/scaffold-add-regression-tests` | `[TASK-###]` | Add regression tests using 6-layer model |
-| **Complete** | | |
-| **Edit** | | |
-| `/scaffold-update-doc` | `[doc-name\|path]` | Add, remove, or modify entries in any scaffold doc |
-| `/scaffold-sync-glossary` | `[--scope all\|design\|systems\|references\|style\|input] [--dry-run]` | Scan docs for glossary-worthy terms with worthiness gate and ambiguity detection |
-| `/scaffold-sync-reference-docs` | — | Sync reference docs after upstream changes |
+| `/scaffold-implement` | `<TASK-###> [--max-retries N] [--cri N]` | Implement task end-to-end: plan, code (one step at a time, including tests), build, review, sync, complete. All mechanical ops in Python (utils.py). Code review via iterate.py --reviewer code. |
 | **Validate** | | |
 | `/scaffold-validate` | `[--scope refs\|design\|systems\|foundation\|roadmap\|phases\|slices\|specs\|tasks\|engine\|style\|input\|all]` | Normalize markdown formatting, then run cross-reference validation across scaffold docs |
 | **Decisions** | | |
@@ -549,7 +541,7 @@ Add, remove, or modify entries in any scaffold document.
 
 **Synopsis**
 
-    /scaffold-update-doc [doc-name|path]
+    direct file editing [doc-name|path]
 
 **Description**
 
@@ -565,9 +557,9 @@ Updates cross-references automatically: glossary term renames propagate, system 
 
 **Examples**
 
-    /scaffold-update-doc glossary
-    /scaffold-update-doc SYS-001
-    /scaffold-update-doc reference/signal-registry.md
+    direct file editing glossary
+    direct file editing SYS-001
+    direct file editing reference/signal-registry.md
     /scaffold-update-doc
 
 ---
@@ -578,7 +570,7 @@ Scan scaffold docs for domain terms missing from the glossary.
 
 **Synopsis**
 
-    /scaffold-sync-glossary [--scope all|design|systems|references|style|input] [--dry-run]
+    utils.py sync-glossary [--scope all|design|systems|references|style|input] [--dry-run]
 
 **Description**
 
@@ -594,13 +586,13 @@ Scans scaffold docs for domain terms that should be in the glossary but aren't. 
 **Examples**
 
     /scaffold-sync-glossary
-    /scaffold-sync-glossary --scope references
-    /scaffold-sync-glossary --scope style,input
-    /scaffold-sync-glossary --dry-run
+    utils.py sync-glossary --scope references
+    utils.py sync-glossary --scope style,input
+    utils.py sync-glossary --dry-run
 
 **See Also**
 
-`/scaffold-seed systems` (initial glossary seeding), `/scaffold-validate` (glossary coverage check), `/scaffold-update-doc glossary` (manual edits)
+`/scaffold-seed systems` (initial glossary seeding), `/scaffold-validate` (glossary coverage check), `direct file editing glossary` (manual edits)
 
 ---
 
@@ -630,7 +622,7 @@ Presents results as a summary table with PASS/FAIL per check and lists each fail
 
 **See Also**
 
-`/scaffold-update-doc`
+direct file editing
 
 ---
 
@@ -666,7 +658,7 @@ Captures playtester observations into `decisions/playtest-feedback.md`. Creates 
 
 **See Also**
 
-`/scaffold-playtest-review`, `/scaffold-update-doc`
+`/scaffold-playtest-review`, direct file editing
 
 ---
 

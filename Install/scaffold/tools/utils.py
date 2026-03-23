@@ -432,6 +432,119 @@ def reorder_tasks(task_dir=None, scaffold_dir=None):
 
 
 # ---------------------------------------------------------------------------
+# Sync Reference Docs — Update refs from code/doc changes
+# ---------------------------------------------------------------------------
+
+def sync_reference_docs(changed_files=None, scaffold_dir=None):
+    """Sync reference docs with implementation changes.
+    Updates signal-registry, entity-components, authority when code changes
+    introduce new signals, entities, or state ownership."""
+    sd = Path(scaffold_dir) if scaffold_dir else SCAFFOLD_DIR
+    updates = []
+
+    # Scan changed files for new signals
+    signal_registry = sd / "reference" / "signal-registry.md"
+    if signal_registry.exists() and changed_files:
+        registry_content = signal_registry.read_text(encoding="utf-8")
+        for f in changed_files:
+            abs_f = (sd.parent / f) if not Path(f).is_absolute() else Path(f)
+            if abs_f.exists() and abs_f.suffix in (".cpp", ".h", ".gd"):
+                code = abs_f.read_text(encoding="utf-8")
+                # Find signal definitions
+                for match in re.finditer(r'ADD_SIGNAL\(MethodInfo\("(\w+)"', code):
+                    signal_name = match.group(1)
+                    if signal_name not in registry_content:
+                        updates.append({
+                            "doc": "reference/signal-registry.md",
+                            "type": "new_signal",
+                            "detail": f"Signal '{signal_name}' found in {f} but not in registry",
+                        })
+
+    # Scan for new entity properties
+    entity_doc = sd / "reference" / "entity-components.md"
+    if entity_doc.exists() and changed_files:
+        entity_content = entity_doc.read_text(encoding="utf-8")
+        for f in changed_files:
+            abs_f = (sd.parent / f) if not Path(f).is_absolute() else Path(f)
+            if abs_f.exists() and abs_f.suffix in (".cpp", ".h"):
+                code = abs_f.read_text(encoding="utf-8")
+                for match in re.finditer(r'ClassDB::bind_method.*"(get|set)_(\w+)"', code):
+                    prop = match.group(2)
+                    if prop not in entity_content:
+                        updates.append({
+                            "doc": "reference/entity-components.md",
+                            "type": "new_property",
+                            "detail": f"Property '{prop}' found in {f} but not in entity-components",
+                        })
+
+    return {"updates": updates, "count": len(updates)}
+
+
+# ---------------------------------------------------------------------------
+# Sync Glossary — Scan docs for unglosseried terms
+# ---------------------------------------------------------------------------
+
+def sync_glossary(scope="all", scaffold_dir=None):
+    """Scan scaffold docs for domain terms not in the glossary.
+    Returns proposed additions."""
+    sd = Path(scaffold_dir) if scaffold_dir else SCAFFOLD_DIR
+    glossary_path = sd / "design" / "glossary.md"
+
+    if not glossary_path.exists():
+        return {"status": "error", "message": "No glossary found."}
+
+    glossary_content = glossary_path.read_text(encoding="utf-8")
+
+    # Extract existing terms (case-insensitive)
+    existing_terms = set()
+    for line in glossary_content.splitlines():
+        if "|" in line and line.count("|") >= 3:
+            cells = [c.strip() for c in line.split("|")]
+            if len(cells) > 1 and cells[1] and not cells[1].startswith("-"):
+                existing_terms.add(cells[1].lower())
+
+    # Scan docs for capitalized domain terms not in glossary
+    scan_dirs = {
+        "all": ["design/systems", "specs", "tasks", "slices", "phases"],
+        "design": ["design"],
+        "systems": ["design/systems"],
+        "references": ["reference"],
+        "style": ["design"],
+        "input": ["inputs"],
+    }
+
+    dirs = scan_dirs.get(scope, scan_dirs["all"])
+    found_terms = {}
+
+    for dir_name in dirs:
+        scan_dir = sd / dir_name
+        if not scan_dir.exists():
+            continue
+        for doc_file in scan_dir.glob("*.md"):
+            if doc_file.name.startswith("_"):
+                continue
+            content = doc_file.read_text(encoding="utf-8")
+            # Find capitalized multi-word terms that look like domain concepts
+            for match in re.finditer(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b', content):
+                term = match.group(1)
+                if term.lower() not in existing_terms and len(term) > 5:
+                    if term not in found_terms:
+                        found_terms[term] = []
+                    found_terms[term].append(str(doc_file.relative_to(sd)))
+
+    # Deduplicate and sort by frequency
+    proposals = []
+    for term, sources in sorted(found_terms.items(), key=lambda x: -len(x[1])):
+        proposals.append({
+            "term": term,
+            "frequency": len(sources),
+            "sources": sources[:3],
+        })
+
+    return {"proposals": proposals[:50], "total_found": len(proposals)}
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -453,6 +566,14 @@ def main():
     p_reorder = subparsers.add_parser("reorder", help="Topological sort tasks")
     p_reorder.add_argument("--task-dir", default="tasks")
 
+    # sync-refs
+    p_sync = subparsers.add_parser("sync-refs", help="Sync reference docs with code changes")
+    p_sync.add_argument("--files", nargs="*", default=[], help="Changed files to scan")
+
+    # sync-glossary
+    p_gloss = subparsers.add_parser("sync-glossary", help="Scan for unglosseried terms")
+    p_gloss.add_argument("--scope", default="all", help="Scope: all, design, systems, references, style, input")
+
     args = parser.parse_args()
     if not args.command:
         parser.print_help()
@@ -466,6 +587,12 @@ def main():
         print(json.dumps(result, indent=2))
     elif args.command == "reorder":
         result = reorder_tasks(args.task_dir)
+        print(json.dumps(result, indent=2))
+    elif args.command == "sync-refs":
+        result = sync_reference_docs(args.files)
+        print(json.dumps(result, indent=2))
+    elif args.command == "sync-glossary":
+        result = sync_glossary(args.scope)
         print(json.dumps(result, indent=2))
 
 

@@ -234,7 +234,7 @@ Failure Signal: <what indicates the design is breaking> -->
 ## Rules
 
 1. This document is the highest authority for game intent, player experience, and design rules.
-2. Sections marked Complete are locked canon — use `/scaffold-init-design --mode refresh` to change them.
+2. Sections marked Complete are locked canon — use `/scaffold-seed design --mode refresh` to change them.
 3. Design Invariants are non-breakable. Features that violate invariants are wrong.
 4. Decision Anchors resolve ambiguous design choices without debate.
 5. System truth, reference truth, and engine truth live in their own documents, not here.

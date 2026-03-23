@@ -81,7 +81,7 @@ Follow the pipeline in order. Each step builds on the last.
 ### Phase 1 — Define the game
 
 ```
-/scaffold-init-design               ← core vision, pillars, mechanics, loops, scope
+/scaffold-seed design               ← core vision, pillars, mechanics, loops, scope
 /scaffold-fix design                 ← mechanical cleanup
 /scaffold-iterate design             ← adversarial review
 /scaffold-validate --scope design    ← gate check
@@ -150,7 +150,7 @@ See `scaffold/WORKFLOW.md` for the full 24-step recipe.
 | **Art** | `art-concept`, `art-ui-mockup`, `art-character`, `art-environment`, `art-sprite`, `art-icon`, `art-promo` |
 | **Audio** | `audio-music`, `audio-sfx`, `audio-ambience`, `audio-voice` |
 
-All skill names are prefixed with `/scaffold-` (e.g., `/scaffold-init-design`).
+All skill names are prefixed with `/scaffold-` (e.g., `/scaffold-seed design`).
 
 ## Key Directories
 

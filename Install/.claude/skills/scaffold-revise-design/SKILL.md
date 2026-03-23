@@ -26,7 +26,7 @@ This is distinct from:
 
 ## Preconditions
 
-1. **Design doc exists** — verify `design/design-doc.md` exists and is not at template defaults. If missing, stop: "No design doc to revise. Run `/scaffold-init-design` first."
+1. **Design doc exists** — verify `design/design-doc.md` exists and is not at template defaults. If missing, stop: "No design doc to revise. Run `/scaffold-seed design` first."
 2. **Design doc has been through Step 1 pipeline** — verify at least one iterate or fix log exists in `scaffold/decisions/review/`. If no logs exist, stop: "Design doc hasn't been stabilized yet. Run the Step 1 pipeline (init → fix → iterate → validate) first."
 3. **Implementation feedback exists** — if `--signals` is provided, at least one signal must resolve to a real source document (see signal resolution rules in Step 1). If none resolve, report: "No valid implementation signals found. Nothing to revise." If `--signals` is not provided, at least one of: accepted ADRs, known issues entries, playtest patterns, triage logs, or revision logs must exist. If none exist, report: "No implementation feedback found. Nothing to revise."
 

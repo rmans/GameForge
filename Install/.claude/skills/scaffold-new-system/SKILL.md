@@ -102,7 +102,7 @@ This is the most important gate. Answer three questions:
 **Result:**
 - **Required** — clear gameplay gap, cannot be absorbed by existing systems, needed this phase. Proceed.
 - **Premature** — valid concept but not needed yet. Stop: "This system addresses a real concern but isn't needed until [phase/slice]. Log it in `scaffold/decisions/known-issues.md` as a future system candidate and revisit when its phase begins."
-- **Redundant** — an existing system can absorb this. Stop: "SYS-### [Name] already covers this responsibility. Consider expanding it via `/scaffold-update-doc SYS-###` instead."
+- **Redundant** — an existing system can absorb this. Stop: "SYS-### [Name] already covers this responsibility. Consider expanding it via `direct file editing SYS-###` instead."
 
 Present the necessity assessment to the user. If the result is Required, proceed. If Premature or Redundant, present the recommendation but let the user override with justification.
 
@@ -172,7 +172,7 @@ After all sections are defined, validate that the system has a clear identity bo
 - **Strong identity** — passes all three tests. Proceed to file creation.
 - **Weak identity** — fails one or more tests. Present the failure to the user:
   - If one-sentence test fails: suggest splitting into two systems or narrowing scope.
-  - If absorption test fails: suggest merging with the absorbing system via `/scaffold-update-doc`.
+  - If absorption test fails: suggest merging with the absorbing system via direct file editing.
   - If core concept test fails: identify which sections belong to a different concern and suggest refactoring.
 
 The user may override a Weak identity result with justification, but the concern is logged in the system's Open Questions section.
@@ -225,7 +225,7 @@ When `--split-from SYS-###` was provided, update the parent system:
 
 **Scope of parent edits is strictly bounded:**
 - Never change the parent's Purpose or Simulation Responsibility — those define what the parent system is.
-- Never remove Owned State from the parent — if state ownership transferred, that's an escalation for the user to resolve via `/scaffold-update-doc` or triage.
+- Never remove Owned State from the parent — if state ownership transferred, that's an escalation for the user to resolve via direct file editing or triage.
 - Only add Non-Responsibilities entries and update dependency tables.
 
 ## Step 9 — Report
@@ -266,7 +266,7 @@ When `--split-from SYS-###` was provided, update the parent system:
 - Run `/scaffold-fix systems SYS-###` to clean up mechanical issues
 - Run `/scaffold-iterate systems SYS-###` to adversarially review the new system
 - Run `/scaffold-validate --scope systems` to confirm structural readiness
-- Update `design/interfaces.md` if the system interacts with others → `/scaffold-update-doc interfaces`
+- Update `design/interfaces.md` if the system interacts with others → `direct file editing interfaces`
 ```
 
 ## Rules

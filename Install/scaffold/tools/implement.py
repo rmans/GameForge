@@ -453,12 +453,23 @@ def _advance(session):
         })
 
     elif phase == "test":
+        # Tests are written as a code step — same as other implementation steps
         _write_action({
-            "action": "test",
+            "action": "code",
             "session_id": sid,
             "task_id": session["task_id"],
+            "step": {"number": 0, "text": "Add regression tests for all implemented functionality", "details": [
+                "Cover layers 1-6 from the task template",
+                "Test each public API method",
+                "Test edge cases from the parent spec",
+                "Test cross-system integration points",
+            ]},
+            "step_number": "test",
+            "total_steps": "test",
             "file_manifest": session["file_manifest"],
-            "message": f"Add regression tests and run build. Files: {len(session['file_manifest'])}",
+            "context_docs": session["context_docs"],
+            "plan": session.get("plan", ""),
+            "message": f"Write regression tests for {session['task_id']}. {len(session['file_manifest'])} implementation files.",
         })
 
     elif phase == "build":
@@ -566,13 +577,13 @@ def _advance(session):
         _advance(session)
 
     elif phase == "sync":
-        _write_action({
-            "action": "sync",
-            "session_id": sid,
-            "task_id": session["task_id"],
-            "file_manifest": session["file_manifest"],
-            "message": "Sync reference docs with implementation changes.",
-        })
+        # Run sync directly via utils — no sub-skill needed
+        from utils import sync_reference_docs
+        sync_result = sync_reference_docs(session["file_manifest"])
+        session["results"]["sync_updates"] = sync_result.get("count", 0)
+        session["phase"] = "complete"
+        _save_session(sid, session)
+        _advance(session)
 
     elif phase == "complete":
         # Run complete directly via utils — no sub-skill needed
@@ -637,9 +648,10 @@ def cmd_resolve(args):
         _advance(session)
 
     elif phase == "test":
-        session["results"]["tests_added"] = result.get("tests_added", 0)
-        # Add test files to manifest
-        for f in result.get("test_files", []):
+        # Test phase uses the code action — collect files same as code phase
+        new_files = result.get("files_created", [])
+        modified_files = result.get("files_modified", [])
+        for f in new_files + modified_files:
             if f not in session["file_manifest"]:
                 session["file_manifest"].append(f)
         session["phase"] = "build"
@@ -670,11 +682,6 @@ def cmd_resolve(args):
             session["build_attempts"] = 0
         else:
             session["phase"] = "sync"
-        _save_session(sid, session)
-        _advance(session)
-
-    elif phase == "sync":
-        session["phase"] = "complete"
         _save_session(sid, session)
         _advance(session)
 

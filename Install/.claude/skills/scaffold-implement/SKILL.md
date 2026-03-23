@@ -15,12 +15,11 @@ This skill is a **thin dispatcher** backed by `implement.py`. Claude only does o
 | Sub-skill / Tool | What it does |
 |------------------|-------------|
 | `/scaffold-implement-plan` | Read context, produce implementation outline |
-| `/scaffold-implement-code` | Write code for one task step |
-| `/scaffold-add-regression-tests` | Add test coverage |
+| `/scaffold-implement-code` | Write code for one task step (including tests) |
 | `utils.py build-test` | Build and run tests (Python — no skill needed) |
 | `iterate.py --reviewer code` | Code review via external LLM (same pattern as doc review) |
-| `/scaffold-sync-reference-docs` | Sync scaffold docs with code changes |
-| `utils.py complete` | Mark task Complete (Python — no skill needed) |
+| `utils.py sync-refs` | Sync scaffold docs with code changes (Python) |
+| `utils.py complete` | Mark task Complete with upstream ripple (Python) |
 
 ## Arguments
 
@@ -42,7 +41,7 @@ implement.py orchestrator
 │   └── /scaffold-implement-code → writes code, reports files
 │
 ├── Phase 3: Test
-│   └── /scaffold-add-regression-tests → adds test coverage
+│   └── implement.py test phase → adds test coverage
 │
 ├── Phase 4: Build (Python — runs directly, no skill)
 │   ├── utils.py build-test → scons, lint, tests
@@ -56,7 +55,7 @@ implement.py orchestrator
 │   └── utils.py build-test → if review changed code
 │
 ├── Phase 7: Sync
-│   └── /scaffold-sync-reference-docs → update scaffold docs
+│   └── utils.py sync-refs → update scaffold docs
 │
 └── Phase 8: Complete (Python — runs directly, no skill)
     └── utils.py complete → status update, rename, index
