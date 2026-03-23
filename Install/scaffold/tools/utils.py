@@ -111,12 +111,18 @@ def _complete_single(abs_path, sd):
 
 
 def _ripple_complete(completed_path, sd):
-    """Check if completing this doc triggers parent completion. Ripples upward."""
+    """Check if completing this doc triggers parent completion. Ripples upward.
+    Also updates parent docs' tables to reflect the new status."""
     rippled = []
     name = completed_path.name
+    completed_id = re.search(r"(TASK|SPEC|SLICE|PHASE)-\d+", name)
+    completed_id = completed_id.group() if completed_id else ""
 
     # Determine doc type and find parent
     if "TASK-" in name:
+        # Update parent slice's Tasks table with this task's new status
+        _update_parent_table_status(sd, "slices", completed_id, "Complete")
+
         # Task → Spec: check if all tasks for parent spec are Complete
         parent_spec_id = _find_parent_ref(completed_path, "Implements")
         if parent_spec_id:
@@ -124,29 +130,89 @@ def _ripple_complete(completed_path, sd):
             if spec_files and _all_children_complete(sd, spec_files[0], "tasks", "Implements"):
                 result = _complete_single(spec_files[0], sd)
                 rippled.append({"doc": result.get("file", ""), "type": "spec"})
+                # Update parent slice's Specs table
+                _update_parent_table_status(sd, "slices", parent_spec_id, "Complete")
                 # Spec → Slice
                 rippled.extend(_ripple_complete(spec_files[0], sd))
 
     elif "SPEC-" in name:
+        # Update parent slice's Specs table
+        _update_parent_table_status(sd, "slices", completed_id, "Complete")
+
         # Spec → Slice: check if all specs in parent slice are Complete
         parent_slice = _find_parent_slice(completed_path, sd)
         if parent_slice:
             if _all_specs_in_slice_complete(sd, parent_slice):
                 result = _complete_single(parent_slice, sd)
                 rippled.append({"doc": result.get("file", ""), "type": "slice"})
+                slice_id = re.search(r"SLICE-\d+", parent_slice.name)
+                if slice_id:
+                    # Update parent phase's slice references
+                    _update_parent_table_status(sd, "phases", slice_id.group(), "Complete")
                 # Slice → Phase
                 rippled.extend(_ripple_complete(parent_slice, sd))
 
     elif "SLICE-" in name:
-        # Slice → Phase: check if all slices in parent phase are Complete
-        parent_phase = _find_parent_ref(completed_path, "Phase")
-        if parent_phase:
-            phase_files = list(sd.glob(f"phases/{parent_phase}-*.md"))
+        # Update parent phase
+        parent_phase_id = _find_parent_ref(completed_path, "Phase")
+        if parent_phase_id:
+            _update_parent_table_status(sd, "phases", completed_id, "Complete")
+
+            phase_files = list(sd.glob(f"phases/{parent_phase_id}-*.md"))
             if phase_files and _all_children_complete_by_phase(sd, phase_files[0]):
                 result = _complete_single(phase_files[0], sd)
                 rippled.append({"doc": result.get("file", ""), "type": "phase"})
+                # Update roadmap with phase completion
+                _update_roadmap_phase_status(sd, parent_phase_id, "Complete")
+
+    elif "PHASE-" in name:
+        # Update roadmap
+        _update_roadmap_phase_status(sd, completed_id, "Complete")
 
     return rippled
+
+
+def _update_parent_table_status(sd, parent_dir, child_id, new_status):
+    """Update a child's status in parent doc tables (e.g., slice's Tasks/Specs table)."""
+    for parent_file in sd.glob(f"{parent_dir}/*-*.md"):
+        if parent_file.name.startswith("_"):
+            continue
+        content = parent_file.read_text(encoding="utf-8")
+        if child_id in content:
+            # Find table rows containing this child ID and update status
+            updated = re.sub(
+                rf"(\|\s*{re.escape(child_id)}\s*\|.*?\|)\s*\w+\s*\|",
+                rf"\1 {new_status} |",
+                content
+            )
+            if updated != content:
+                parent_file.write_text(updated, encoding="utf-8")
+                return True
+    return False
+
+
+def _update_roadmap_phase_status(sd, phase_id, new_status):
+    """Update a phase's status in the roadmap."""
+    roadmap = sd / "phases" / "roadmap.md"
+    if not roadmap.exists():
+        return False
+    content = roadmap.read_text(encoding="utf-8")
+    updated = re.sub(
+        rf"(\|\s*{re.escape(phase_id)}\s*\|.*?\|)\s*\w+\s*\|",
+        rf"\1 {new_status} |",
+        content
+    )
+    if updated != content:
+        # Also add completion date
+        today = datetime.now().strftime("%Y-%m-%d")
+        updated = re.sub(
+            rf"(\|\s*{re.escape(phase_id)}[^\n]*){new_status}\s*\|",
+            rf"\1{new_status} ({today}) |",
+            updated
+        )
+        roadmap.write_text(updated, encoding="utf-8")
+        return True
+    return False
 
 
 def _find_parent_ref(doc_path, field_name):
