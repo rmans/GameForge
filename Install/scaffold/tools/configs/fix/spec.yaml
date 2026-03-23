@@ -11,20 +11,42 @@ preflight:
   glob_pattern: "specs/SPEC-*-*.md"
   blocked_message: "No spec files found."
 
-context_files:
-  static:
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - design/state-transitions.md
-    - design/authority.md
-    - design/interfaces.md
-    - decisions/known-issues.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 20000
+
+  base:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
   per_target:
     - type: parent_system
+      sections: ["### Purpose", "### Player Actions", "### Owned State"]
+      priority: 1
+      class: upstream
     - type: parent_slice
+      sections: ["### Goal", "### Done Criteria"]
+      priority: 2
+      class: upstream
+
+  on_demand:
+    - file: design/authority.md
+      class: constraint
+      sections: ["## Authority Table"]
+      priority: 3
+      condition: exists
+    - file: design/state-transitions.md
+      class: constraint
+      priority: 3
+      condition: exists
+    - file: design/interfaces.md
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files_pattern: "specs/SPEC-*.md"
 

@@ -25,9 +25,19 @@ upstream_sources:
   - type: system
     glob: "design/systems/SYS-*-*.md"
     extract: "Systems provide owned state, dependencies, state lifecycle, player actions"
+    extract_sections:
+      - "### Purpose"
+      - "### Player Actions"
+      - "### Owned State"
+      - "### State Lifecycle"
+      - "### Asset Needs"
   - type: design
     glob: "design/design-doc.md"
     extract: "Design doc provides governance constraints"
+    extract_sections:
+      - "## Identity"
+      - "## Control"
+      - "## System Domains"
 
 dependency_checks: []
 

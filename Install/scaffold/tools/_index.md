@@ -11,8 +11,8 @@
 | `code-review.py` | Adversarial code review — multi-provider LLM review for implementation code |
 | `iterate.py` | Iterate orchestrator — manages adversarial review sessions for scaffold documents (used by `/scaffold-iterate`) |
 | `local-review.py` | Local review orchestrator — runs mechanical checks (regex, patterns, template diffs) and routes judgment calls for scaffold documents (used by `/scaffold-fix`) |
-| `configs/iterate/*.yaml` | Per-layer review configs for iterate.py (topics, context files, scope guards, bias packs) |
-| `configs/fix/*.yaml` | Per-layer fix configs for local-review.py (mechanical checks, judgment checks, signals) |
+| `configs/iterate/*.yaml` | Per-layer review configs for iterate.py (topics, hierarchical context, scope guards, bias packs) |
+| `configs/fix/*.yaml` | Per-layer fix configs for local-review.py (mechanical checks, judgment checks, hierarchical context) |
 | `review.py` | Review orchestrator — chains local-review.py (fix) then iterate.py (adversarial) for full document review (used by `/scaffold-review`) |
 | `validate.py` | Validate orchestrator — runs deterministic structural checks from per-scope YAML configs (used by `/scaffold-validate`) |
 | `seed.py` | Seed orchestrator — dependency-aware document generation from upstream context (used by `/scaffold-seed`) |
@@ -22,6 +22,143 @@
 | `utils.py` | Shared utilities — complete, build-test, reorder, sync-refs, sync-glossary. Callable standalone or imported by orchestrators. |
 | `revise.py` | Revise orchestrator — detect drift, classify signals, auto-apply safe changes, escalate dangerous changes (used by `/scaffold-revise`) |
 | `configs/revise/*.yaml` | Per-layer revise configs (feedback sources, safe/escalation patterns) |
+| `context.py` | Hierarchical context resolver — budget-aware, section-extracting context loading for all orchestrators |
+
+## context.py
+
+Hierarchical context resolver that loads precisely the right context for each review call. Used by iterate.py, local-review.py, implement.py, and seed.py.
+
+### Problem It Solves
+
+Without context.py, every review call loaded the same flat list of whole files — the design doc, glossary, authority, interfaces, all ADRs. For a subsection review of `### Purpose`, that meant sending 10+ full documents to the external LLM when only the design doc's Identity section was relevant. This burned tokens, diluted reviewer attention, and made reviews worse.
+
+### Context Hierarchy
+
+Context is resolved at four levels, from broadest to narrowest:
+
+| Level | When loaded | Example |
+|-------|------------|---------|
+| **base** | Every review call | design-doc.md (## Identity only) |
+| **per_target** | Based on target doc metadata | Parent system's ### Purpose + ### Owned State |
+| **per_section** | Only when reviewing a specific heading | authority.md's ## Authority Table for ### Owned State |
+| **on_demand** | Escalation if reviewer flags ambiguity | glossary.md, doc-authority.md |
+
+### Section Extraction
+
+Instead of loading whole files, entries can specify `sections` — a list of headings to extract:
+
+```yaml
+- file: design/design-doc.md
+  class: canonical
+  sections: ["## Identity", "## Control"]
+  priority: 1
+```
+
+This loads only those sections from the design doc, not the entire file.
+
+### Context Classes
+
+Each entry has a `class` that describes its role:
+
+| Class | Purpose | Drop order |
+|-------|---------|-----------|
+| `canonical` | Source of truth (design doc, roadmap) | Last dropped |
+| `constraint` | Rules, authority, style, glossary | 4th |
+| `upstream` | Parent docs (spec, system, slice) | 3rd |
+| `adjacent` | Directly interacting docs (peer systems) | 2nd |
+| `evidence` | Specific extracted sections, indexes | First dropped |
+
+### Budget Enforcement
+
+Each config sets a `budget` (default 50000 chars). When total context exceeds the budget, entries are dropped by priority (5 first), then by class (evidence first, canonical last).
+
+### YAML Config Format
+
+```yaml
+context:
+  budget: 30000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity"]
+      priority: 1
+
+  per_target:
+    - type: parent_system          # resolved from target's System: SYS-### field
+      sections: ["### Purpose", "### Owned State"]
+      priority: 2
+      class: upstream
+    - type: parent_spec            # resolved from target's Implements: SPEC-### field
+      sections: ["### Acceptance Criteria"]
+      priority: 2
+      class: upstream
+    - type: interaction_partners   # systems in target's dependency tables
+      sections: ["### Purpose"]
+      priority: 3
+      class: adjacent
+    - type: referenced_engine      # engine docs matched by task type
+      priority: 2
+      class: constraint
+
+  per_section:
+    "### Owned State":
+      - file: design/authority.md
+        class: constraint
+        sections: ["## Authority Table"]
+        priority: 1
+    "### Steps":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 2
+        condition: exists           # only load if file exists
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
+```
+
+### Per-Target Types
+
+| Type | Resolves from | What it loads |
+|------|--------------|---------------|
+| `parent_system` | Target's `System: SYS-###` field | System design file |
+| `parent_spec` | Target's `Implements: SPEC-###` field | Spec file |
+| `parent_slice` | Slice containing the target spec/task | Slice file |
+| `parent_phase` | Target's `Phase: PHASE-###` field | Phase file |
+| `interaction_partners` | SYS-### IDs in target's content | Peer system files |
+| `referenced_engine` | Target's `Task Type` field | Engine docs by type |
+| `adjacent_phases` | Prior/next phases in roadmap order | Phase files |
+
+### Conditions
+
+Entries can be gated with `condition`:
+- `exists` — only load if the file exists
+- `task_type:foundation` — only load for foundation tasks
+- `has_field:system` — only load if target has a System field
+- `not_task_type:art` — exclude for art tasks
+
+### API
+
+```python
+from context import resolve, resolve_as_text, resolve_as_files
+
+# Full resolution — returns list of {file, text, class, priority}
+entries = resolve(config, "specs/SPEC-003-wall-placement_approved.md", "### Owned State")
+
+# As concatenated string (for passing to reviewer)
+text = resolve_as_text(config, target_path, section_heading)
+
+# As file paths only (loses section extraction)
+files = resolve_as_files(config, target_path)
+```
+
+### Dependencies
+
+None — uses Python standard library only (`pathlib`, `re`).
 
 ## adversarial-review.py
 

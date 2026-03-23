@@ -12,26 +12,40 @@ preflight:
   glob_pattern: "slices/SLICE-*-*.md"
   blocked_message: "No slice docs found. Run `/scaffold-new-slice` first."
 
-context_files:
-  static:
-    - design/architecture.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - decisions/known-issues.md
-  conditional:
-    - file: design/authority.md
-      when: exists
-    - file: design/interfaces.md
-      when: exists
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 30000
+
+  base: []
+
   per_target:
     - type: parent_phase
-      description: "Parent phase file"
-    - type: system_designs
-      description: "System designs referenced by the slice"
-    - type: earlier_slices
+      sections: ["### Objective", "### Slice Strategy", "### Exit Criteria"]
+      priority: 1
+      class: upstream
+
+  per_section:
+    "### Goal":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Core Loop"]
+        priority: 2
+    "### Integration Points":
+      - file: design/interfaces.md
+        class: constraint
+        priority: 2
+        condition: exists
+    "### Done Criteria":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 3
+        condition: exists
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
       description: "Earlier slices (for dependency validation)"
 
 defaults:

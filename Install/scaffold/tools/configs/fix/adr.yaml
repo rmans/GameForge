@@ -11,10 +11,19 @@ preflight:
   glob_pattern: "decisions/architecture-decision-record/ADR-*.md"
   blocked_message: "No ADR files found."
 
-context_files:
-  static:
-    - design/glossary.md
-    - scaffold/doc-authority.md
+context:
+  budget: 15000
+
+  base:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  on_demand:
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files_pattern: "decisions/architecture-decision-record/ADR-*.md"
 

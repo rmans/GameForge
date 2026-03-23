@@ -11,9 +11,14 @@ preflight:
   glob_pattern: "decisions/playtest-feedback/PT-*.md"
   blocked_message: "No PT files found."
 
-context_files:
-  static:
-    - design/glossary.md
+context:
+  budget: 15000
+
+  base:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
 
 editable_files_pattern: "decisions/playtest-feedback/PT-*.md"
 

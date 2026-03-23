@@ -21,9 +21,16 @@ upstream_sources:
   - type: design
     glob: "design/design-doc.md"
     extract: "Player Verbs and Control Model drive action map"
+    extract_sections:
+      - "## Control"
+      - "## Identity"
   - type: interaction_model
     glob: "design/interaction-model.md"
     extract: "Interaction patterns drive bindings and navigation"
+    extract_sections:
+      - "## Selection Model"
+      - "## Command Model"
+      - "## Interaction Patterns"
   - type: ui_kit
     glob: "design/ui-kit.md"
     extract: "UI components drive navigation requirements"

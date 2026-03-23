@@ -12,14 +12,23 @@ preflight:
   critical_sections: [Description, "Fix Options"]
   blocked_message: "Known issue is too incomplete for review. Fill in Description and Fix Options first."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## System Domains"]
+      priority: 2
+
+  per_target: []
+  per_section: {}
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
 
 defaults:
   max_iterations: 3

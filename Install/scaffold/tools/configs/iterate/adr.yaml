@@ -12,16 +12,23 @@ preflight:
   critical_sections: [Context, Decision, Consequences]
   blocked_message: "ADR is too incomplete for review. Fill in Context, Decision, and Consequences first."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - decisions/known-issues.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
-      label: "Other accepted ADRs for consistency"
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## System Domains"]
+      priority: 2
+
+  per_target: []
+  per_section: {}
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
 
 defaults:
   max_iterations: 5

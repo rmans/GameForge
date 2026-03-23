@@ -11,19 +11,41 @@ preflight:
   glob_pattern: "tasks/TASK-*-*.md"
   blocked_message: "No task files found."
 
-context_files:
-  static:
-    - design/architecture.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 20000
+
+  base:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+    - file: design/architecture.md
+      class: constraint
+      sections: ["## Foundation Areas", "## Core API Boundary"]
+      priority: 2
+      condition: exists
+
   per_target:
     - type: parent_spec
+      sections: ["### Acceptance Criteria", "### Steps", "### Out of Scope"]
+      priority: 1
+      class: upstream
     - type: parent_system
-    - type: signal_registry
-    - type: relevant_engine_docs
+      sections: ["### Purpose", "### Owned State"]
+      priority: 2
+      class: upstream
+    - type: referenced_engine
+      priority: 3
+      class: constraint
+
+  on_demand:
+    - file: reference/signal-registry.md
+      class: evidence
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files_pattern: "tasks/TASK-*.md"
 

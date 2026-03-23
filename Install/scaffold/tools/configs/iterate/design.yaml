@@ -14,18 +14,43 @@ preflight:
   blocked_message: "No design doc to review. Run `/scaffold-init-design` first."
   incomplete_message: "Design doc is too incomplete for adversarial review. Run `/scaffold-init-design --mode fill-gaps` to fill remaining sections, then `/scaffold-fix-design` to clean up mechanical issues."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - design/systems/_index.md
-    - decisions/known-issues.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
-    - pattern: "theory/*.md"
-      label: "Advisory — non-authoritative"
+context:
+  budget: 40000
+
+  base: []
+
+  per_target: []
+
+  per_section:
+    "### Design Invariants":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 3
+    "### Player Verbs":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 3
+    "### Major System Domains":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 2
+    "### Entity Presentation":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 3
+    "### Scope Reality Check":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 3
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 defaults:
   max_iterations: 10

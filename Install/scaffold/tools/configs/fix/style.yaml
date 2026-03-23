@@ -16,24 +16,29 @@ preflight:
     - design/design-doc.md
   blocked_message: "Design doc required as context."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-  conditional:
-    - file: design/style-guide.md
-      when: exists
-    - file: design/color-system.md
-      when: exists
-    - file: design/ui-kit.md
-      when: exists
-    - file: design/interaction-model.md
-      when: exists
-    - file: design/feedback-system.md
-      when: exists
-    - file: design/audio-direction.md
-      when: exists
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Philosophy"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  per_target:
+    - type: style_peers
+      priority: 3
+      class: adjacent
+      condition: exists
+
+  on_demand:
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files:
   - design/style-guide.md

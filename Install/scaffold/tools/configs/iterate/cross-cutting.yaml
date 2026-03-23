@@ -11,10 +11,18 @@ preflight:
     - decisions/cross-cutting-findings.md
   blocked_message: "No cross-cutting findings file."
 
-context_files:
-  static:
-    - decisions/cross-cutting-findings.md
-    - scaffold/doc-authority.md
+context:
+  budget: 20000
+
+  base:
+    - file: decisions/cross-cutting-findings.md
+      class: evidence
+      priority: 1
+      condition: exists
+
+  per_target: []
+  per_section: {}
+  on_demand: []
 
 defaults:
   max_iterations: 3

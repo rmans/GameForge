@@ -13,23 +13,45 @@ preflight:
     - design/design-doc.md
   blocked_message: "No roadmap to review. Run `/scaffold-new-roadmap` first."
 
-context_files:
-  static:
-    - phases/roadmap.md
-    - design/design-doc.md
-    - design/systems/_index.md
-    - design/architecture.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - decisions/known-issues.md
-  conditional:
-    - file: design/authority.md
-      when: exists
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
-    - pattern: "phases/PHASE-*-*.md"
-      label: "Phase files for sequence validation"
+context:
+  budget: 30000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## System Domains", "## Scope"]
+      priority: 1
+    - file: design/systems/_index.md
+      class: evidence
+      priority: 2
+
+  per_target: []
+
+  per_section:
+    "### Phase Overview":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 2
+        condition: exists
+    "### System Coverage Map":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 1
+    "### Capability Ladder":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Progression Arc", "### Player Goals"]
+        priority: 2
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 defaults:
   max_iterations: 10

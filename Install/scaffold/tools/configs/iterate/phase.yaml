@@ -13,25 +13,47 @@ preflight:
   glob_pattern: "phases/PHASE-*-*.md"
   blocked_message: "No phase docs found. Run `/scaffold-new-phase` first."
 
-context_files:
-  static:
-    - phases/roadmap.md
-    - design/design-doc.md
-    - design/architecture.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - decisions/known-issues.md
-  conditional:
-    - file: design/authority.md
-      when: exists
-    - file: design/interfaces.md
-      when: exists
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 30000
+
+  base:
+    - file: phases/roadmap.md
+      class: canonical
+      sections: ["### Phase Overview", "### Capability Ladder", "### System Coverage Map"]
+      priority: 1
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## System Domains", "## Scope"]
+      priority: 2
+
   per_target:
     - type: adjacent_phases
-      description: "Prior and next phase files for chain validation"
+      sections: ["### Objective", "### Exit Criteria"]
+      priority: 3
+      class: adjacent
+
+  per_section:
+    "### Entry Criteria":
+      - file: phases/roadmap.md
+        class: canonical
+        sections: ["### Phase Overview"]
+        priority: 1
+    "### Slice Strategy":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 2
+        condition: exists
+    "### System Readiness":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 2
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
 
 defaults:
   max_iterations: 10

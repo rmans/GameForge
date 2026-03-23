@@ -11,19 +11,37 @@ preflight:
   glob_pattern: "slices/SLICE-*-*.md"
   blocked_message: "No slice files found."
 
-context_files:
-  static:
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - design/interfaces.md
-    - decisions/known-issues.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 20000
+
+  base:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
   per_target:
     - type: parent_phase
+      sections: ["### Goal", "### Exit Criteria", "### Slice Strategy"]
+      priority: 1
+      class: upstream
     - type: system_designs
+      sections: ["### Purpose", "### Owned State"]
+      priority: 3
+      class: adjacent
     - type: earlier_slices
+      sections: ["### Goal", "### Done Criteria"]
+      priority: 3
+      class: adjacent
+
+  on_demand:
+    - file: design/interfaces.md
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files_pattern: "slices/SLICE-*.md"
 

@@ -21,12 +21,23 @@ upstream_sources:
   - type: design
     glob: "design/design-doc.md"
     extract: "Tone, aesthetic pillars, camera, Entity Presentation, player information model drive style"
+    extract_sections:
+      - "## Identity"
+      - "## Control"
+      - "## Content"
   - type: system
     glob: "design/systems/SYS-*-*.md"
     extract: "System visibility and feel requirements inform UI and feedback"
+    extract_sections:
+      - "### Purpose"
+      - "### Player Actions"
+      - "### Asset Needs"
   - type: architecture
     glob: "design/architecture.md"
     extract: "Architecture constraints inform UI implementation approach"
+    extract_sections:
+      - "## Foundation Areas"
+      - "## Core API Boundary"
 
 dependency_checks: []
 

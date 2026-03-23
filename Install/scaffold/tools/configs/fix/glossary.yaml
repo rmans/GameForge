@@ -10,10 +10,23 @@ preflight:
     - design/glossary.md
   blocked_message: "No glossary found."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
+context:
+  budget: 15000
+
+  base:
+    - file: design/glossary.md
+      class: canonical
+      sections: ["## Terms"]
+      priority: 1
+    - file: design/systems/_index.md
+      class: adjacent
+      priority: 3
+
+  on_demand:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## System Domains"]
+      priority: 4
 
 editable_files:
   - design/glossary.md

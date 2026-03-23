@@ -10,10 +10,19 @@ preflight:
   required_files: []
   blocked_message: "No files to review."
 
-context_files:
-  static:
-    - design/architecture.md
-    - scaffold/doc-authority.md
+context:
+  budget: 25000
+
+  base:
+    - file: design/architecture.md
+      class: constraint
+      sections: ["## Foundation Areas", "## Core API Boundary", "## Coding Conventions"]
+      priority: 1
+      condition: exists
+
+  per_target: []
+  per_section: {}
+  on_demand: []
 
 defaults:
   max_iterations: 10

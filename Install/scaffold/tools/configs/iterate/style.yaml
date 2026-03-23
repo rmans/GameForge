@@ -18,25 +18,82 @@ preflight:
     - design/design-doc.md
   blocked_message: "Design doc required as context for style review."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - decisions/known-issues.md
-  conditional:
-    - file: design/style-guide.md
-      when: exists
-    - file: design/color-system.md
-      when: exists
-    - file: design/ui-kit.md
-      when: exists
-    - file: design/interaction-model.md
-      when: exists
-    - file: design/feedback-system.md
-      when: exists
-    - file: design/audio-direction.md
-      when: exists
+context:
+  budget: 30000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Presentation", "## Identity"]
+      priority: 1
+
+  per_target: []
+
+  per_section:
+    "### Aesthetic Pillars":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Aesthetic Pillars", "### Tone"]
+        priority: 1
+    "### Tone Registers":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Tone", "### Core Fantasy"]
+        priority: 1
+    "### Entity Visual Hierarchy":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Entity Presentation", "### Content Categories"]
+        priority: 1
+    "### Base Palette":
+      - file: design/style-guide.md
+        class: upstream
+        sections: ["## Art Direction", "## Visual Tone"]
+        priority: 2
+        condition: exists
+    "### Signal Palette":
+      - file: design/state-transitions.md
+        class: constraint
+        priority: 3
+        condition: exists
+    "## Component Definitions":
+      - file: design/style-guide.md
+        class: upstream
+        sections: ["## Art Direction"]
+        priority: 2
+        condition: exists
+      - file: design/color-system.md
+        class: upstream
+        sections: ["## Palette", "## Color Tokens"]
+        priority: 2
+        condition: exists
+    "## Interaction Patterns":
+      - file: design/interaction-model.md
+        class: adjacent
+        priority: 2
+        condition: exists
+    "## Event-Response Table":
+      - file: design/interaction-model.md
+        class: adjacent
+        priority: 2
+        condition: exists
+      - file: design/audio-direction.md
+        class: adjacent
+        sections: ["## Sound Categories", "## Feedback Hierarchy"]
+        priority: 2
+        condition: exists
+    "## Audio Philosophy":
+      - file: design/feedback-system.md
+        class: adjacent
+        sections: ["## Priority & Stacking"]
+        priority: 2
+        condition: exists
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
 
 defaults:
   max_iterations: 10

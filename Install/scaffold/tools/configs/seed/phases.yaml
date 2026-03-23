@@ -18,12 +18,23 @@ upstream_sources:
   - type: roadmap
     glob: "phases/roadmap.md"
     extract: "Roadmap phase overview drives phase creation"
+    extract_sections:
+      - "### Phase Overview"
+      - "### Capability Ladder"
+      - "### System Coverage Map"
   - type: design
     glob: "design/design-doc.md"
     extract: "Design doc scope and system domains inform phase goals"
+    extract_sections:
+      - "## Identity"
+      - "## System Domains"
+      - "## Content"
   - type: system
     glob: "design/systems/SYS-*-*.md"
     extract: "Systems inform which phase they belong to"
+    extract_sections:
+      - "### Purpose"
+      - "### Owned State"
 
 dependency_checks: []
 

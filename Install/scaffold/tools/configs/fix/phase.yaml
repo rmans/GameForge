@@ -12,18 +12,36 @@ preflight:
   glob_pattern: "phases/PHASE-*-*.md"
   blocked_message: "No phase files found."
 
-context_files:
-  static:
-    - phases/roadmap.md
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - decisions/known-issues.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 20000
+
+  base:
+    - file: phases/roadmap.md
+      class: upstream
+      sections: ["## Phase Overview", "## Capability Ladder"]
+      priority: 1
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Scope", "## Identity"]
+      priority: 2
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
   per_target:
     - type: adjacent_phases
+      sections: ["### Goal", "### Exit Criteria"]
+      priority: 3
+      class: adjacent
+
+  on_demand:
+    - file: decisions/known-issues.md
+      class: evidence
+      priority: 4
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files_pattern: "phases/PHASE-*-*.md"
 

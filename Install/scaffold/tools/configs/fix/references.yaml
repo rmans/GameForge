@@ -19,21 +19,44 @@ preflight:
     - design/design-doc.md
   blocked_message: "Design doc required as context."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - design/systems/_index.md
-  conditional:
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## System Domains"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+    - file: design/systems/_index.md
+      class: adjacent
+      priority: 3
+
+  on_demand:
     - file: design/architecture.md
-      when: exists
+      class: constraint
+      sections: ["## Foundation Areas"]
+      priority: 3
+      condition: exists
     - file: design/authority.md
-      when: exists
+      class: constraint
+      sections: ["## Authority Table"]
+      priority: 3
+      condition: exists
     - file: design/interfaces.md
-      when: exists
+      class: constraint
+      priority: 4
+      condition: exists
     - file: design/state-transitions.md
-      when: exists
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files:
   - design/architecture.md

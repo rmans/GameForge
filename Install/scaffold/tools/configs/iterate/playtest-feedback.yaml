@@ -12,14 +12,23 @@ preflight:
   critical_sections: [Observation, Context]
   blocked_message: "Playtest feedback is too incomplete for review. Fill in Observation and Context first."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Control"]
+      priority: 2
+
   per_target:
-    - type: referenced_system
-      description: "System design referenced in System/Spec field"
+    - type: parent_system
+      sections: ["### Purpose", "### Player Actions"]
+      priority: 2
+      class: upstream
+
+  per_section: {}
+  on_demand: []
 
 defaults:
   max_iterations: 3

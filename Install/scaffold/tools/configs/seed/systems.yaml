@@ -17,6 +17,11 @@ upstream_sources:
   - type: design
     glob: "design/design-doc.md"
     extract: "System Domains, Major Mechanics, Core Loop, and Simulation Depth Target drive system identification"
+    extract_sections:
+      - "## Identity"
+      - "## Control"
+      - "## System Domains"
+      - "## Content"
 
 dependency_checks: []
 

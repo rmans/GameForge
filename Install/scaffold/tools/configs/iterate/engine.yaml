@@ -27,21 +27,63 @@ preflight:
     - design/design-doc.md
   blocked_message: "Design doc required as context for engine review."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/architecture.md
-    - scaffold/doc-authority.md
-    - design/glossary.md
-    - decisions/known-issues.md
-  conditional:
+context:
+  budget: 35000
+
+  base:
+    - file: design/architecture.md
+      class: constraint
+      sections: ["## Foundation Areas", "## Core API Boundary"]
+      priority: 1
+      condition: exists
+
+  per_target: []
+
+  per_section:
+    "## Conventions":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Coding Conventions"]
+        priority: 2
+        condition: exists
+    "## Scene Tree":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 1
+        condition: exists
+    "## Save Architecture":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 1
+        condition: exists
+    "## Simulation Loop":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Tick Order"]
+        priority: 1
+        condition: exists
+    "## Audio Asset Pipeline":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Audio Direction", "### Entity Presentation"]
+        priority: 2
+
+  on_demand:
     - file: design/authority.md
-      when: exists
+      class: constraint
+      sections: ["## Authority Table"]
+      priority: 4
+      condition: exists
     - file: design/interfaces.md
-      when: exists
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 5
 
 defaults:
   max_iterations: 10

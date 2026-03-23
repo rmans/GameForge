@@ -10,12 +10,24 @@ preflight:
     - decisions/cross-cutting-findings.md
   blocked_message: "No cross-cutting findings file. Run `/scaffold-validate --scope all` first."
 
-context_files:
-  static:
-    - decisions/cross-cutting-findings.md
-    - scaffold/doc-authority.md
-    - decisions/known-issues.md
-    - decisions/design-debt.md
+context:
+  budget: 25000
+
+  base:
+    - file: decisions/cross-cutting-findings.md
+      class: canonical
+      priority: 1
+    - file: decisions/known-issues.md
+      class: evidence
+      priority: 3
+    - file: decisions/design-debt.md
+      class: evidence
+      priority: 3
+
+  on_demand:
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files:
   - decisions/cross-cutting-findings.md

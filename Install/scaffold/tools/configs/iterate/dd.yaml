@@ -12,14 +12,23 @@ preflight:
   critical_sections: [Compromise, "Why Accepted", "Payoff Plan"]
   blocked_message: "Design debt entry is too incomplete for review. Fill in Compromise, Why Accepted, and Payoff Plan first."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Scope"]
+      priority: 2
+
+  per_target: []
+  per_section: {}
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
 
 defaults:
   max_iterations: 3

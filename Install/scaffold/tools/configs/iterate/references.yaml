@@ -21,23 +21,64 @@ preflight:
     - design/design-doc.md
   blocked_message: "Design doc required as context for reference review."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - design/systems/_index.md
-    - decisions/known-issues.md
-  conditional:
-    - file: design/architecture.md
-      when: exists
-    - file: design/authority.md
-      when: exists
-    - file: design/interfaces.md
-      when: exists
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 35000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## System Domains", "## Control"]
+      priority: 2
+
+  per_target: []
+
+  per_section:
+    "### System Representation":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 1
+        condition: exists
+    "### Tier Definitions":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 1
+        condition: exists
+    "### Simulation Update Semantics":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Tick Order"]
+        priority: 1
+        condition: exists
+    "### Runtime Identity":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 1
+        condition: exists
+    "## Authority Table":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 2
+    "## Signal Wiring Map":
+      - file: design/interfaces.md
+        class: constraint
+        priority: 2
+        condition: exists
+    "## State Machines":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 3
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 defaults:
   max_iterations: 10

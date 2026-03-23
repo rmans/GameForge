@@ -12,12 +12,21 @@ preflight:
     - design/design-doc.md
   blocked_message: "No glossary to review. Run `/scaffold-bulk-seed-systems` to create it."
 
-context_files:
-  static:
-    - design/glossary.md
-    - design/design-doc.md
-    - scaffold/doc-authority.md
-    - design/systems/_index.md
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## System Domains"]
+      priority: 1
+    - file: design/systems/_index.md
+      class: evidence
+      priority: 2
+
+  per_target: []
+  per_section: {}
+  on_demand: []
 
 defaults:
   max_iterations: 5

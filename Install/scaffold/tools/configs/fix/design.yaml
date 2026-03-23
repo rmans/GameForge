@@ -12,15 +12,29 @@ preflight:
     - design/glossary.md
   blocked_message: "No design doc found. Run `/scaffold-init-design` first."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - design/systems/_index.md
-    - decisions/known-issues.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Philosophy", "## Scope", "### Design Invariants", "### Decision Anchors", "### Design Pressure Tests"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+    - file: design/systems/_index.md
+      class: adjacent
+      priority: 3
+
+  on_demand:
+    - file: decisions/known-issues.md
+      class: evidence
+      priority: 4
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files:
   - design/design-doc.md

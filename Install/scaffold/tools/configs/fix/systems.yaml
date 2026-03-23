@@ -14,23 +14,48 @@ preflight:
   glob_pattern: "design/systems/SYS-*-*.md"
   blocked_message: "No system files found."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - design/systems/_index.md
-    - decisions/known-issues.md
-  conditional:
-    - file: design/authority.md
-      when: exists
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Control", "## System Domains"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+    - file: design/systems/_index.md
+      class: adjacent
+      priority: 3
+
+  per_target:
+    - type: interaction_partners
+      sections: ["### Purpose", "### Owned State"]
+      priority: 3
+      class: adjacent
+
+  per_section:
+    "### Owned State":
+      - file: design/authority.md
+        class: constraint
+        sections: ["## Authority Table"]
+        priority: 1
+        condition: exists
+
+  on_demand:
     - file: design/interfaces.md
-      when: exists
+      class: constraint
+      priority: 4
+      condition: exists
     - file: design/state-transitions.md
-      when: exists
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files_pattern: "design/systems/SYS-*.md"
 

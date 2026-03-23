@@ -26,19 +26,36 @@ preflight:
     - design/architecture.md
   blocked_message: "Design doc and architecture.md required as context."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/architecture.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-  conditional:
+context:
+  budget: 20000
+
+  base:
+    - file: design/architecture.md
+      class: canonical
+      sections: ["## Foundation Areas", "## Core API Boundary", "## Data Flow"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity"]
+      priority: 3
+
+  on_demand:
     - file: design/authority.md
-      when: exists
+      class: constraint
+      sections: ["## Authority Table"]
+      priority: 4
+      condition: exists
     - file: design/interfaces.md
-      when: exists
-    - file: reference/signal-registry.md
-      when: exists
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files_pattern: "engine/*.md"
 

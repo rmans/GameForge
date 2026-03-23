@@ -11,16 +11,29 @@ preflight:
     - design/design-doc.md
   blocked_message: "No roadmap found."
 
-context_files:
-  static:
-    - phases/roadmap.md
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-  dynamic:
-    - pattern: "phases/PHASE-*-*.md"
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Scope", "## Philosophy"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  per_target:
+    - type: phase_files
+      sections: ["### Goal", "### Exit Criteria"]
+      priority: 3
+      class: adjacent
+
+  on_demand:
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 editable_files:
   - phases/roadmap.md

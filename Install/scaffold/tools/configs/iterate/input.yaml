@@ -17,20 +17,45 @@ preflight:
     - design/design-doc.md
   blocked_message: "Design doc required as context for input review."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - decisions/known-issues.md
-  conditional:
+context:
+  budget: 25000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Control", "### Player Verbs"]
+      priority: 1
     - file: design/interaction-model.md
-      when: exists
-    - file: design/ui-kit.md
-      when: exists
-  dynamic:
-    - pattern: "inputs/*.md"
-      label: "All input docs for cross-reference"
+      class: upstream
+      sections: ["## Selection Model", "## Command Model", "## Interaction Patterns"]
+      priority: 1
+      condition: exists
+
+  per_target: []
+
+  per_section:
+    "## Actions":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Player Verbs", "### Player Control Model"]
+        priority: 1
+    "## Bindings":
+      - file: inputs/action-map.md
+        class: upstream
+        priority: 2
+        condition: exists
+    "## Navigation":
+      - file: design/ui-kit.md
+        class: adjacent
+        sections: ["## Component Definitions"]
+        priority: 3
+        condition: exists
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
 
 defaults:
   max_iterations: 10

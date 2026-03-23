@@ -10,10 +10,17 @@ preflight:
     - scaffold/doc-authority.md
   blocked_message: "No doc-authority.md found."
 
-context_files:
-  static:
-    - scaffold/doc-authority.md
-    - design/design-doc.md
+context:
+  budget: 15000
+
+  base:
+    - file: scaffold/doc-authority.md
+      class: canonical
+      priority: 1
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## System Domains"]
+      priority: 2
 
 editable_files:
   - scaffold/doc-authority.md
