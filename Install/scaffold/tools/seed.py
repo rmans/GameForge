@@ -386,6 +386,144 @@ def _extract_upstream_requirements(config, inventory):
 
 
 # ---------------------------------------------------------------------------
+# Existing Docs Analysis (Delta Mode)
+# ---------------------------------------------------------------------------
+
+def _analyze_existing(config, inventory, requirements):
+    """Analyze what already exists for this layer. Returns delta info."""
+    layer = config.get("layer", "")
+    analysis = {
+        "has_existing": False,
+        "existing_count": 0,
+        "existing_files": [],
+        "existing_summaries": [],
+        "stale": [],
+        "missing_sections": [],
+    }
+
+    # Find existing docs for this layer
+    glob_pattern = config.get("glob_pattern", "")
+    target = config.get("target", "")
+
+    if target:
+        # Fixed target (design doc, roadmap)
+        target_path = SCAFFOLD_DIR / target
+        if target_path.exists():
+            content = target_path.read_text(encoding="utf-8")
+            analysis["has_existing"] = True
+            analysis["existing_count"] = 1
+            analysis["existing_files"] = [target]
+
+            # Check section fill status
+            headings = [line.strip() for line in content.splitlines() if line.strip().startswith("#")]
+            filled = 0
+            empty = 0
+            for heading in headings:
+                heading_text = re.sub(r"^#+\s+", "", heading)
+                section_content = _extract_section_content(content, heading)
+                if section_content:
+                    cleaned = re.sub(r"<!--.*?-->", "", section_content, flags=re.DOTALL).strip()
+                    if len(cleaned) > 20:
+                        filled += 1
+                    else:
+                        empty += 1
+                        analysis["missing_sections"].append(heading_text)
+
+            analysis["existing_summaries"].append({
+                "file": target,
+                "total_sections": filled + empty,
+                "filled_sections": filled,
+                "empty_sections": empty,
+            })
+
+    elif glob_pattern:
+        # Multiple docs (systems, specs, tasks, etc.)
+        doc_key = layer
+        existing = inventory.get("scaffold_docs", {}).get(doc_key, [])
+        if existing:
+            analysis["has_existing"] = True
+            analysis["existing_count"] = len(existing)
+            analysis["existing_files"] = existing
+
+            # Sample first few for summary
+            for f in existing[:5]:
+                abs_path = SCAFFOLD_DIR / f
+                if abs_path.exists():
+                    content = abs_path.read_text(encoding="utf-8")
+                    # Check for staleness — is there a Status field?
+                    status_match = re.search(r">\s*\*\*Status:\*\*\s*(\w+)", content)
+                    status = status_match.group(1) if status_match else "Unknown"
+
+                    # Check Implements/System references for traceability
+                    implements = re.search(r">\s*\*\*Implements:\*\*\s*(\S+)", content)
+                    system = re.search(r">\s*\*\*System:\*\*\s*(\S+)", content)
+
+                    analysis["existing_summaries"].append({
+                        "file": f,
+                        "status": status,
+                        "implements": implements.group(1) if implements else None,
+                        "system": system.group(1) if system else None,
+                    })
+
+    # Check for stale references (docs that reference things that no longer exist)
+    for f in analysis.get("existing_files", []):
+        abs_path = SCAFFOLD_DIR / f
+        if abs_path.exists():
+            content = abs_path.read_text(encoding="utf-8")
+            # Check for references to non-existent docs
+            for ref_match in re.finditer(r"(SYS|SPEC|TASK|SLICE|P)\d+-\d+", content):
+                ref_id = ref_match.group()
+                # Try to find the referenced file
+                ref_patterns = {
+                    "SYS": "design/systems/SYS-*",
+                    "SPEC": "specs/SPEC-*",
+                    "TASK": "tasks/TASK-*",
+                    "SLICE": "slices/SLICE-*",
+                    "P": "phases/P*",
+                }
+                prefix = re.match(r"(SYS|SPEC|TASK|SLICE|P)", ref_id).group()
+                pattern = ref_patterns.get(prefix, "")
+                if pattern:
+                    matches = list(SCAFFOLD_DIR.glob(f"{pattern}"))
+                    ref_found = any(ref_id in str(m) for m in matches)
+                    if not ref_found:
+                        analysis["stale"].append({
+                            "file": f,
+                            "reference": ref_id,
+                            "issue": f"References {ref_id} but no matching file found",
+                        })
+
+    return analysis
+
+
+def _extract_section_content(doc_content, heading):
+    """Extract content after a heading until the next heading of same or higher level."""
+    level = len(heading) - len(heading.lstrip("#"))
+    heading_text = heading.lstrip("# ").strip()
+    pattern = rf"^{'#' * level}\s+{re.escape(heading_text)}\s*$"
+
+    lines = doc_content.splitlines()
+    start = None
+    for i, line in enumerate(lines):
+        if re.match(pattern, line.strip()):
+            start = i + 1
+            break
+    if start is None:
+        return None
+
+    end = len(lines)
+    for i in range(start, len(lines)):
+        line = lines[i].strip()
+        if line.startswith("#"):
+            match = re.match(r"^(#+)", line)
+            if match and len(match.group(1)) <= level:
+                end = i
+                break
+
+    return "\n".join(lines[start:end])
+
+
+# ---------------------------------------------------------------------------
 # Dependency Graph
 # ---------------------------------------------------------------------------
 
@@ -465,6 +603,9 @@ def cmd_next_action(args):
         inventory = _build_inventory(config)
         requirements = _extract_upstream_requirements(config, inventory)
 
+        # Analyze existing docs for this layer (delta mode)
+        existing_analysis = _analyze_existing(config, inventory, requirements)
+
         session = {
             "session_id": session_id,
             "layer": args.layer,
@@ -472,6 +613,7 @@ def cmd_next_action(args):
             "phase": "confirm_inventory",
             "inventory": inventory,
             "requirements": requirements,
+            "existing_analysis": existing_analysis,
             "requirement_index": 0,
             "candidates": [],
             "confirmed_candidates": [],
@@ -512,7 +654,24 @@ def _advance(session, config):
         })
         return
 
-    if phase == "propose":
+    if phase == "review_existing":
+        # Present what already exists and the delta
+        existing = session.get("existing_analysis", {})
+        _write_action({
+            "action": "review_existing",
+            "session_id": session["session_id"],
+            "layer": session["layer"],
+            "existing_count": existing.get("existing_count", 0),
+            "existing_files": existing.get("existing_files", []),
+            "existing_summaries": existing.get("existing_summaries", []),
+            "stale_references": existing.get("stale", []),
+            "missing_sections": existing.get("missing_sections", []),
+            "total_requirements": len(session.get("requirements", [])),
+            "message": f"Found {existing.get('existing_count', 0)} existing docs. Review what exists, what's stale, and what's missing.",
+        })
+        return
+
+    elif phase == "propose":
         # Send one upstream requirement at a time for candidate proposal
         idx = session.get("requirement_index", 0)
         requirements = session.get("requirements", [])
@@ -720,6 +879,33 @@ def cmd_resolve(args):
 
         if additions:
             session["inventory"].setdefault("testing_tools", {}).update(additions)
+
+        # If existing docs found, present delta before proposing
+        existing = session.get("existing_analysis", {})
+        if existing.get("has_existing"):
+            session["phase"] = "review_existing"
+        else:
+            session["phase"] = "propose"
+        _save_session(args.session, session)
+        _advance(session, config)
+
+    elif phase == "review_existing":
+        # User reviewed existing docs — they may have:
+        # - confirmed: proceed, only seed what's missing
+        # - requested reseed: treat specific docs as if they don't exist
+        # - noted stale docs: flag for update during proposal
+        reseed_files = result.get("reseed", [])
+        skip_files = result.get("skip", [])
+
+        # Remove reseeded files from the existing analysis so proposals treat them as gaps
+        if reseed_files:
+            existing = session.get("existing_analysis", {})
+            existing["existing_files"] = [f for f in existing.get("existing_files", []) if f not in reseed_files]
+            existing["existing_count"] = len(existing["existing_files"])
+            session["existing_analysis"] = existing
+
+        # Track which existing files to skip (they're fine as-is)
+        session["skip_existing"] = skip_files or session.get("existing_analysis", {}).get("existing_files", [])
 
         session["phase"] = "propose"
         _save_session(args.session, session)

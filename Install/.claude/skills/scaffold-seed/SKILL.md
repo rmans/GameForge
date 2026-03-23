@@ -95,7 +95,12 @@ loop:
       present detected project state (test frameworks, lint tools, CI, directories)
       user confirms, corrects, or adds missing tools
       python seed.py resolve --session <id>
-      # inventory is now authoritative for task generation
+
+    "review_existing":
+      present what already exists for this layer
+      user: confirm (seed only gaps), reseed (regenerate specific docs), or skip
+      python seed.py resolve --session <id>
+      # only gaps and reseeded docs go through the proposal phase
 
     "propose":
       call /scaffold-seed-propose
