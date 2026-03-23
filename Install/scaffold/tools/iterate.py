@@ -38,6 +38,7 @@ CONFIGS_DIR = TOOLS_DIR / "configs" / "iterate"
 SCAFFOLD_DIR = TOOLS_DIR.parent
 REVIEWS_DIR = SCAFFOLD_DIR / ".reviews" / "iterate"
 DOC_REVIEW_SCRIPT = TOOLS_DIR / "adversarial-review.py"
+CODE_REVIEW_SCRIPT = TOOLS_DIR / "code-review.py"
 ACTION_FILE = REVIEWS_DIR / "action.json"
 RESULT_FILE = REVIEWS_DIR / "result.json"
 
@@ -494,6 +495,7 @@ def _create_session(args, config, session_id, target):
         "max_exchanges": args.max_exchanges or config.get("defaults", {}).get("max_exchanges", 5),
         "focus": args.focus or "",
         "fast": args.fast or False,
+        "reviewer": getattr(args, 'reviewer', 'doc'),
         "queue": queue,
         "queue_index": 0,
         "adjudications": [],
@@ -1006,7 +1008,14 @@ def cmd_resolve(args):
 # ---------------------------------------------------------------------------
 
 def _call_reviewer(session, config, section_content, questions, context_files):
-    """Call adversarial-review.py and return issues list."""
+    """Call the appropriate reviewer script and return issues list."""
+    # Select reviewer script
+    reviewer = session.get("reviewer", "doc")
+    if reviewer == "code":
+        review_script = CODE_REVIEW_SCRIPT
+    else:
+        review_script = DOC_REVIEW_SCRIPT
+
     # Build prompt with questions
     prompt_parts = ["Review the following section:\n", section_content, "\n\nEvaluate against these questions:\n"]
     for q in questions:
@@ -1024,7 +1033,7 @@ def _call_reviewer(session, config, section_content, questions, context_files):
 
     target_abs = SCAFFOLD_DIR / session["target"]
     cmd = [
-        sys.executable, str(DOC_REVIEW_SCRIPT),
+        sys.executable, str(review_script),
         "review", str(target_abs),
         "--iteration", str(session.get("iteration", 1)),
         "--system-prompt-file", str(prompt_file),
@@ -1046,12 +1055,15 @@ def _call_reviewer(session, config, section_content, questions, context_files):
 
 def _send_pushback(session, config, counter_argument):
     """Send pushback to reviewer, return their response."""
+    reviewer = session.get("reviewer", "doc")
+    review_script = CODE_REVIEW_SCRIPT if reviewer == "code" else DOC_REVIEW_SCRIPT
+
     msg_file = REVIEWS_DIR / f"pushback-{session['session_id']}.md"
     msg_file.write_text(counter_argument, encoding="utf-8")
 
     target_abs = SCAFFOLD_DIR / session["target"]
     cmd = [
-        sys.executable, str(DOC_REVIEW_SCRIPT),
+        sys.executable, str(review_script),
         "respond", str(target_abs),
         "--iteration", str(session.get("iteration", 1)),
         "--message-file", str(msg_file),
@@ -1087,7 +1099,7 @@ def _run_doc_review(cmd):
     except subprocess.TimeoutExpired:
         return {"error": "Timed out after 300s"}
     except FileNotFoundError:
-        return {"error": f"adversarial-review.py not found at {DOC_REVIEW_SCRIPT}"}
+        return {"error": f"Reviewer script not found"}
 
 
 # ---------------------------------------------------------------------------
@@ -1148,6 +1160,8 @@ def main():
     p_next.add_argument("--sections", default="")
     p_next.add_argument("--signals", default="")
     p_next.add_argument("--fast", action="store_true")
+    p_next.add_argument("--reviewer", default="doc", choices=["doc", "code"],
+                       help="Which reviewer to use: doc (adversarial-review.py) or code (code-review.py)")
 
     # resolve
     p_res = subparsers.add_parser("resolve")

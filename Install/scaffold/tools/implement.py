@@ -482,7 +482,9 @@ def _advance(session):
             "task_id": session["task_id"],
             "file_manifest": session["file_manifest"],
             "iterations": session.get("code_review_iterations", 10),
-            "message": f"Code review {len(session['file_manifest'])} files.",
+            "reviewer": "code",
+            "layer": "code",
+            "message": f"Code review {len(session['file_manifest'])} files via iterate.py --reviewer code.",
         })
 
     elif phase == "rebuild":

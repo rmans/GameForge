@@ -109,7 +109,9 @@ loop:
       # if fail → retry or stuck
 
     "review":
-      call /scaffold-code-review
+      run iterate.py --reviewer code --layer code --target <file>
+      # uses same iterate pattern as doc review, but with code-review.py as LLM backend
+      # routes through /scaffold-review-adjudicate for each issue
       python implement.py resolve --session <id>
 
     "sync":
