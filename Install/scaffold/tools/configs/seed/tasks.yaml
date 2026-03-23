@@ -18,12 +18,25 @@ upstream_sources:
   - type: spec
     glob: "specs/SPEC-*_approved*.md"
     extract: "Each spec AC produces task steps"
+    extract_sections:
+      - "### Acceptance Criteria"
+      - "### Steps"
+      - "### Asset Requirements"
+      - "### Out of Scope"
   - type: engine
     glob: "engine/*.md"
     extract: "Engine patterns inform implementation approach"
+    extract_sections:
+      - "## Conventions"
+      - "## Patterns"
+      - "## Rules"
   - type: architecture
     glob: "design/architecture.md"
     extract: "Tick order, signal wiring, data flow rules constrain implementation"
+    extract_sections:
+      - "## Foundation Areas"
+      - "## Core API Boundary"
+      - "## Tick Order"
 
 dependency_checks:
   - type: engine_config

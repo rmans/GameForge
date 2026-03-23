@@ -18,9 +18,21 @@ upstream_sources:
   - type: slice
     glob: "slices/SLICE-*_approved*.md"
     extract: "Each slice proof goal produces specs"
+    extract_sections:
+      - "### Goal"
+      - "### Proof Value"
+      - "### Specs Included"
+      - "### Done Criteria"
   - type: system
     glob: "design/systems/SYS-*-*.md"
     extract: "System Player Actions and State Lifecycle produce spec behaviors. System Asset Needs identify art/audio requirements for the spec's Asset Requirements table."
+    extract_sections:
+      - "### Purpose"
+      - "### Player Actions"
+      - "### System Resolution"
+      - "### Owned State"
+      - "### State Lifecycle"
+      - "### Asset Needs"
   - type: state_transitions
     glob: "design/state-transitions.md"
     extract: "State machines produce transition specs"

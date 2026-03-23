@@ -358,7 +358,9 @@ def _build_inventory(config):
 # ---------------------------------------------------------------------------
 
 def _extract_upstream_requirements(config, inventory):
-    """Extract what needs to be seeded from upstream docs."""
+    """Extract what needs to be seeded from upstream docs.
+    Uses heading-based extraction when extract_sections is specified in config,
+    falls back to first 3000 chars otherwise."""
     requirements = []
     upstream_sources = config.get("upstream_sources", [])
 
@@ -369,15 +371,30 @@ def _extract_upstream_requirements(config, inventory):
         source_type = source.get("type", "")
         glob_pattern = source.get("glob", "")
         extract_from = source.get("extract", "")
+        extract_sections = source.get("extract_sections", [])
 
         if glob_pattern:
             matches = sorted(SCAFFOLD_DIR.glob(glob_pattern))
             for match in matches:
-                content = match.read_text(encoding="utf-8") if match.exists() else ""
+                if not match.exists():
+                    continue
+                content = match.read_text(encoding="utf-8")
+
+                # Heading-based extraction if sections specified
+                if extract_sections:
+                    parts = []
+                    for heading in extract_sections:
+                        section = _extract_section_content(content, heading)
+                        if section:
+                            parts.append(f"{heading}\n{section}")
+                    summary = "\n\n".join(parts) if parts else content[:3000]
+                else:
+                    summary = content[:3000]
+
                 req = {
                     "source_file": str(match.relative_to(SCAFFOLD_DIR)),
                     "source_type": source_type,
-                    "content_summary": content[:3000],
+                    "content_summary": summary,
                     "extract_rule": extract_from,
                 }
                 requirements.append(req)

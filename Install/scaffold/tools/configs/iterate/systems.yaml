@@ -14,24 +14,70 @@ preflight:
   critical_sections: [Purpose, "Simulation Responsibility", "Player Actions", "Owned State"]
   blocked_message: "Systems are too incomplete for adversarial review. Run `/scaffold-fix-systems` first to normalize structure."
 
-context_files:
-  static:
-    - design/design-doc.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - design/systems/_index.md
-    - decisions/known-issues.md
-  conditional:
-    - file: design/authority.md
-      when: exists
-    - file: design/interfaces.md
-      when: exists
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 35000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Control", "## System Domains"]
+      priority: 1
+
   per_target:
     - type: interaction_partners
-      description: "Other system files that interact with the reviewed system (dependency/consequence targets)"
+      sections: ["### Purpose", "### Owned State"]
+      priority: 3
+      class: adjacent
+
+  per_section:
+    "### Purpose":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Core Fantasy", "### Simulation Depth Target"]
+        priority: 1
+    "### Design Constraints":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Design Invariants", "### Decision Anchors", "### Design Boundaries"]
+        priority: 1
+    "### Non-Responsibilities":
+      - file: design/systems/_index.md
+        class: constraint
+        priority: 2
+    "### Owned State":
+      - file: design/authority.md
+        class: constraint
+        sections: ["## Authority Table"]
+        priority: 1
+    "### State Lifecycle":
+      - file: design/state-transitions.md
+        class: constraint
+        priority: 2
+        condition: exists
+    "### Upstream Dependencies":
+      - file: design/interfaces.md
+        class: constraint
+        priority: 2
+        condition: exists
+    "### Downstream Consequences":
+      - file: design/interfaces.md
+        class: constraint
+        priority: 2
+        condition: exists
+    "### Asset Needs":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Entity Presentation"]
+        priority: 2
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
 
 defaults:
   max_iterations: 10

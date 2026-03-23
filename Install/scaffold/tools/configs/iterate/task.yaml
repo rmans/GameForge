@@ -12,21 +12,52 @@ preflight:
   critical_sections: ["Implements", "Steps", "Summary"]
   blocked_message: "Task is too incomplete for adversarial review."
 
-context_files:
-  static:
-    - design/architecture.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 30000
+
+  base: []
+
   per_target:
     - type: parent_spec
-      description: "Parent spec file (follow Implements: SPEC-###)"
+      sections: ["### Acceptance Criteria", "### Steps", "### Out of Scope"]
+      priority: 1
+      class: upstream
     - type: parent_system
-      description: "Parent system design (follow spec's system reference)"
-    - type: signal_registry
-      file: reference/signal-registry.md
+      sections: ["### Purpose", "### Owned State"]
+      priority: 2
+      class: upstream
+    - type: referenced_engine
+      priority: 2
+      class: constraint
+
+  per_section:
+    "### Steps":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas", "## Core API Boundary"]
+        priority: 2
+        condition: exists
+    "### Data Tables":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Data Flow"]
+        priority: 2
+        condition: exists
+    "### Regression Tests":
+      - file: design/interfaces.md
+        class: constraint
+        priority: 3
+        condition: exists
+
+  on_demand:
+    - file: reference/signal-registry.md
+      class: evidence
+      priority: 4
+      condition: exists
+    - file: reference/entity-components.md
+      class: evidence
+      priority: 4
+      condition: exists
     - type: relevant_engine_docs
       description: "Engine docs from scaffold/engine/ relevant to the task domain"
 

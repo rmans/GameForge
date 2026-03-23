@@ -12,24 +12,57 @@ preflight:
   critical_sections: [Trigger, "Observable Outcome", "Failure Outcome", "Acceptance Criteria"]
   blocked_message: "Spec is too incomplete for adversarial review. Run `/scaffold-fix-specs` first."
 
-context_files:
-  static:
-    - design/state-transitions.md
-    - design/interfaces.md
-    - design/authority.md
-    - design/glossary.md
-    - scaffold/doc-authority.md
-    - decisions/known-issues.md
-  dynamic:
-    - pattern: "decisions/architecture-decision-record/ADR-*.md"
-      filter: "status: Accepted"
+context:
+  budget: 30000
+
+  base: []
+
   per_target:
     - type: parent_system
-      description: "Parent system design (follow spec's system reference)"
+      sections: ["### Purpose", "### Player Actions", "### Owned State", "### Asset Needs"]
+      priority: 1
+      class: upstream
     - type: parent_slice
-      description: "Parent slice file (find via spec index or slice tables)"
-    - type: signal_registry
-      file: reference/signal-registry.md
+      sections: ["### Goal", "### Proof Value", "### Done Criteria"]
+      priority: 2
+      class: upstream
+
+  per_section:
+    "### Preconditions":
+      - file: design/authority.md
+        class: constraint
+        sections: ["## Authority Table"]
+        priority: 2
+    "### Steps":
+      - file: design/state-transitions.md
+        class: constraint
+        priority: 2
+        condition: exists
+    "### Secondary Effects":
+      - file: design/interfaces.md
+        class: constraint
+        priority: 2
+        condition: exists
+    "### Acceptance Criteria":
+      - file: design/state-transitions.md
+        class: constraint
+        priority: 3
+        condition: exists
+    "### Asset Requirements":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Entity Presentation"]
+        priority: 2
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
+    - file: reference/signal-registry.md
+      class: evidence
+      priority: 4
+      condition: exists
 
 defaults:
   max_iterations: 10

@@ -235,7 +235,25 @@ def _read_result():
 # Context File Resolution
 # ---------------------------------------------------------------------------
 
-def resolve_context_files(config, target_path):
+def resolve_context_files(config, target_path, section_heading=None):
+    """Resolve context using the hierarchical context system.
+    Falls back to legacy context_files format if no 'context' key in config."""
+    # New format: use context.py resolver
+    if "context" in config:
+        try:
+            from context import resolve as ctx_resolve, resolve_as_text
+            ctx_text = resolve_as_text(config, target_path, section_heading)
+            if ctx_text:
+                # Write extracted context to a single temp file
+                # (adversarial-review.py reads --context-files as whole files)
+                ctx_file = REVIEWS_DIR / f"ctx-{hashlib.md5((target_path + str(section_heading)).encode()).hexdigest()[:8]}.md"
+                ctx_file.write_text(ctx_text, encoding="utf-8")
+                return [str(ctx_file)]
+            return []
+        except ImportError:
+            pass  # Fall through to legacy
+
+    # Legacy format: flat context_files
     files = []
     static = config.get("context_files", {})
     if isinstance(static, dict):
@@ -667,7 +685,8 @@ def _advance_and_write_action(session, config):
     _save_session(session["session_id"], session)
 
     # Call adversarial-review.py for the review
-    context_files = resolve_context_files(config, target)
+    section_heading = item.get("section", "")
+    context_files = resolve_context_files(config, target, section_heading)
     issues = _call_reviewer(session, config, section_content, questions, context_files)
 
     if not issues:

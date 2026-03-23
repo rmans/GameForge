@@ -194,7 +194,9 @@ def _output(data):
 # ---------------------------------------------------------------------------
 
 def _load_task_context(task_file):
-    """Read a task file and determine what context docs are needed."""
+    """Read a task file and determine what context docs are needed.
+    Uses context.py resolver if implement config has 'context' key,
+    otherwise falls back to structured metadata resolution."""
     abs_path = SCAFFOLD_DIR / task_file
     if not abs_path.exists():
         return None, []
@@ -216,19 +218,16 @@ def _load_task_context(task_file):
     if dep_match:
         depends_on = dep_match.group(1).strip()
 
-    # Determine needed context based on task type and content
+    # --- Structured context resolution ---
     needed_docs = []
 
-    # Always need architecture
-    needed_docs.append("design/architecture.md")
-
-    # Parent spec
+    # 1. Parent spec — always (extract ACs + Steps only)
     if implements and implements != "—":
         spec_matches = list(SCAFFOLD_DIR.glob(f"specs/{implements}-*.md"))
         if spec_matches:
             needed_docs.append(str(spec_matches[0].relative_to(SCAFFOLD_DIR)))
 
-    # System design (from spec's System field)
+    # 2. Parent system — from spec's System field (extract Purpose + Owned State)
     if implements:
         for spec_file in SCAFFOLD_DIR.glob(f"specs/{implements}-*.md"):
             spec_content = spec_file.read_text(encoding="utf-8")
@@ -238,37 +237,41 @@ def _load_task_context(task_file):
                 for sys_file in SCAFFOLD_DIR.glob(f"design/systems/{sys_id}-*.md"):
                     needed_docs.append(str(sys_file.relative_to(SCAFFOLD_DIR)))
 
-    # Signals — only if task mentions signals
-    if re.search(r"signal|emit|connect", content, re.IGNORECASE):
+    # 3. Architecture — only for types that need it
+    if task_type.lower() in ("foundation", "behavior", "integration"):
+        needed_docs.append("design/architecture.md")
+
+    # 4. Engine docs — by task type (structured, not keyword)
+    engine_dir = SCAFFOLD_DIR / "engine"
+    if engine_dir.exists():
+        patterns_by_type = {
+            "foundation": ["*scene-architecture*", "*coding*"],
+            "ui": ["*ui*"],
+            "behavior": ["*coding*", "*simulation-runtime*"],
+            "integration": ["*coding*", "*simulation-runtime*"],
+            "wiring": ["*coding*"],
+        }
+        for pat in patterns_by_type.get(task_type.lower(), []):
+            for match in engine_dir.glob(f"{pat}.md"):
+                needed_docs.append(str(match.relative_to(SCAFFOLD_DIR)))
+
+    # 5. Reference docs — only when task Steps explicitly reference them
+    steps_section = ""
+    steps_match = re.search(r"###\s+Steps\s*\n(.*?)(?=\n##|\Z)", content, re.DOTALL)
+    if steps_match:
+        steps_section = steps_match.group(1)
+
+    if re.search(r"signal[-_]registry|emit.*signal|connect.*signal", steps_section, re.IGNORECASE):
         if (SCAFFOLD_DIR / "reference/signal-registry.md").exists():
             needed_docs.append("reference/signal-registry.md")
 
-    # Entity components — only if task mentions entities
-    if re.search(r"entity|component|colonist|structure|building", content, re.IGNORECASE):
+    if re.search(r"entity[-_]components|component.*table", steps_section, re.IGNORECASE):
         if (SCAFFOLD_DIR / "reference/entity-components.md").exists():
             needed_docs.append("reference/entity-components.md")
 
-    # Interfaces — only if task mentions cross-system
-    if re.search(r"interface|contract|cross-system|handoff", content, re.IGNORECASE):
+    if re.search(r"interfaces\.md|interface.*contract", steps_section, re.IGNORECASE):
         if (SCAFFOLD_DIR / "design/interfaces.md").exists():
             needed_docs.append("design/interfaces.md")
-
-    # Engine docs — based on task type
-    engine_dir = SCAFFOLD_DIR / "engine"
-    if engine_dir.exists():
-        if task_type == "foundation":
-            # Foundation tasks need scene architecture and coding
-            for doc in ["*scene-architecture*", "*coding*"]:
-                for match in engine_dir.glob(f"{doc}.md"):
-                    needed_docs.append(str(match.relative_to(SCAFFOLD_DIR)))
-        elif task_type == "UI":
-            for doc in ["*ui*"]:
-                for match in engine_dir.glob(f"{doc}.md"):
-                    needed_docs.append(str(match.relative_to(SCAFFOLD_DIR)))
-        elif task_type in ("behavior", "integration", "wiring"):
-            for doc in ["*coding*", "*simulation-runtime*"]:
-                for match in engine_dir.glob(f"{doc}.md"):
-                    needed_docs.append(str(match.relative_to(SCAFFOLD_DIR)))
 
     # Deduplicate
     needed_docs = list(dict.fromkeys(needed_docs))
