@@ -37,12 +37,14 @@ ACTION_FILE = REVIEWS_DIR / "action.json"
 RESULT_FILE = REVIEWS_DIR / "result.json"
 LOCAL_REVIEW = TOOLS_DIR / "local-review.py"
 ITERATE = TOOLS_DIR / "iterate.py"
+VALIDATE = TOOLS_DIR / "validate.py"
 
 # Sub-orchestrators use their own action/result files
 FIX_ACTION = SCAFFOLD_DIR / ".reviews" / "fix" / "action.json"
 FIX_RESULT = SCAFFOLD_DIR / ".reviews" / "fix" / "result.json"
 ITERATE_ACTION = SCAFFOLD_DIR / ".reviews" / "iterate" / "action.json"
 ITERATE_RESULT = SCAFFOLD_DIR / ".reviews" / "iterate" / "result.json"
+VALIDATE_ACTION = SCAFFOLD_DIR / ".reviews" / "validate" / "action.json"
 
 
 # ---------------------------------------------------------------------------
@@ -130,11 +132,44 @@ def _copy_result_to_sub(sub_result_file):
 
 
 # ---------------------------------------------------------------------------
+# Layer-to-Scope Mapping
+# ---------------------------------------------------------------------------
+
+# Most layers map directly to validate scopes. Some differ.
+LAYER_TO_SCOPE = {
+    "design": "design",
+    "systems": "systems",
+    "spec": "specs",
+    "task": "tasks",
+    "slice": "slices",
+    "phase": "phases",
+    "roadmap": "roadmap",
+    "references": "refs",
+    "style": "style",
+    "input": "input",
+    "engine": "engine",
+    "adr": "adr",
+    "ki": "ki",
+    "dd": "dd",
+    "playtest-feedback": "playtest-feedback",
+    "playtest-session": "playtest-session",
+    "glossary": "glossary",
+    "doc-authority": "doc-authority",
+    "cross-cutting": "cross-cutting",
+}
+
+
+def _layer_to_scope(layer):
+    """Map a fix/iterate layer name to a validate scope name."""
+    return LAYER_TO_SCOPE.get(layer, layer)
+
+
+# ---------------------------------------------------------------------------
 # Preflight
 # ---------------------------------------------------------------------------
 
 def cmd_preflight(args):
-    """Run preflight for both fix and iterate."""
+    """Run preflight for fix, iterate, and validate."""
     fix_result = _run_sub(LOCAL_REVIEW, ["preflight", "--layer", args.layer, "--target", args.target])
     if fix_result and fix_result.get("status") != "ready":
         _output(fix_result)
@@ -143,6 +178,12 @@ def cmd_preflight(args):
     iterate_result = _run_sub(ITERATE, ["preflight", "--layer", args.layer, "--target", args.target])
     if iterate_result and iterate_result.get("status") != "ready":
         _output(iterate_result)
+        return
+
+    scope = _layer_to_scope(args.layer)
+    validate_result = _run_sub(VALIDATE, ["preflight", "--scope", scope])
+    if validate_result and validate_result.get("status") not in ("ready", "skip"):
+        _output(validate_result)
         return
 
     _output({"status": "ready", "layer": args.layer, "target": args.target})
@@ -218,12 +259,42 @@ def cmd_next_action(args):
         # Copy iterate's action.json to our action.json
         action = _copy_action_from_sub(ITERATE_ACTION)
         if action and action.get("action") == "done":
-            # Both phases complete
+            # Iterate complete — transition to validate
+            session["phase"] = "validate"
+            session["iterate_report"] = action.get("report_summary", "")
+            _save_session(session_id, session)
+            _write_action({
+                "action": "phase_complete",
+                "session_id": session_id,
+                "completed_phase": "iterate",
+                "next_phase": "validate",
+                "message": "Adversarial review complete. Running validation gate...",
+            })
+        return
+
+    if phase == "validate":
+        # Determine the scope from the layer
+        scope = _layer_to_scope(args.layer)
+        _run_sub(VALIDATE, ["run", "--scope", scope])
+
+        # Copy validate's action.json to our action.json
+        action = _copy_action_from_sub(VALIDATE_ACTION)
+        if action:
+            # Validate is a single run — always completes in one call
+            session["validate_report"] = action
+            _save_session(session_id, session)
+
+            verdict = action.get("verdict", "PASS")
+            blocking = action.get("blocking", False)
+
             _write_action({
                 "action": "done",
                 "session_id": session_id,
                 "fix_report": session.get("fix_report", ""),
-                "iterate_report": action.get("report_summary", ""),
+                "iterate_report": session.get("iterate_report", ""),
+                "validate_report": action,
+                "verdict": verdict,
+                "blocking": blocking,
             })
         return
 

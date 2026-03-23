@@ -1,6 +1,6 @@
 ---
 name: scaffold-review
-description: "Full document review — runs /scaffold-fix (mechanical cleanup) then /scaffold-iterate (adversarial review) automatically. Same sub-skills, chained."
+description: "Full document review pipeline — runs /scaffold-fix (mechanical cleanup) then /scaffold-iterate (adversarial review) then /scaffold-validate (structural gate) automatically. Three phases, chained."
 argument-hint: "<layer> [target] [--focus \"concern\"] [--sections \"Identity,Player Experience\"] [--iterations N] [--max-exchanges N] [--fast]"
 allowed-tools: Read, Write, Grep, Glob, Bash
 user-invocable: true
@@ -10,7 +10,7 @@ user-invocable: true
 
 Run a complete review of scaffold documents: **$ARGUMENTS**
 
-This skill chains `/scaffold-fix` (mechanical cleanup) then `/scaffold-iterate` (adversarial review) automatically. Same dispatcher pattern, same shared sub-skills. The document gets mechanically cleaned first, then the cleaned version goes to an external LLM for deep review.
+This skill chains three phases automatically: `/scaffold-fix` (mechanical cleanup) → `/scaffold-iterate` (adversarial review) → `/scaffold-validate` (structural gate). Same dispatcher pattern, same shared sub-skills. The document gets mechanically cleaned, then reviewed by an external LLM, then validated as structurally sound.
 
 ```
 /scaffold-review systems SYS-005
@@ -21,13 +21,17 @@ Phase 1: Fix (local-review.py)
 Phase 2: Iterate (iterate.py → adversarial-review.py)
   → L3 subsections → apply → L2 sections → apply → L1 document → apply → converge → iterate report
 
-Combined report
+Phase 3: Validate (validate.py)
+  → structural checks → pass/fail/warn → validation verdict
+
+Combined report with verdict
 ```
 
 You can still run them independently:
 - `/scaffold-fix systems SYS-005` — just mechanical cleanup
 - `/scaffold-iterate systems SYS-005` — just adversarial review
-- `/scaffold-review systems SYS-005` — both, chained
+- `/scaffold-validate --scope systems` — just structural validation
+- `/scaffold-review systems SYS-005` — all three, chained
 
 ## Arguments
 
@@ -104,19 +108,37 @@ The dispatcher doesn't know which phase is active — it just routes actions to 
 
 ### Step 4 — Summary
 
-Display the combined report (fix summary + iterate summary).
+Display the combined report (fix summary + iterate summary + validation verdict).
 
-## Phase Transition
+## Phase Transitions
 
-When fix completes, review.py writes `{action: "phase_complete", message: "Fix complete. Starting adversarial review..."}`. The dispatcher logs the message and calls `review.py next-action` again (not `resolve` — there's no sub-skill result to process). review.py sees `phase == "iterate"`, starts iterate.py, and the next `action.json` comes from iterate (the first L3 subsection adjudication).
+Two transitions happen during a full review:
 
-The transition is seamless — the dispatcher loop never breaks. It just keeps routing actions. The only difference is `phase_complete` calls `next-action` instead of `resolve`.
+**Fix → Iterate:** When fix completes, review.py writes `{action: "phase_complete", message: "Fix complete. Starting adversarial review..."}`. The dispatcher logs the message and calls `review.py next-action`. review.py sees `phase == "iterate"`, starts iterate.py.
+
+**Iterate → Validate:** When iterate completes, review.py writes `{action: "phase_complete", message: "Adversarial review complete. Running validation gate..."}`. The dispatcher calls `review.py next-action`. review.py sees `phase == "validate"`, runs validate.py synchronously (one call, no sub-skill routing), and writes the final `done` action with the validation verdict.
+
+Validate is the simplest phase — it runs all checks in one call and reports pass/fail/warn. No iteration, no adjudication, no file edits.
+
+The final `done` action includes all three reports + the verdict:
+```json
+{
+  "action": "done",
+  "fix_report": "...",
+  "iterate_report": "...",
+  "validate_report": {"verdict": "PASS", "results": [...]},
+  "verdict": "PASS",
+  "blocking": false
+}
+```
 
 ## Rules
 
 - **This skill never reads documents or makes judgments.** Sub-skills do that.
 - **This skill never edits files.** `/scaffold-review-apply` does that.
-- **Fix runs first, iterate runs second.** Always.
-- **Both phases use the same sub-skills** — adjudicate, apply, scope-check, report.
+- **Fix runs first, iterate second, validate third.** Always in this order.
+- **Fix and iterate use the same sub-skills** — adjudicate, apply, scope-check, report.
+- **Validate is read-only** — no sub-skills needed, runs in one call.
 - **If fix finds the doc is already clean**, iterate starts immediately.
+- **If validate returns FAIL**, the done action includes `blocking: true`. The dispatcher should warn the user.
 - **If review.py errors**, report and stop.
