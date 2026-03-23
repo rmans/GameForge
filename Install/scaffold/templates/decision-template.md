@@ -30,17 +30,25 @@
 
 ## Consequences
 
-<!-- What changes as a result of this decision? Split into positive and negative. Be specific about downstream impact — what gets easier, what gets harder, what needs follow-up work. -->
+<!-- What changes as a result of this decision? Be specific about downstream impact — what gets easier, what gets harder, what needs follow-up work. -->
 
-**Positive:**
+### Positive
+
 - <!-- benefit -->
 
-**Negative:**
-- <!-- cost or risk -->
+### Negative
+
+- <!-- cost or risk — be honest about what this decision makes harder -->
 
 ## Scope & Migration
 
-<!-- If this ADR requires implementation work: what's the scope? Is it a single task, a task range, or a full slice? Does it affect existing code/data that needs migration? Reference specific TASK-### or SLICE-### if known. Remove this section for design-only ADRs with no implementation impact. -->
+### Scope
+
+<!-- What's the implementation scope? Single task, task range, or full slice? Remove this section for design-only ADRs with no implementation impact. -->
+
+### Migration
+
+<!-- Does this affect existing code/data that needs migration? Reference specific TASK-### or SLICE-### if known. Remove if no migration needed. -->
 
 ## Supersedes
 

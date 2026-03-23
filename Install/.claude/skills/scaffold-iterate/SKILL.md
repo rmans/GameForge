@@ -1,314 +1,206 @@
 ---
 name: scaffold-iterate
-description: "Adversarial document review using an external LLM. Orchestrated by iterate.py — handles any layer (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine). Supports single targets and ranges. Replaces all layer-specific iterate skills."
-argument-hint: "<layer> [target] [--focus \"concern\"] [--topics \"1,3\"] [--iterations N] [--max-exchanges N] [--signals \"...\"] [--sections \"Identity,Shape\"] [--fast]"
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash
+description: "Adversarial document review dispatcher. Routes between iterate.py (Python orchestrator) and sub-skills (adjudicate, apply, scope-check, report). Handles all scaffold document types — 18 layers covering every ranked doc, decision doc, glossary, and doc-authority."
+argument-hint: "<layer> [target] [--focus \"concern\"] [--sections \"Identity,Player Experience\"] [--iterations N] [--max-exchanges N] [--signals \"...\"] [--fast]"
+allowed-tools: Read, Write, Grep, Glob, Bash
 user-invocable: true
 ---
 
-# Adversarial Document Review
+# Adversarial Document Review — Dispatcher
 
-Run an adversarial per-topic review of scaffold documents: **$ARGUMENTS**
+Run an adversarial review of scaffold documents: **$ARGUMENTS**
 
-This skill orchestrates reviews across all document layers using `iterate.py` and per-layer YAML configs. The Python script manages the topic loop, issue delivery, review lock, scope guard, and report generation. Claude's job is simple: **adjudicate each issue one at a time**.
+This skill is a **thin dispatcher**. It does not read documents, make judgments, or edit files. It routes between `iterate.py` (Python orchestrator) and focused sub-skills:
+
+| Sub-skill | What it does |
+|-----------|-------------|
+| `/scaffold-iterate-adjudicate` | Judge one issue — accept, reject, escalate, or pushback |
+| `/scaffold-iterate-scope-check` | Evaluate scope guard tests on a proposed change |
+| `/scaffold-iterate-apply` | Edit target files based on accepted issues |
+| `/scaffold-iterate-report` | Write the review log and fill in final questions/rating |
+
+Communication between iterate.py and sub-skills uses two temp files:
+- **`action.json`** — iterate.py writes the next instruction (what to do + all context needed)
+- **`result.json`** — sub-skill writes its output (decision, edits made, report content)
+
+The dispatcher reads one, calls the appropriate sub-skill, reads the other, passes it back. That's it.
 
 ## Arguments
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `<layer>` | Yes | — | Layer to review: `design`, `systems`, `spec`, `task`, `slice`, `phase`, `roadmap`, `references`, `style`, `input`, `engine` |
+| `<layer>` | Yes | — | Layer to review: `design`, `systems`, `spec`, `task`, `slice`, `phase`, `roadmap`, `references`, `style`, `input`, `engine`, `adr`, `ki`, `dd`, `playtest-feedback`, `playtest-session`, `glossary`, `doc-authority` |
 | `[target]` | Depends | — | Target document or range. Required for layers with ranges (e.g., `SYS-001`, `SPEC-001-SPEC-020`). Optional for fixed-target layers (e.g., `design` always reviews `design-doc.md`). |
-| `--focus` | No | — | Narrow review to a specific concern within each topic |
-| `--topics` | No | all | Comma-separated topic numbers (e.g., `"1,3,5"`) |
+| `--focus` | No | — | Narrow review to a specific concern within each pass |
+| `--sections` | No | all | Comma-separated `##` section names to review (e.g., `"Identity,Player Experience"`). Scopes L3 and L2 passes to matching sections. L1 still runs in full. |
 | `--iterations` | No | from config | Maximum outer loop iterations |
-| `--max-exchanges` | No | from config | Maximum back-and-forth exchanges per topic |
+| `--max-exchanges` | No | from config | Maximum back-and-forth exchanges per review call |
 | `--signals` | No | — | Design signals from the corresponding fix skill |
-| `--sections` | No | — | Section groups that changed (auto-maps to relevant topics via config) |
-| `--topic` | No | — | Single topic number (shorthand for `--topics "N"`) |
 | `--fast` | No | false | Batch L3 subsection reviews by parent section instead of one-at-a-time. Fewer API calls, less granular. |
 
-## How It Works
+## Three-Pass Review Model
 
-The review uses a three-pass model: L3 (subsections) → L2 (sections) → L1 (document). Each pass builds on the previous — fix the bricks before judging the wall.
-
-```
-User calls /scaffold-iterate <layer> [target] [args]
-│
-├─ 1. Parse arguments
-├─ 2. Resolve work list (single target or range)
-├─ 3. For each target document:
-│   ├─ a. Preflight check (iterate.py preflight)
-│   ├─ b. For each iteration (1..max):
-│   │   │
-│   │   ├─ L3 PASS — Subsections (### level)
-│   │   │   For each ### subsection in the YAML config:
-│   │   │   ├─ Send ONLY that subsection's content + its questions to the reviewer
-│   │   │   ├─ While issues remain:
-│   │   │   │   ├─ READ the issue
-│   │   │   │   ├─ ADJUDICATE: accept / reject / escalate / respond
-│   │   │   │   └─ Get next issue
-│   │   │   ├─ Sleep between subsections
-│   │   │   └─ Next subsection
-│   │   │   (--fast mode: batch all ### under each ## parent as one call)
-│   │   │
-│   │   ├─ L2 PASS — Sections (## level)
-│   │   │   For each ## section in the YAML config:
-│   │   │   ├─ Send the FULL section content + its L2 questions to the reviewer
-│   │   │   ├─ Adjudicate issues one at a time
-│   │   │   ├─ Sleep between sections
-│   │   │   └─ Next section
-│   │   │
-│   │   ├─ L1 PASS — Document (# level)
-│   │   │   ├─ Send the WHOLE document + L1 questions to the reviewer
-│   │   │   ├─ Adjudicate issues one at a time
-│   │   │   ├─ Run identity check / bias pack / stress test (if configured)
-│   │   │   └─ Done
-│   │   │
-│   │   ├─ Apply accepted changes (iterate.py apply) → Claude edits the files
-│   │   └─ Check convergence (iterate.py convergence)
-│   │       ├─ clean → stop
-│   │       ├─ converged → stop
-│   │       ├─ human_only → stop, report escalations
-│   │       ├─ limit → stop
-│   │       └─ needs_iteration → back to L3 (verification pass)
-│   │
-│   └─ c. Generate report (iterate.py report) → Claude writes review log
-└─ 4. Print final summary
-```
-
-### Default vs Fast Mode
-
-**Default (granular):** Each `###` subsection is a separate review call. The reviewer only sees one subsection at a time with 2-4 targeted questions. Best quality — the reviewer can't skip subsections or give shallow answers.
-
-**`--fast` mode:** All `###` subsections under each `##` parent are batched into one review call. The reviewer sees the full section with all subsection questions at once. Fewer API calls, less granular.
+The review uses L3 (subsections) → L2 (sections) → L1 (document). Each pass builds on the previous — fix the bricks before judging the wall. Changes are applied after each pass level so later passes see improvements.
 
 ```
-Default:    20 L3 calls → 6 L2 calls → 1 L1 call = 27 calls (systems example)
---fast:      6 L3 calls → 6 L2 calls → 1 L1 call = 13 calls
-```
-
-### Multi-Doc Layers (style, input, references, engine)
-
-For layers with multiple documents, the flow is:
-
-```
-For each doc in the layer:
-  ├─ L3: review each ### subsection (per-doc tailored questions)
-  ├─ L2: review each ## section (per-doc tailored questions)
-  └─ Per-doc summary question
-
-After all docs reviewed:
-  └─ L1: cross-doc integration review (layer-wide questions)
+Default:    20 L3 calls → apply → 6 L2 calls → apply → 1 L1 call → apply (systems example)
+--fast:      6 L3 calls → apply → 6 L2 calls → apply → 1 L1 call → apply
 ```
 
 ## Execution
 
-### Step 1 — Parse Arguments and Resolve Work List
+### Step 1 — Parse Arguments and Resolve Target
 
 Parse `$ARGUMENTS` to extract layer, target, and options.
 
-**Single targets:** `design`, `roadmap`, `SYS-005`, `SPEC-042`, `TASK-017`, etc.
-**Ranges:** `SYS-001-SYS-043`, `SPEC-001-SPEC-020`, `TASK-001-TASK-010`, etc.
+To resolve a target like `SYS-005` to a file path, read the YAML config's `target_pattern` (e.g., `design/systems/SYS-*.md` for systems) and glob for the matching file. For range targets (e.g., `SYS-001-SYS-043`), glob all matches in the range and build a work list sorted by ID. For fixed-target layers (e.g., `design` → `target: design/design-doc.md`), the target is predetermined — no glob needed.
 
-For ranges, glob the matching files and build a work list sorted by ID number.
-
-For layers with `target_type: fixed` in their config (e.g., `design`, `roadmap`), the target is predetermined — no argument needed.
-
-**Section scoping:** If `--sections` is provided (e.g., `--sections "Identity,Player Experience"`), only review the L3 subsections and L2 sections matching those `##` groups. L1 still runs in full since it's holistic.
-
-### Step 2 — Loop Over Work List
-
-For each document in the work list, execute Steps 3-6 below. This is the skill's primary job — a simple sequential loop.
-
-### Step 3 — Preflight
+### Step 2 — Preflight
 
 ```bash
-python scaffold/tools/iterate.py preflight --layer <layer>
+python scaffold/tools/iterate.py preflight --layer <layer> --target <relative-path>
 ```
 
 Check the JSON output:
-- `"status": "ready"` → proceed. Note any `skip_topics`.
-- `"status": "blocked"` → report the message to the user and stop this target.
+- `"status": "ready"` → proceed. Note any `skip_sections`.
+- `"status": "blocked"` → report the message to the user and stop.
 
-### Step 4 — Iteration Loop
+### Step 3 — Dispatch Loop
 
-For each iteration (starting at 1):
+For each document in the work list, start the session then run the dispatch loop.
 
-#### 4a — L3 Pass (### Subsections)
-
-For each `###` subsection defined in the YAML config's `l3_sections`:
-
+**Start the session** (once per document):
 ```bash
-python scaffold/tools/iterate.py start \
-    --layer <layer> \
-    --target <relative-path> \
-    --pass l3 \
-    --section "### Purpose" \
-    --iteration <N> \
-    [--focus "concern"]
+python scaffold/tools/iterate.py next-action \
+    --layer <layer> --target <relative-path> \
+    [--focus "..."] [--sections "..."] [--iterations N] [--max-exchanges N] [--fast]
 ```
 
-The script extracts ONLY that subsection's content from the document, combines it with the subsection's questions from the YAML config, and sends it to the reviewer. Returns issues one at a time.
+This creates the session, calls the reviewer for the first section, and writes `action.json` with the first instruction. Then loop:
 
-**`--fast` mode:** Instead of one call per `###`, batch all `###` subsections under each `##` parent into one call:
+```
+loop:
+  read action.json
+  switch action.type:
 
-```bash
-python scaffold/tools/iterate.py start \
-    --layer <layer> \
-    --target <relative-path> \
-    --pass l3 \
-    --section "## Identity" \
-    --iteration <N> \
-    --fast
+    "adjudicate":
+      call /scaffold-iterate-adjudicate         ← reads action.json, writes result.json
+      python iterate.py resolve --session <id>  ← reads result.json, writes next action.json
+      # accept → scope_check action next
+      # reject/escalate → next issue or next section
+      # pushback → sends counter to reviewer, new adjudicate action
+
+    "scope_check":
+      call /scaffold-iterate-scope-check        ← reads action.json, writes result.json
+      python iterate.py resolve --session <id>
+      # pass → confirms accept, next issue or next section
+      # fail → converts to reject, next issue or next section
+
+    "apply":
+      call /scaffold-iterate-apply              ← reads action.json, edits files, writes result.json
+      python iterate.py resolve --session <id>
+      # advances to next pass level; if changes + under limit → inserts verification pass
+
+    "report":
+      call /scaffold-iterate-report             ← reads action.json, writes review log + result.json
+      python iterate.py resolve --session <id>  ← writes "done" action
+
+    "done":
+      break
+
+    "blocked":
+      report message to user, break
 ```
 
-**Adjudicate each issue** (same for all passes):
+The dispatcher never reads `result.json` — it just calls the sub-skill (which writes `result.json`) then calls `resolve` (which reads it internally). Three lines per action type: call skill, call resolve, loop.
 
-For each issue returned, read it carefully. The issue contains `severity`, `section`, `description`, and `suggestion`. Decide on one outcome:
+Escalated issues are collected during adjudication and presented in the final report — not surfaced mid-review.
 
-1. **Accept** — the issue is valid and the fix is appropriate.
-   - First, run scope check:
-     ```bash
-     python scaffold/tools/iterate.py scope-check --session <id> --change "<description>"
-     ```
-   - Review the scope guard tests returned. If any test fails, reject instead.
-   - If scope is clean:
-     ```bash
-     python scaffold/tools/iterate.py adjudicate --session <id> --outcome accept --reasoning "..."
-     ```
+### Step 4 — Summary
 
-2. **Reject** — the issue is incorrect, out of scope, or contradicted by higher-authority docs.
-   ```bash
-   python scaffold/tools/iterate.py adjudicate --session <id> --outcome reject --reasoning "..."
-   ```
+After the loop ends with `"done"`, display the report summary that `/scaffold-iterate-report` generated.
 
-3. **Escalate** — requires user judgment, unclear authority, or reviewer and Claude remain split.
-   ```bash
-   python scaffold/tools/iterate.py adjudicate --session <id> --outcome escalate --reasoning "..."
-   ```
+## What iterate.py Manages
 
-4. **Pushback** — Claude disagrees and wants to counter-argue before deciding.
-   ```bash
-   python scaffold/tools/iterate.py respond --session <id> --message "counter-argument"
-   ```
-   - Read the reviewer's response, then adjudicate.
+The Python orchestrator owns all the logic the old 11 skills used to carry in their heads:
 
-After adjudicating, the script returns the next issue or `"status": "section_complete"`.
+- **Pass sequencing** — L3 → apply → L2 → apply → L1 → apply
+- **Section iteration** — walks through each ### and ## in YAML config order
+- **Review calls** — calls doc-review.py, gets reviewer feedback
+- **Review lock** — tracks resolved root causes, filters duplicates
+- **Scope check routing** — after an accept, writes a scope_check action before confirming
+- **Convergence** — after all passes + applies, checks if changes were made; if yes, rebuilds the queue for a verification pass; if no new issues on verification, stops
+- **Session state** — persists everything in session JSON
+- **Context files** — resolves and passes context to each review call
+- **Verification pass** — after changes are applied, re-queues the affected pass levels. Only a pass with ZERO new issues counts as clean. iterate.py will not write `"done"` until a clean verification pass completes or the iteration limit is reached
 
-**Sleep between subsections** to avoid rate limits.
+## What Sub-Skills Handle
 
-#### 4b — L2 Pass (## Sections)
+Each sub-skill reads `action.json`, does its focused job, writes `result.json`.
 
-For each `##` section defined in the YAML config's `l2_sections`:
+### /scaffold-iterate-adjudicate
+- Reads the issue, the relevant section content, layer rules, and context
+- Decides: accept, reject, escalate, or pushback (with counter-argument)
+- If accept: includes a description of the proposed fix
+- If pushback: includes the counter-argument text to send back to the reviewer
 
-```bash
-python scaffold/tools/iterate.py start \
-    --layer <layer> \
-    --target <relative-path> \
-    --pass l2 \
-    --section "## Identity" \
-    --iteration <N>
+### /scaffold-iterate-scope-check
+- Reads the proposed change and scope guard tests from the action
+- Evaluates each test (upward leakage, downward leakage, survival test)
+- Returns pass/fail per test with reasoning
+
+### /scaffold-iterate-apply
+- Reads the list of accepted issues with their fix descriptions
+- Reads the target file
+- Interprets each suggestion and makes the actual edits
+- Returns what was changed (files, sections, line counts)
+
+### /scaffold-iterate-report
+- Reads the full session data (all adjudications, per-section summaries)
+- Synthesizes across all passes to answer final questions
+- Assigns the rating with justification
+- Writes the review log to `scaffold/decisions/review/`
+- Updates `scaffold/decisions/review/_index.md`
+
+## File Locations
+
+| File | Lifetime | Purpose |
+|------|----------|---------|
+| `.reviews/iterate/session-<id>.json` | Full review | Durable session state |
+| `.reviews/iterate/action.json` | One exchange | iterate.py → sub-skill instruction |
+| `.reviews/iterate/result.json` | One exchange | Sub-skill → iterate.py response |
+| `scaffold/decisions/review/ITERATE-*` | Permanent | Review log output |
+
+## Multi-Doc Layers
+
+For style, input, references, engine:
+
+```
+For each doc in the layer:
+  iterate.py runs L3 + L2 per-doc (with per-doc tailored questions)
+  apply after each pass level
+
+After all docs:
+  iterate.py runs L1 cross-doc integration pass
+  apply
 ```
 
-The script extracts the FULL section content (including all `###` subsections) and sends it with the L2 questions. These questions focus on cross-subsection coherence — do the subsections within this section agree with each other?
+The dispatcher doesn't need to know this — iterate.py handles it internally. The dispatcher just keeps reading `action.json` and routing.
 
-Adjudicate issues using the same process as L3.
+## Range Reviews
 
-#### 4c — L1 Pass (# Document)
+For ranges (e.g., `SYS-001-SYS-043`):
 
-```bash
-python scaffold/tools/iterate.py start \
-    --layer <layer> \
-    --target <relative-path> \
-    --pass l1 \
-    --iteration <N>
-```
-
-The script sends the WHOLE document with the `l1_questions` from the YAML config. These are the big-picture questions — does the document hold together as a whole?
-
-If the config includes `identity_check`, `bias_pack`, or `stress_test`, those run as part of L1.
-
-#### 4d — Apply Changes
-
-After all three passes:
-```bash
-python scaffold/tools/iterate.py apply --session <id>
-```
-
-The script returns the list of accepted changes. **Claude applies each change** by editing the target file(s) using the Edit tool. Only edit files listed in the layer config's `adjudication.editable_files`.
-
-#### 4e — Check Convergence
-
-```bash
-python scaffold/tools/iterate.py convergence --session <id>
-```
-
-- `"clean"` → no issues found, stop iterating
-- `"converged"` → same issues as before, stop
-- `"human_only"` → only escalations remain, stop
-- `"limit"` → max iterations reached, stop
-- `"needs_iteration"` → changes were applied, run another pass (back to 4a — verification)
-
-**Verification pass rule:** If changes were applied, the next iteration is a verification pass. Only a pass with ZERO new issues counts as clean. Stopping after fixes without verification is a skill failure.
-
-### Step 5 — Generate Report
-
-```bash
-python scaffold/tools/iterate.py report --session <id>
-```
-
-The script returns:
-- `report` — the formatted summary to display to the user
-- `log_content` — the full review log content
-- `log_path` — where to write the log file
-
-**Claude writes:**
-1. The review log to `scaffold/decisions/review/<log_name>` using the Write tool
-2. Updates `scaffold/decisions/review/_index.md` with a new row
-
-**Claude fills in** the final questions and rating in the report based on the review findings.
-
-### Step 6 — Print Summary
-
-Display the report to the user. If there are escalated issues, present them using the Human Decision Presentation pattern — numbered, with concrete options (a/b/c).
-
-## Adjudication Principles
-
-These apply regardless of layer. Layer-specific rules are in the YAML configs.
-
-- **Project documents and authority order win.** Higher-ranked documents decide disputes.
-- **Never blindly accept.** Every issue gets evaluated against project context.
-- **Pushback is expected and healthy.**
-- **Never half-accept.** Choose exactly one outcome per issue.
-- **Resolved issues are locked.** The script tracks this — if an issue reappears with the same root cause, it was already filtered out.
-- **Reappearing material issues escalate to user** after 2 iterations.
-- **Cross-topic soft weaknesses escalate** if the same issue degrades 2+ topics.
-- **Practicality check.** Reject changes that increase rigidity without improving usability.
-- **Edits are limited to clarification and restructuring** unless the layer config explicitly allows broader changes. Never invent content to solve a review issue — flag the gap.
-- **Ownership changes always require user confirmation.**
-
-## Provider Fallback
-
-The Python scripts handle provider fallback automatically (via `review_config.json`). If all providers are exhausted, `iterate.py` returns `"fallback": "self-review"`. In that case:
-
-Fall back to **self-review mode**: Claude performs the review directly using the same topics and criteria from the YAML config — without the external LLM. Self-review is weaker (no independent perspective) but better than stopping. Log which mode was used.
-
-## Range Review Notes
-
-For range reviews (e.g., `SYS-001-SYS-043`):
-
-1. Glob all matching files for the range.
-2. Sort by ID number.
-3. Log the full work list.
-4. Loop through each document sequentially, running the full review cycle (Steps 3-5) for each.
-5. After all documents reviewed, print a combined summary with per-document ratings.
-
-Cross-document topics (e.g., Topic 4 "Cross-System Coherence" for systems) should be run last, after all individual documents have been reviewed and updated.
+1. Glob matching files, sort by ID.
+2. Log the work list.
+3. For each document, run the full dispatch loop (Steps 2-4).
+4. After all documents, print combined summary.
 
 ## Rules
 
-- **Do not run this skill on documents that haven't been through their fix skill first.** The preflight check catches this.
-- **Sleep between API calls.** The topic sleep is configured per layer. Respect it.
-- **Clean up temporary files** (pushback messages, topic prompts) after use.
-- **Only edit files in the editable_files list** from the layer config.
-- **Log which review mode was used** (adversarial vs self-review) in the review log.
+- **This skill never reads documents or makes judgments.** That's what sub-skills are for.
+- **This skill never edits files.** That's what `/scaffold-iterate-apply` is for.
+- **Clean up temp files** (action.json, result.json) after each exchange.
+- **Sleep between API calls** as configured per layer.
+- **If iterate.py errors**, report the error and stop — don't retry.
+- **If a sub-skill errors**, report and let iterate.py decide next action.

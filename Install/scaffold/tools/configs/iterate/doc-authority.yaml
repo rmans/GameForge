@@ -1,0 +1,181 @@
+# doc-authority.yaml — Iterate config for scaffold/doc-authority.md
+# Has ### subsections under Precedence Chain. Review is L3 → L2 → L1.
+
+layer: doc-authority
+display_name: "Document Authority"
+target: scaffold/doc-authority.md
+target_type: fixed
+
+preflight:
+  required_files:
+    - scaffold/doc-authority.md
+  blocked_message: "No doc-authority.md found."
+
+context_files:
+  static:
+    - scaffold/doc-authority.md
+    - design/design-doc.md
+
+defaults:
+  max_iterations: 3
+  max_exchanges: 3
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L3 — Subsection Review (### level)
+# Only the Precedence Chain has ### subsections.
+# ---------------------------------------------------------------------------
+
+l3_sections:
+
+  "### Rank 1 — Vision":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Is it clear what documents live at this rank?"
+      - "Is the authority description accurate — does this rank actually govern what it claims?"
+
+  "### Rank 2 — Player Experience Definition":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Are all Rank 2 documents listed?"
+      - "Is the boundary between Rank 2 and Rank 1 clear — what decisions does Rank 2 make that Rank 1 doesn't?"
+
+  "### Rank 3 — Input Bindings":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Are all input documents listed?"
+
+  "### Rank 4 — Technical Enforcement":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Are architecture, interfaces, and authority docs all listed?"
+      - "Is the boundary between Rank 4 (technical contracts) and Rank 5 (system behavior) clear?"
+
+  "### Rank 5 — System Behavior":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Is it clear that system designs describe behavior, not implementation?"
+
+  "### Rank 6 — Reference Data":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Are all reference docs listed?"
+
+  "### Rank 7 — Scope":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Is it clear that roadmap and phases define scope, not behavior?"
+
+  "### Rank 8 — Integration":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Is the slice's role clear — vertical cuts through scope?"
+
+  "### Rank 9 — Behavior Specs":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Is it clear that specs define atomic testable behavior?"
+
+  "### Rank 10 — Engine Constraints":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Is the engine docs' HOW-not-WHAT boundary clear?"
+
+  "### Rank 11 — Implementation Steps":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Is it clear that tasks are the lowest ranked docs?"
+
+  "### Unranked — Advisory, Decisions & History":
+    parent: "## Precedence Chain (highest wins)"
+    questions:
+      - "Is it clear that theory docs have no authority?"
+      - "Is the role of decision docs (ADRs, KIs, DDs) as pipeline influence clearly described?"
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Precedence Chain (highest wins)":
+    questions:
+      - "Is the ranking internally consistent — does each rank correctly outrank the one below?"
+      - "Are there document types that exist in the scaffold but aren't assigned a rank?"
+      - "Is the rank assignment justified — why is this document at this level?"
+
+  "## Decision Influence Model":
+    questions:
+      - "Is it clear how decision docs (ADRs, KIs, DDs) influence ranked docs without having rank themselves?"
+      - "Are the influence pathways specific — which decision types affect which doc types?"
+
+  "## Document Influence Map":
+    questions:
+      - "Is every document type's 'Influenced By' and 'Influences' list complete?"
+      - "Are there missing influence relationships?"
+      - "Is the map consistent with the precedence chain?"
+
+  "## Document Table — 5W+1H":
+    questions:
+      - "Is every document type covered — who writes it, what it contains, where it lives, when it's created, why it exists, how it's updated?"
+      - "Is the table consistent with actual skill behavior?"
+
+  "## Conflict Resolution":
+    questions:
+      - "Are conflict resolution rules specific enough to apply without judgment calls?"
+      - "Are same-rank conflicts addressed?"
+      - "Is it clear what happens when a higher-rank doc contradicts a lower-rank doc?"
+
+  "## Deprecation":
+    questions:
+      - "Is the deprecation protocol clear — how does a doc become deprecated?"
+      - "Is it clear what happens to references to deprecated docs?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Is the authority chain complete — every document type in the scaffold has a clear rank or unranked designation?"
+  - "Is the chain internally consistent — no contradictions between precedence, influence, and conflict resolution?"
+  - "Could a developer resolve a document conflict using only this document, without asking someone?"
+  - "Does this document accurately reflect how the scaffold pipeline actually works?"
+
+scope_guard:
+  upward: null
+  downward: null
+  tests: []
+
+adjudication:
+  editable_files:
+    - scaffold/doc-authority.md
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+  rules:
+    - "Rank changes affect the entire pipeline — always escalate"
+    - "Adding new document types to the chain is safe if rank is clear"
+    - "Conflict resolution rule changes should be escalated — they affect all reviews"
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-doc-authority-{date}.md"
+  final_questions:
+    - name: "Completeness"
+      prompt: "Are there document types missing from the authority chain?"
+    - name: "Conflict Gap"
+      prompt: "What conflict scenario would this document fail to resolve?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (ranks missing, conflicts unresolvable)"
+      2: "major issues (significant gaps in coverage or conflict resolution)"
+      3: "workable (most types covered, some conflict rules need specifics)"
+      4: "solid authority doc (complete chain, clear conflict resolution)"
+      5: "strong authority doc (every type ranked, every conflict resolvable, fully consistent)"
+
+rules:
+  - "This is a meta-document — changes here affect how every other review works"
+  - "Rank changes always escalate"
+  - "Never blindly accept"
+  - "Resolved issues are locked across iterations by root cause"

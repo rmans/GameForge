@@ -1,0 +1,105 @@
+# ki.yaml — Iterate config for Known Issues
+# No L3 (no ### subsections). Review is L2 (sections) → L1 (document).
+
+layer: ki
+display_name: "Known Issue"
+target_pattern: "decisions/known-issues/KI-*.md"
+target_type: range
+
+preflight:
+  required_files: []
+  glob_pattern: "decisions/known-issues/KI-*.md"
+  critical_sections: [Description, "Fix Options"]
+  blocked_message: "Known issue is too incomplete for review. Fill in Description and Fix Options first."
+
+context_files:
+  static:
+    - design/design-doc.md
+    - design/glossary.md
+    - scaffold/doc-authority.md
+  dynamic:
+    - pattern: "decisions/architecture-decision-record/ADR-*.md"
+      filter: "status: Accepted"
+
+defaults:
+  max_iterations: 3
+  max_exchanges: 3
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Description":
+    questions:
+      - "Is the issue specific enough to act on? Could someone verify it exists without guessing?"
+      - "Does it cite specific doc sections, system names, or field names — not just 'something is wrong'?"
+      - "Is it clear what the actual problem is vs what the symptom is?"
+
+  "## Affected Documents":
+    questions:
+      - "Is the impact fully mapped — every doc that's affected?"
+      - "Is 'How Affected' specific for each doc — not just 'related'?"
+      - "Are there docs that should be listed but aren't?"
+
+  "## Fix Options":
+    questions:
+      - "Are options concrete with real tradeoffs, not just 'fix it' vs 'don't fix it'?"
+      - "Is there an obviously correct option that means this KI should just be resolved instead of tracked?"
+      - "Are there options that weren't considered?"
+      - "Are tradeoffs honest — what does each option cost?"
+
+  "## Blocking":
+    questions:
+      - "Is the blocking assessment accurate — does this actually block what it claims?"
+      - "If non-blocking, could it become blocking later? Is that risk noted?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Is this a real issue that needs tracking, or should it just be fixed now?"
+  - "Is the severity/category accurate?"
+  - "Would a new team member understand the issue and its impact from reading this alone?"
+  - "Is this a symptom of a deeper problem that should be the real KI?"
+
+scope_guard:
+  upward: null
+  downward: null
+  tests: []
+
+adjudication:
+  editable_files_pattern: "decisions/known-issues/KI-*.md"
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+  rules:
+    - "Improve clarity and specificity — don't resolve the issue"
+    - "If the issue seems trivially fixable, note it but don't reject the KI"
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-ki-{target}-{date}.md"
+  final_questions:
+    - name: "Issue Clarity"
+      prompt: "Is this issue specific enough for someone to act on?"
+    - name: "Hidden Depth"
+      prompt: "Is this a symptom of a deeper problem?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "unclear (can't tell what's wrong or what to do about it)"
+      2: "vague (issue exists but description or options are too thin)"
+      3: "workable (issue is clear, options need more detail)"
+      4: "solid KI (clear issue, good options with tradeoffs, accurate blocking)"
+      5: "strong KI (precise issue, complete options, honest tradeoffs, correct impact mapping)"
+
+rules:
+  - "Don't resolve the issue — improve how it's documented"
+  - "Vague descriptions are the most common problem"
+  - "Fix options with no tradeoffs are rubber stamps"
+  - "Never blindly accept"
+  - "Resolved issues are locked across iterations by root cause"

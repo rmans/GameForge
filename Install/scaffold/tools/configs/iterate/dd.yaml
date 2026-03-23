@@ -1,0 +1,128 @@
+# dd.yaml — Iterate config for Design Debt entries
+# No L3 (no ### subsections). Review is L2 (sections) → L1 (document).
+
+layer: dd
+display_name: "Design Debt"
+target_pattern: "decisions/design-debt/DD-*.md"
+target_type: range
+
+preflight:
+  required_files: []
+  glob_pattern: "decisions/design-debt/DD-*.md"
+  critical_sections: [Compromise, "Why Accepted", "Payoff Plan"]
+  blocked_message: "Design debt entry is too incomplete for review. Fill in Compromise, Why Accepted, and Payoff Plan first."
+
+context_files:
+  static:
+    - design/design-doc.md
+    - design/glossary.md
+    - scaffold/doc-authority.md
+  dynamic:
+    - pattern: "decisions/architecture-decision-record/ADR-*.md"
+      filter: "status: Accepted"
+
+defaults:
+  max_iterations: 3
+  max_exchanges: 3
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Compromise":
+    questions:
+      - "Is the compromised state clearly described — what's wrong and what you're living with?"
+      - "Would a new developer understand how current state differs from what should exist?"
+      - "Is it specific — names systems, fields, or behaviors, not just 'it's not ideal'?"
+
+  "## Why Accepted":
+    questions:
+      - "Is the justification honest — why is this bearable in the short term?"
+      - "Is the risk of keeping this indefinitely acknowledged?"
+      - "Will this justification still hold in 6 months, or is it wishful thinking?"
+
+  "## Affected Documents":
+    questions:
+      - "Are all docs that describe the compromised behavior listed?"
+      - "Is 'What's Compromised' specific for each doc?"
+
+  "## Payoff Plan":
+    questions:
+      - "Do When, How, and Effort together form a credible plan?"
+      - "If the trigger has already passed, should this debt be escalated?"
+
+# ---------------------------------------------------------------------------
+# L3 — Subsection Review (### level)
+# ---------------------------------------------------------------------------
+
+l3_sections:
+
+  "### When":
+    parent: "## Payoff Plan"
+    questions:
+      - "Is the trigger concrete — a specific phase, slice, or condition?"
+      - "'Someday' is not a trigger. 'When we start P2' is. 'After ADR-007 is accepted' is."
+
+  "### How":
+    parent: "## Payoff Plan"
+    questions:
+      - "Is the fix specific enough to estimate effort?"
+      - "Is it clear what changes — new task, refactor, ADR, system redesign?"
+
+  "### Effort":
+    parent: "## Payoff Plan"
+    questions:
+      - "Is the effort estimate realistic — single task, task range, full slice?"
+      - "Does the effort match the scope of 'How'?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Is this real debt (an intentional compromise) or just unfinished work mislabeled as debt?"
+  - "Is the priority accurate given the risk and the payoff plan timing?"
+  - "Would someone reading this know exactly what's compromised, why, and when it gets fixed?"
+  - "Is the payoff plan a real commitment or a 'someday' promise?"
+
+scope_guard:
+  upward: null
+  downward: null
+  tests: []
+
+adjudication:
+  editable_files_pattern: "decisions/design-debt/DD-*.md"
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+  rules:
+    - "Improve clarity — don't pay off the debt"
+    - "Vague payoff plans are the most dangerous gap"
+    - "'Someday' is not a trigger — flag it"
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-dd-{target}-{date}.md"
+  final_questions:
+    - name: "Debt Reality"
+      prompt: "Is this real debt with a real payoff plan, or a wish list item?"
+    - name: "Risk Assessment"
+      prompt: "What happens if this debt is never paid off?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "unclear (can't tell what's compromised or when it gets fixed)"
+      2: "vague (compromise exists but justification or plan is thin)"
+      3: "workable (clear compromise, payoff plan needs specifics)"
+      4: "solid DD (clear compromise, honest justification, concrete plan)"
+      5: "strong DD (precise compromise, honest risk, specific trigger, realistic effort)"
+
+rules:
+  - "Don't pay off the debt — improve how it's documented"
+  - "Vague payoff plans are the most common problem"
+  - "'Someday' triggers must be flagged"
+  - "Never blindly accept"
+  - "Resolved issues are locked across iterations by root cause"

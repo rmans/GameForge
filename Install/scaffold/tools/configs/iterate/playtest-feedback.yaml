@@ -1,0 +1,105 @@
+# playtest-feedback.yaml — Iterate config for playtest feedback entries (PF-###)
+# No L3 (no ### subsections). Review is L2 (sections) → L1 (document).
+
+layer: playtest-feedback
+display_name: "Playtest Feedback"
+target_pattern: "decisions/playtest-feedback/PF-*.md"
+target_type: range
+
+preflight:
+  required_files: []
+  glob_pattern: "decisions/playtest-feedback/PF-*.md"
+  critical_sections: [Observation, Context]
+  blocked_message: "Playtest feedback is too incomplete for review. Fill in Observation and Context first."
+
+context_files:
+  static:
+    - design/design-doc.md
+    - design/glossary.md
+    - scaffold/doc-authority.md
+  per_target:
+    - type: referenced_system
+      description: "System design referenced in System/Spec field"
+
+defaults:
+  max_iterations: 3
+  max_exchanges: 3
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Observation":
+    questions:
+      - "Is this a raw observation (what the tester did/said) or an interpretation?"
+      - "Is it specific enough to reproduce — could someone set up the same situation?"
+      - "Does it describe the sequence of actions, not just the outcome?"
+
+  "## Context":
+    questions:
+      - "Is the game state described — what was the tester doing, what phase of play?"
+      - "Is it clear what the tester was trying to accomplish?"
+      - "Would this context help a developer understand WHY the observation matters?"
+
+  "## Evidence":
+    questions:
+      - "Is there supporting evidence (screenshots, quotes, recordings)?"
+      - "If no evidence, is the observation detailed enough to stand on its own?"
+
+  "## Metadata":
+    questions:
+      - "Is the Type correct (Confusion/Frustration/Delight/Suggestion/Bug)?"
+      - "Is Severity appropriate — does it match the observation's impact?"
+      - "Is the System/Spec reference correct — is this the right system?"
+      - "Is Frequency tracked — how many testers hit this?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Is this observation actionable — could it lead to a spec change, KI, or ADR?"
+  - "Is the Type/Severity classification accurate?"
+  - "Is this a one-off observation or a potential pattern? Is Frequency reflecting that?"
+  - "Is there enough here for someone who wasn't at the playtest to understand the issue?"
+
+scope_guard:
+  upward: null
+  downward: null
+  tests: []
+
+adjudication:
+  editable_files_pattern: "decisions/playtest-feedback/PF-*.md"
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+  rules:
+    - "Preserve the raw observation — don't rewrite what the tester did into what you think they meant"
+    - "Improve specificity and context, not interpretation"
+    - "If the observation is vague, flag it — don't fabricate details"
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-pf-{target}-{date}.md"
+  final_questions:
+    - name: "Actionability"
+      prompt: "Is this feedback actionable — will it lead to a change?"
+    - name: "Missing Context"
+      prompt: "What context is missing that would make this more useful?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "unusable (observation too vague, no context)"
+      2: "weak (observation exists but missing key details)"
+      3: "workable (observation is clear, context needs more)"
+      4: "solid feedback (clear observation, good context, correct classification)"
+      5: "strong feedback (specific observation, rich context, evidence, correct severity, actionable)"
+
+rules:
+  - "Don't interpret observations — improve how they're recorded"
+  - "Raw tester behavior is sacred — preserve it"
+  - "Never blindly accept"
+  - "Resolved issues are locked across iterations by root cause"
