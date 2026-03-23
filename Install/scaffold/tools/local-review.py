@@ -582,12 +582,15 @@ def cmd_next_action(args):
             "max_iterations": args.iterations or config.get("defaults", {}).get("max_iterations", 10),
             "queue": [],
             "queue_index": 0,
+            "auto_fixes_all": [],
             "auto_fixes": [],
             "findings": [],
             "signals": [],
             "adjudications": [],
             "changes_pending": [],
             "changes_applied_total": 0,
+            "changes_this_iteration": 0,
+            "rejected_judgment_ids": [],
             "created": datetime.now().isoformat(),
         }
 
@@ -602,8 +605,10 @@ def cmd_next_action(args):
     signals = _detect_signals(session, config, doc_content, target)
 
     session["auto_fixes"] = auto_fixes
+    session["auto_fixes_all"] = session.get("auto_fixes_all", []) + auto_fixes
     session["findings"] = findings
     session["signals"] = signals
+    session["changes_this_iteration"] = 0
 
     # Build queue: auto-fixes first, then judgment checks, then apply, then report
     queue = []
@@ -612,12 +617,16 @@ def cmd_next_action(args):
     if auto_fixes:
         queue.append({"phase": "auto_apply", "fixes": auto_fixes})
 
-    # Judgment checks need adjudication
+    # Judgment checks need adjudication — skip checks already rejected in previous iterations
+    rejected_ids = session.get("rejected_judgment_ids", [])
     judgment = config.get("judgment_checks", {})
     for category, checks in judgment.items():
         if isinstance(checks, list):
             for check in checks:
                 if isinstance(check, dict):
+                    check_id = check.get("id", "")
+                    if check_id in rejected_ids:
+                        continue
                     queue.append({
                         "phase": "judgment",
                         "check": check,
@@ -711,12 +720,12 @@ def _advance_and_write_action(session, config):
         return
 
     if item["phase"] == "convergence":
-        # Check if we need another pass
+        # Check if we need another pass — based on THIS iteration's changes, not total
         iteration = session.get("iteration", 1)
         max_iter = session.get("max_iterations", 10)
-        applied = session.get("changes_applied_total", 0)
+        applied_this_iteration = session.get("changes_this_iteration", 0)
 
-        if applied > 0 and iteration < max_iter:
+        if applied_this_iteration > 0 and iteration < max_iter:
             # Re-run checks on the updated document
             session["iteration"] = iteration + 1
             session["changes_pending"] = []
@@ -729,7 +738,19 @@ def _advance_and_write_action(session, config):
             auto_fixes, findings = _run_mechanical_checks(session, config, doc_content, session["target"])
             signals = _detect_signals(session, config, doc_content, session["target"])
 
-            if not auto_fixes and not config.get("judgment_checks"):
+            # Filter judgment checks — skip already-rejected ones
+            rejected_ids = session.get("rejected_judgment_ids", [])
+            remaining_judgment = []
+            judgment = config.get("judgment_checks", {})
+            for category, checks in judgment.items():
+                if isinstance(checks, list):
+                    for check in checks:
+                        if isinstance(check, dict):
+                            check_id = check.get("id", "")
+                            if check_id not in rejected_ids:
+                                remaining_judgment.append({"phase": "judgment", "check": check, "category": category})
+
+            if not auto_fixes and not remaining_judgment:
                 # Clean — no more issues
                 session["queue_index"] = idx + 1
                 _save_session(session["session_id"], session)
@@ -737,18 +758,15 @@ def _advance_and_write_action(session, config):
                 return
 
             session["auto_fixes"] = auto_fixes
+            session["auto_fixes_all"] = session.get("auto_fixes_all", []) + auto_fixes
             session["findings"] = findings
             session["signals"] = signals
+            session["changes_this_iteration"] = 0
 
             queue = []
             if auto_fixes:
                 queue.append({"phase": "auto_apply", "fixes": auto_fixes})
-            judgment = config.get("judgment_checks", {})
-            for category, checks in judgment.items():
-                if isinstance(checks, list):
-                    for check in checks:
-                        if isinstance(check, dict):
-                            queue.append({"phase": "judgment", "check": check, "category": category})
+            queue.extend(remaining_judgment)
             queue.append({"phase": "judgment_apply"})
             queue.append({"phase": "convergence"})
             queue.append({"phase": "report"})
@@ -776,7 +794,7 @@ def _advance_and_write_action(session, config):
             "iterations_completed": session.get("iteration", 1),
             "max_iterations": session.get("max_iterations", 10),
             "changes_applied": session.get("changes_applied_total", 0),
-            "auto_fixes": session.get("auto_fixes", []),
+            "auto_fixes": session.get("auto_fixes_all", []),
             "findings": session.get("findings", []),
             "signals": session.get("signals", []),
             "adjudications": session.get("adjudications", []),
@@ -819,6 +837,7 @@ def cmd_resolve(args):
         applied = result.get("applied", 0)
         session["changes_pending"] = []
         session["changes_applied_total"] = session.get("changes_applied_total", 0) + applied
+        session["changes_this_iteration"] = session.get("changes_this_iteration", 0) + applied
         session["queue_index"] = idx + 1
         _save_session(args.session, session)
         _advance_and_write_action(session, config)
@@ -838,9 +857,10 @@ def cmd_resolve(args):
     # Judgment adjudication result
     if item.get("phase") == "judgment":
         outcome = result.get("outcome", "")
+        check_id = item.get("check", {}).get("id", "")
         adjudication = {
             "phase": "judgment",
-            "check_id": item.get("check", {}).get("id", ""),
+            "check_id": check_id,
             "section": item.get("check", {}).get("section", ""),
             "outcome": outcome,
             "reasoning": result.get("reasoning", ""),
@@ -855,6 +875,12 @@ def cmd_resolve(args):
                 "issue_description": item.get("check", {}).get("description", ""),
                 "severity": "MEDIUM",
             })
+        elif outcome == "reject":
+            # Track rejected judgment check IDs so they're skipped in future iterations
+            rejected = session.get("rejected_judgment_ids", [])
+            if check_id and check_id not in rejected:
+                rejected.append(check_id)
+            session["rejected_judgment_ids"] = rejected
 
         session["queue_index"] = idx + 1
         _save_session(args.session, session)

@@ -17,6 +17,7 @@
 | `local-review.py` | Local review orchestrator — runs mechanical checks (regex, patterns, template diffs) and routes judgment calls for scaffold documents (used by `/scaffold-fix`) |
 | `configs/iterate/*.yaml` | Per-layer review configs for iterate.py (topics, context files, scope guards, bias packs) |
 | `configs/fix/*.yaml` | Per-layer fix configs for local-review.py (mechanical checks, judgment checks, signals) |
+| `review.py` | Review orchestrator — chains local-review.py (fix) then iterate.py (adversarial) for full document review (used by `/scaffold-review`) |
 
 ## image-gen.py
 
