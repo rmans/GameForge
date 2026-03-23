@@ -6,7 +6,7 @@ This is the installable overlay. Copy its contents into any game project to give
 
 ```
 your-project/
-├── .claude/skills/       ← 21 slash commands (create, seed, fix, iterate, revise, approve, implement, art, audio)
+├── .claude/skills/       ← 10 slash commands (create, seed, fix, iterate, revise, approve, implement, art, audio)
 ├── scaffold/             ← Document pipeline with indexes and templates
 └── CLAUDE.md             ← Rules that tell Claude Code how to use the scaffold
 ```
@@ -15,7 +15,7 @@ your-project/
 
 **`scaffold/`** — A structured document hierarchy with 11 authority ranks. Every design decision, style rule, system behavior, interface contract, and implementation constraint has a home. Start at `scaffold/_index.md` — it's the master entry point.
 
-**`.claude/skills/`** — 21 slash commands that automate document creation, bulk seeding, mechanical fixes, adversarial iteration, revision, approval gates, implementation, art/audio generation, completion tracking, and editing. Skills read higher-authority documents to pre-fill lower ones, check ADRs before scoping new work, and cross-reference everything.
+**`.claude/skills/`** — 10 slash commands that automate document creation, bulk seeding, mechanical fixes, adversarial iteration, revision, approval gates, implementation, art/audio generation, completion tracking, and editing. Skills read higher-authority documents to pre-fill lower ones, check ADRs before scoping new work, and cross-reference everything.
 
 ## Prerequisites
 
@@ -129,7 +129,7 @@ For each approved phase:
 
 See `scaffold/WORKFLOW.md` for the full 24-step recipe.
 
-## All 21 Skills
+## All 10 Skills
 
 | Category | Skills |
 |----------|--------|
@@ -143,8 +143,6 @@ See `scaffold/WORKFLOW.md` for the full 24-step recipe.
 | **Implement (1)** | `implement` — step-by-step code generation with file manifest. Orchestrated by `implement.py`. |
 | **Decisions (1)** | `file-decision` — file ADR/KI/DD with auto-review. |
 | **Playtest (1)** | `playtest` — log sessions and review feedback. |
-| **Art (7)** | `art-concept`, `art-ui-mockup`, `art-character`, `art-environment`, `art-sprite`, `art-icon`, `art-promo` |
-| **Audio (4)** | `audio-music`, `audio-sfx`, `audio-ambience`, `audio-voice` |
 
 All skill names are prefixed with `/scaffold-` (e.g., `/scaffold-seed design`).
 

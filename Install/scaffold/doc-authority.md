@@ -68,13 +68,13 @@ This table defines what each document reads (influenced by) and what reads it (i
 | Document | Influenced By (reads these) | Influences (read by these) |
 |----------|---------------------------|---------------------------|
 | **design-doc.md** | (foundation — self-contained) | Everything. Every doc, every skill, every decision traces back here. |
-| **style-guide.md** | design-doc, architecture (scene tree), engine UI doc, system designs | color-system, ui-kit, feedback-system, audio-direction, art skills, engine UI/post-processing/asset-import docs, tasks |
-| **color-system.md** | design-doc, style-guide, state-transitions (state→color mapping) | ui-kit, feedback-system, art skills, engine UI doc, tasks |
+| **style-guide.md** | design-doc, architecture (scene tree), engine UI doc, system designs | color-system, ui-kit, feedback-system, audio-direction, art assets, engine UI/post-processing/asset-import docs, tasks |
+| **color-system.md** | design-doc, style-guide, state-transitions (state→color mapping) | ui-kit, feedback-system, art assets, engine UI doc, tasks |
 | **ui-kit.md** | design-doc, style-guide, color-system, system designs (what info to surface), architecture (UI panel pattern), engine UI doc | feedback-system, interaction-model, engine UI/scene-architecture docs, tasks |
 | **glossary.md** | design-doc | Every doc (terminology compliance). validate checks all docs against glossary NOT column. |
 | **interaction-model.md** | design-doc, system designs, architecture, engine input doc, style-guide, color-system, ui-kit | feedback-system, input docs (action-map, bindings, navigation), engine input doc, specs, tasks |
 | **feedback-system.md** | design-doc, system designs, interaction-model, style-guide, color-system, ui-kit, audio-direction, signal-registry, state-transitions, engine UI doc | audio-direction (priority coordination), engine UI/post-processing docs, specs, tasks |
-| **audio-direction.md** | design-doc, style-guide, feedback-system (priority hierarchy), system designs | engine audio doc (if exists), audio skills, feedback-system (sound categories), tasks |
+| **audio-direction.md** | design-doc, style-guide, feedback-system (priority hierarchy), system designs | engine audio doc (if exists), audio assets, feedback-system (sound categories), tasks |
 | **action-map.md** | design-doc, interaction-model | bindings (KBM, gamepad), ui-navigation, engine input doc, tasks |
 | **default-bindings-kbm.md** | design-doc, action-map, input-philosophy | engine input doc, tasks |
 | **default-bindings-gamepad.md** | design-doc, action-map, input-philosophy | engine input doc, tasks |

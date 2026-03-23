@@ -13,11 +13,11 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
-VERSION = "2.36.0"
+VERSION = "2.37.0"
 GITHUB_ZIP_URL = "https://github.com/rmans/ClaudeScaffold/archive/refs/heads/{branch}.zip"
 EXCLUDE_DIRS = {"__pycache__"}
 SCAFFOLD_SKILL_PREFIX = "scaffold-"
-EXPECTED_SKILLS = 29
+EXPECTED_SKILLS = 18
 
 # Upgrade mode: these scaffold/ subdirectories are infrastructure and get fully replaced
 UPGRADE_REPLACE_DIRS = {"theory", "templates", "tools"}

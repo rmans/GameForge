@@ -24,7 +24,7 @@ Every design decision, visual style rule, system behavior, interface contract, a
 - **Draft → Review → Approved → Complete lifecycle.** Documents start as `Draft`, move through adversarial review via `/scaffold-iterate`, are set to `Approved` by approval gates, and marked `Complete` by `utils.py complete` when implementation is done. Completion ripples up from tasks through specs, slices, and phases.
 - **Token-efficient retrieval.** Index files in every directory let Claude find what it needs without loading entire folders.
 - **Asset requirements in specs.** Specs identify what art and audio the behavior needs, scan for reusable assets, and track production status. Tasks wire the ready assets.
-- **21 skills automate the pipeline.** Create, seed, fix, iterate, revise, approve, implement, file decisions, generate art/audio, and edit documents with slash commands — no manual file wrangling.
+- **10 skills automate the pipeline.** Create, seed, fix, iterate, revise, approve, implement, file decisions, and edit documents with slash commands — no manual file wrangling.
 
 ## How It Works
 
@@ -56,7 +56,6 @@ OUTER LOOP (architecture stability)
 9. **Spec** — Write atomic behavior specs for each slice (with asset requirements)
 10. **Build** — Create implementation tasks, write code, run adversarial code review
 11. **Feedback** — ADRs, triage logs, and revision loops update the roadmap and re-scope upcoming work
-12. **Art/Audio** — Produce assets identified by specs, following the craft pipelines in ART-WORKFLOW.md and AUDIO-WORKFLOW.md
 
 Each step has skills that automate it. Each document has a clear authority rank. Nothing is ad-hoc.
 
@@ -141,7 +140,7 @@ cp ClaudeScaffold/Install/CLAUDE.md /path/to/your/project/
 This gives your project:
 
 ```
-.claude/skills/       ← 29 Claude Code skills (21 user-facing + 8 sub-skills)
+.claude/skills/       ← 18 Claude Code skills (10 user-facing + 8 sub-skills)
 scaffold/             ← Document pipeline with templates and indexes
 CLAUDE.md             ← Instructions that tell Claude Code how to use the scaffold
 ```
@@ -150,7 +149,7 @@ See [Install/README.md](Install/README.md) for full installation details.
 
 ## Skills
 
-21 slash commands organized by workflow:
+10 slash commands organized by workflow:
 
 | Category | Skills |
 |----------|--------|
@@ -164,8 +163,6 @@ See [Install/README.md](Install/README.md) for full installation details.
 | **Implement (1)** | `implement` — step-by-step code generation with file manifest. |
 | **Decisions (1)** | `file-decision` — file ADR/KI/DD with auto-review. |
 | **Playtest (1)** | `playtest` — log sessions and review feedback. |
-| **Art (7)** | `art-concept`, `art-ui-mockup`, `art-character`, `art-environment`, `art-sprite`, `art-icon`, `art-promo` |
-| **Audio (4)** | `audio-music`, `audio-sfx`, `audio-ambience`, `audio-voice` |
 
 All skill names are prefixed with `/scaffold-` (e.g., `/scaffold-seed design`).
 
@@ -188,7 +185,7 @@ All skill names are prefixed with `/scaffold-` (e.g., `/scaffold-seed design`).
 14. Per phase: seed slices → approve → seed specs/tasks → approve → implement
 ```
 
-See `scaffold/WORKFLOW.md` for the full pipeline recipe. See `scaffold/ART-WORKFLOW.md` and `scaffold/AUDIO-WORKFLOW.md` for art and audio production pipelines.
+See `scaffold/WORKFLOW.md` for the full pipeline recipe. See `scaffold/ART-WORKFLOW.md` and `scaffold/AUDIO-WORKFLOW.md` for art and audio production guidelines.
 
 ## Scaffold Structure
 

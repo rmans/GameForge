@@ -396,7 +396,6 @@ Full review pipeline for all 6 Step 5 docs. Fix phase: template text, terminolog
 
 Validates Step 5 doc structural integrity, content health, cross-doc consistency, authority flow, boundary compliance, token resolution, and accessibility coherence. Checks that color tokens resolve, no raw hex values leak into downstream docs, interaction actions have feedback coverage, feedback priorities align with audio priorities, and accessibility promises are enforced (no color-only states, no hover-only cues, multi-channel critical events).
 
-> **Art & Audio:** With style docs in place, you can now generate visual and audio assets at any point. See the Quick Reference table for all art and audio skills.
 
 ### 5e — Revise (post-implementation feedback loop)
 
@@ -1041,9 +1040,3 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 | `playtest-log` | Capture feedback | Record playtester observations | Detects duplicates, promotes patterns at 3+ reports |
 | `playtest-review` | Analyze feedback | Review playtest patterns | Severity x frequency grid, cross-reference checks, delight inventory |
 
-### Art & Audio Generation
-
-| Skill | What |
-|-------|------|
-| `art-concept`, `art-character`, `art-environment`, `art-icon`, `art-promo`, `art-sprite`, `art-ui-mockup` | Generate visual assets informed by style guide and color system |
-| `audio-music`, `audio-sfx`, `audio-ambience`, `audio-voice` | Generate audio assets informed by style guide and design doc |
