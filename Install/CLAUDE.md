@@ -32,7 +32,7 @@ Never load entire directories. Follow this protocol:
 | 4 | `design/architecture.md`, `design/interfaces.md`, `design/authority.md` | Canon — engineering conventions, contracts, data ownership |
 | 5 | `design/systems/SYS-###`, `design/state-transitions.md` | Canon — systems, states |
 | 6 | `reference/*` | Reference — data tables |
-| 7 | `phases/roadmap.md`, `phases/P#-###` | Scope — roadmap and phase gates |
+| 7 | `phases/roadmap.md`, `phases/PHASE-###` | Scope — roadmap and phase gates |
 | 8 | `slices/SLICE-###` | Integration — vertical slice contracts |
 | 9 | `specs/SPEC-###` | Behavior — atomic specs |
 | 10 | `engine/*` | Implementation — engine constraints |
@@ -204,7 +204,7 @@ When creating or modifying scaffold documents, check and update these related fi
 | When you change... | Also update... |
 |---------------------|---------------|
 | `phases/roadmap.md` | `phases/_index.md` must match Phase Overview |
-| `phases/P#-###` (new phase) | `phases/_index.md`, `phases/roadmap.md` Phase Overview and Capability Ladder |
+| `phases/PHASE-###` (new phase) | `phases/_index.md`, `phases/roadmap.md` Phase Overview and Capability Ladder |
 | `slices/SLICE-###` (new slice) | `slices/_index.md`, parent phase file Slice Strategy section |
 | `specs/SPEC-###` (new spec) | `specs/_index.md`, parent slice Specs table |
 | `tasks/TASK-###` (new task) | `tasks/_index.md`, parent slice Tasks table |

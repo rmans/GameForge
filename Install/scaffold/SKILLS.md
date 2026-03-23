@@ -14,7 +14,7 @@
 | `/scaffold-init-design` | `[--mode seed\|fill-gaps\|reconcile\|refresh]` | Initialize or update design document |
 | **Create** | | |
 | `/scaffold-new-roadmap` | — | Create the project roadmap |
-| `/scaffold-new-phase` | `[phase-name]` | Create a phase scope gate with auto P#-### ID |
+| `/scaffold-new-phase` | `[phase-name]` | Create a phase scope gate with auto PHASE-### ID |
 | `/scaffold-new-slice` | `[slice-name]` | Create a vertical slice with auto SLICE-### ID |
 | `/scaffold-new-system` | `[system-name] [--split-from SYS-###] [--trigger ADR-###\|KI:keyword]` | Create a single system design with overlap/authority audit |
 | `/scaffold-new-spec` | `[spec-name]` | Create a behavior spec with auto SPEC-### ID |
@@ -26,7 +26,7 @@
 | **Iterate** | | |
 | `/scaffold-iterate` | `<layer> [target] [--topics "1,3"] [--focus "..."] [--iterations N]` | Adversarial per-topic review for any layer (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine). Orchestrated by iterate.py with per-layer YAML configs. |
 | **Revise** | | |
-| `/scaffold-revise-design` | `[--source P#-###\|SLICE-###\|foundation-recheck]` | Detect design drift from implementation feedback |
+| `/scaffold-revise-design` | `[--source PHASE-###\|SLICE-###\|foundation-recheck]` | Detect design drift from implementation feedback |
 | `/scaffold-revise-systems` | `[--source SLICE-###]` | Detect system design drift from implementation feedback |
 | `/scaffold-revise-references` | `[--source SLICE-###]` | Detect Step 3 doc drift from implementation feedback |
 | `/scaffold-revise-engine` | `[--source SLICE-###]` | Detect engine doc drift from implementation feedback |
@@ -34,7 +34,7 @@
 | `/scaffold-revise-input` | `[--source SLICE-###] [--target doc.md]` | Detect Step 6 input doc drift from implementation feedback |
 | `/scaffold-revise-foundation` | `[--mode initial\|recheck]` | Verify foundation stability, dispatch revision loops |
 | `/scaffold-revise-roadmap` | — | Update roadmap after phase completion |
-| `/scaffold-revise-phases` | `[--source P#-###]` | Update remaining phases from implementation feedback |
+| `/scaffold-revise-phases` | `[--source PHASE-###]` | Update remaining phases from implementation feedback |
 | `/scaffold-revise-slices` | `[--source SLICE-###]` | Update remaining slices from implementation feedback |
 | **Approve** | | |
 | `/scaffold-approve-phases` | — | Lifecycle gate: approve Draft phases for slice seeding |
@@ -116,7 +116,7 @@ Create a phase scope gate with automatic ID assignment.
 
 **Description**
 
-Creates a phase scope gate at `phases/P#-###-<name>.md` with automatic sequential ID assignment. Reads the roadmap, design doc, all systems, and all ADRs for impact analysis before defining the phase. Walks through Goal, Entry Criteria (with specific IDs), In Scope, Out of Scope, Deliverables, Exit Criteria, and Dependencies. Registers in `phases/_index.md`.
+Creates a phase scope gate at `phases/PHASE-###-<name>.md` with automatic sequential ID assignment. Reads the roadmap, design doc, all systems, and all ADRs for impact analysis before defining the phase. Walks through Goal, Entry Criteria (with specific IDs), In Scope, Out of Scope, Deliverables, Exit Criteria, and Dependencies. Registers in `phases/_index.md`.
 
 **Arguments**
 

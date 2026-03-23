@@ -103,7 +103,7 @@ This is a **hard stop with explicit override**.
 
 Read the parent phase file. Verify the slice's goal still matches the phase's current in-scope proof.
 
-If the phase was re-scoped (check revision logs, ADRs filed after slice creation, or phase file modification date vs slice review date) and the slice wasn't updated to match, **stop**: "Phase P#-### may have been re-scoped since this slice was last updated. Verify the slice still matches phase scope, or rerun `/scaffold-review-slice`."
+If the phase was re-scoped (check revision logs, ADRs filed after slice creation, or phase file modification date vs slice review date) and the slice wasn't updated to match, **stop**: "Phase PHASE-### may have been re-scoped since this slice was last updated. Verify the slice still matches phase scope, or rerun `/scaffold-review-slice`."
 
 This is a **hard stop with explicit override**.
 
@@ -146,7 +146,7 @@ If any check fails, **stop** and suggest running `/scaffold-review-slice` first.
 ```
 ## Slice Approved: SLICE-### — [Name]
 
-**Phase:** P#-### — [Name]
+**Phase:** PHASE-### — [Name]
 **Implementation order position:** N of M slices in phase
 
 ### Gate Summary

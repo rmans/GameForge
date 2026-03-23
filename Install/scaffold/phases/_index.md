@@ -15,6 +15,6 @@
 ## Adding a Phase
 
 1. Use the [phase template](../templates/phase-template.md).
-2. Assign the next P#-### ID (e.g., P1-001 for Phase 1, item 1).
-3. Save the file in this directory as `P#-###-name.md`.
+2. Assign the next PHASE-### ID (e.g., P1-001 for Phase 1, item 1).
+3. Save the file in this directory as `PHASE-###-name.md`.
 4. Register it in the table above.

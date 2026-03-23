@@ -3,14 +3,14 @@
 
 layer: phase
 display_name: "Phase Scope Gate"
-target_pattern: "phases/P*-*.md"
+target_pattern: "phases/PHASE-*-*.md"
 target_type: range
 
 preflight:
   required_files:
     - design/design-doc.md
     - phases/roadmap.md
-  glob_pattern: "phases/P*-*.md"
+  glob_pattern: "phases/PHASE-*-*.md"
   blocked_message: "No phase docs found. Run `/scaffold-new-phase` first."
 
 context_files:
@@ -76,7 +76,7 @@ l3_sections:
     parent: "## Criteria"
     questions:
       - "Are criteria testable — can you verify each one before starting?"
-      - "Do they reference what prior phases deliver (P#-### Complete)?"
+      - "Do they reference what prior phases deliver (PHASE-### Complete)?"
 
   "### Exit Criteria":
     parent: "## Criteria"
@@ -177,7 +177,7 @@ scope_guard:
       guidance: "Phases define what gets built; slices and specs define how it breaks down."
 
 adjudication:
-  editable_files_pattern: "phases/P*-*.md"
+  editable_files_pattern: "phases/PHASE-*-*.md"
   outcomes: [accept, reject, escalate, ambiguous_intent]
 
 review_lock:

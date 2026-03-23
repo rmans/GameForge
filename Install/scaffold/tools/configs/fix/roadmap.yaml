@@ -18,7 +18,7 @@ context_files:
     - design/glossary.md
     - scaffold/doc-authority.md
   dynamic:
-    - pattern: "phases/P*-*.md"
+    - pattern: "phases/PHASE-*-*.md"
     - pattern: "decisions/architecture-decision-record/ADR-*.md"
       filter: "status: Accepted"
 

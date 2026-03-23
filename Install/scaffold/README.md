@@ -166,7 +166,7 @@ Deferred issues with recorded decisions do not block stabilization.
 | 4 | `design/architecture.md`, `design/interfaces.md`, `design/authority.md` | Engineering conventions, contracts, data ownership |
 | 5 | `design/systems/SYS-###`, `design/state-transitions.md` | Per-system behavior, state machines |
 | 6 | `reference/*` | Signals, entities, resources, balance, enums/statuses |
-| 7 | `phases/P#-###` | Scope and milestones |
+| 7 | `phases/PHASE-###` | Scope and milestones |
 | 8 | `specs/SPEC-###` | Atomic testable behaviors |
 | 9 | `engine/*` | Engine constraints |
 | 10 | `tasks/TASK-###` | Implementation steps |

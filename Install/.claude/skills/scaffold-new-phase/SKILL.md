@@ -15,7 +15,7 @@ Create a new phase document for: **$ARGUMENTS**
 
 1. **Read the roadmap** at `scaffold/phases/roadmap.md` — find this phase in the Phase Overview table.
 2. **Read the phase template** at `scaffold/templates/phase-template.md`.
-3. **Read the phases index** at `scaffold/phases/_index.md` to find the next available P#-### ID.
+3. **Read the phases index** at `scaffold/phases/_index.md` to find the next available PHASE-### ID.
 4. **Read the design doc** at `scaffold/design/design-doc.md` for overall scope.
 5. **Read the systems index** at `scaffold/design/systems/_index.md` to see available systems.
 6. **Read all ADRs** — Glob `scaffold/decisions/ADR-*.md` and read each one. These are critical input for phase planning.
@@ -64,7 +64,7 @@ Walk the user through each section of the phase template, asking one question at
 
 ### 4. Create the Phase File
 
-Create `scaffold/phases/P#-###-<name>_draft.md` where:
+Create `scaffold/phases/PHASE-###-<name>_draft.md` where:
 
 - `P#` is the phase number from the roadmap.
 - `###` is the next sequential ID from `scaffold/phases/_index.md`.

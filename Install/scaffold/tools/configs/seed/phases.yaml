@@ -4,9 +4,9 @@ layer: phases
 display_name: "Phase Scope Gates"
 template: "scaffold/templates/phase-template.md"
 index_file: "phases/_index.md"
-id_pattern: "P#-###"
-id_prefix: "P"
-output_pattern: "phases/P*-*.md"
+id_pattern: "PHASE-###"
+id_prefix: "PHASE"
+output_pattern: "phases/PHASE-*-*.md"
 
 preflight:
   required_files:

@@ -1,7 +1,7 @@
 ---
 name: scaffold-revise-phases
 description: Update remaining Draft phases based on implementation feedback from a completed phase. Reads ADRs, known issues, playtest patterns, triage logs, and foundation recheck results. Writes a persistent revision log. Also refines the active Approved phase's scope from feedback.
-argument-hint: P#-### (the just-completed phase)
+argument-hint: PHASE-### (the just-completed phase)
 allowed-tools: Read, Edit, Write, Grep, Glob
 ---
 
@@ -15,11 +15,11 @@ This skill is the feedback loop between phase completion and the next phase's pl
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `P#-###` | Yes | — | The phase that was just completed. Feedback from its implementation drives the revision. |
+| `PHASE-###` | Yes | — | The phase that was just completed. Feedback from its implementation drives the revision. |
 
 ## Preconditions
 
-1. **Source phase exists** — glob `scaffold/phases/P#-###-*.md`. If not found, stop.
+1. **Source phase exists** — glob `scaffold/phases/PHASE-###-*.md`. If not found, stop.
 2. **Source phase is Complete** — verify `> **Status:**` is `Complete`. If not Complete, stop.
 3. **Check for remaining phases** — if no Draft or Approved phases remain, switch to **report-only mode**: gather feedback and surface roadmap-level insights, but skip scope edits. The feedback loop is mandatory even at end-of-project.
 
@@ -106,15 +106,15 @@ For each affected phase, classify proposed changes:
 ## Step 4 — Present Proposed Changes
 
 ```
-## Phase Revision: Post P#-### — [Name]
+## Phase Revision: Post PHASE-### — [Name]
 
-**Completed phase:** P#-### — [Name] (Status: Complete)
+**Completed phase:** PHASE-### — [Name] (Status: Complete)
 **Feedback sources:** N ADRs, N known issues, N playtest patterns, N triage actions
 
 ### Most Dangerous Planning Change
 [The revision most likely to cause downstream disruption if mishandled.]
 
-### Active Phase: P#-### — [Name] (Approved)
+### Active Phase: PHASE-### — [Name] (Approved)
 
 #### Safe Refinements
 | # | Section | Current | Proposed | Reason |
@@ -126,7 +126,7 @@ For each affected phase, classify proposed changes:
 |---|---------|---------|----------|--------|
 | 2 | In Scope | [current] | [proposed] | Implementation revealed gap |
 
-### Draft Phase: P#-### — [Name]
+### Draft Phase: PHASE-### — [Name]
 
 #### Changes
 | # | Section | Current | Proposed | Reason |
@@ -161,13 +161,13 @@ For each affected phase, classify proposed changes:
 
 ## Step 6 — Write Revision Log
 
-Write to `scaffold/decisions/revision-logs/REVISION-post-P#-###.md`. If the file already exists, append a new dated section.
+Write to `scaffold/decisions/revision-logs/REVISION-post-PHASE-###.md`. If the file already exists, append a new dated section.
 
 ```markdown
-# Revision Log: Post-P#-### — [Name]
+# Revision Log: Post-PHASE-### — [Name]
 
 > **Date:** YYYY-MM-DD
-> **Completed phase:** P#-### — [Name]
+> **Completed phase:** PHASE-### — [Name]
 > **Feedback sources:** N ADRs, N known issues, N playtest patterns, N triage actions
 
 ## Most Dangerous Planning Change
@@ -177,13 +177,13 @@ Write to `scaffold/decisions/revision-logs/REVISION-post-P#-###.md`. If the file
 
 | # | Phase | Section | Classification | Change | Reason |
 |---|-------|---------|---------------|--------|--------|
-| 1 | P#-### | Exit Criteria | Safe refinement | Added constraint | ADR-### |
+| 1 | PHASE-### | Exit Criteria | Safe refinement | Added constraint | ADR-### |
 
 ## Proposed Changes Rejected
 
 | # | Phase | Section | Proposed Change | Reason Rejected |
 |---|-------|---------|----------------|----------------|
-| 2 | P#-### | In Scope | Add save/load | User: belongs in next phase |
+| 2 | PHASE-### | In Scope | Add save/load | User: belongs in next phase |
 
 ## Roadmap Notes
 [Impacts on future phases, or "None."]
@@ -192,7 +192,7 @@ Write to `scaffold/decisions/revision-logs/REVISION-post-P#-###.md`. If the file
 ## Step 7 — Report
 
 ```
-## Revision [Complete / Conditional / Report-Only]: Post-P#-### Implementation
+## Revision [Complete / Conditional / Report-Only]: Post-PHASE-### Implementation
 
 | Metric | Value |
 |--------|-------|
@@ -212,13 +212,13 @@ Write to `scaffold/decisions/revision-logs/REVISION-post-P#-###.md`. If the file
 **LOW / MEDIUM / HIGH** — [Based on: milestone weakening proposals, large refinement volume, ADR-required changes, implementation friction signals. LOW = routine refinements only. MEDIUM = scope widening or friction detected. HIGH = milestone weakening or ADR-required changes.]
 
 ### Recommended Next Phase
-**P#-### — [Name]** is the next phase in roadmap order.
+**PHASE-### — [Name]** is the next phase in roadmap order.
 
 ### Next Steps
-- Run `/scaffold-fix phase P#-###` on the next phase
-- Run `/scaffold-iterate phase P#-###` for adversarial review
+- Run `/scaffold-fix phase PHASE-###` on the next phase
+- Run `/scaffold-iterate phase PHASE-###` for adversarial review
 - Run `/scaffold-validate --scope phases` to check structural integrity
-- Run `/scaffold-approve-phases P#-###` to approve the next phase for slice seeding
+- Run `/scaffold-approve-phases PHASE-###` to approve the next phase for slice seeding
 ```
 
 ## Rules

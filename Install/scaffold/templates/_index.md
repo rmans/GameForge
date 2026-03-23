@@ -8,7 +8,7 @@
 |------|----------|-----------|-----------------|
 | S1 | [design-doc-template.md](design-doc-template.md) | (singleton) | [design/](../design/) |
 | S2 | [system-template.md](system-template.md) | SYS-### | [design/systems/](../design/systems/_index.md) |
-| S8–S9 | [phase-template.md](phase-template.md) | P#-### | [phases/](../phases/_index.md) |
+| S8–S9 | [phase-template.md](phase-template.md) | PHASE-### | [phases/](../phases/_index.md) |
 | S10–S12 | [spec-template.md](spec-template.md) | SPEC-### | [specs/](../specs/_index.md) |
 | S10–S12 | [task-template.md](task-template.md) | TASK-### | [tasks/](../tasks/_index.md) |
 | S10–S12 | [slice-template.md](slice-template.md) | SLICE-### | [slices/](../slices/_index.md) |

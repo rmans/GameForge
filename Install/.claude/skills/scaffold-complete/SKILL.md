@@ -31,7 +31,7 @@ Resolve the document path:
   - `TASK-###` → `scaffold/tasks/TASK-###-*.md`
   - `SPEC-###` → `scaffold/specs/SPEC-###-*.md`
   - `SLICE-###` → `scaffold/slices/SLICE-###-*.md`
-  - `P#-###` → `scaffold/phases/P#-###-*.md`
+  - `PHASE-###` → `scaffold/phases/PHASE-###-*.md`
 
 If the document is not a planning-layer type (task, spec, slice, or phase), report the error and stop. Only planning-layer docs can be marked Complete.
 
@@ -53,7 +53,7 @@ If the document's status is already `Complete`, report that and stop. Skip all r
 **For specs, slices, and phases:** Before marking Complete, verify that **all children** are already Complete:
 - **Spec:** Find all existing tasks that implement it (grep `scaffold/tasks/TASK-*.md` for `Implements: SPEC-###`). All must have `Status: Complete`. This means "all defined implementing tasks are done" — if future tasks haven't been created yet, that's the user's responsibility to ensure before targeting the spec.
 - **Slice:** Read the slice's "Specs Included" table. Every listed spec must have `Status: Complete`.
-- **Phase:** Find all slices in this phase (grep `scaffold/slices/SLICE-*.md` for `Phase: P#-###`). All must have `Status: Complete`.
+- **Phase:** Find all slices in this phase (grep `scaffold/slices/SLICE-*.md` for `Phase: PHASE-###`). All must have `Status: Complete`.
 
 If any children are not Complete, report what's still pending and stop. Do not mark the document Complete.
 
@@ -125,8 +125,8 @@ Present a summary to the user:
 |----------|------------------|---------------------|
 | Task | `Implements: SPEC-###` | (leaf node — no children) |
 | Spec | (found via slice's "Specs Included" table) | Grep `scaffold/tasks/TASK-*.md` for `Implements: SPEC-###` |
-| Slice | `Phase: P#-###` | Read "Specs Included" table in the slice |
-| Phase | (top of hierarchy) | Grep `scaffold/slices/SLICE-*.md` for `Phase: P#-###` |
+| Slice | `Phase: PHASE-###` | Read "Specs Included" table in the slice |
+| Phase | (top of hierarchy) | Grep `scaffold/slices/SLICE-*.md` for `Phase: PHASE-###` |
 
 ## Rules
 

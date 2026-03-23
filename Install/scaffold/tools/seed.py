@@ -222,7 +222,7 @@ def _build_inventory(config):
         "specs": "specs/SPEC-*-*.md",
         "tasks": "tasks/TASK-*-*.md",
         "slices": "slices/SLICE-*-*.md",
-        "phases": "phases/P*-*.md",
+        "phases": "phases/PHASE-*-*.md",
         "engine": "engine/*.md",
         "style": "design/style-guide.md",
         "references": "reference/*.md",
@@ -478,7 +478,7 @@ def _analyze_existing(config, inventory, requirements):
         if abs_path.exists():
             content = abs_path.read_text(encoding="utf-8")
             # Check for references to non-existent docs
-            for ref_match in re.finditer(r"(SYS|SPEC|TASK|SLICE|P)\d+-\d+", content):
+            for ref_match in re.finditer(r"(SYS|SPEC|TASK|SLICE|PHASE)-\d+", content):
                 ref_id = ref_match.group()
                 # Try to find the referenced file
                 ref_patterns = {
@@ -486,9 +486,9 @@ def _analyze_existing(config, inventory, requirements):
                     "SPEC": "specs/SPEC-*",
                     "TASK": "tasks/TASK-*",
                     "SLICE": "slices/SLICE-*",
-                    "P": "phases/P*",
+                    "PHASE": "phases/PHASE-*",
                 }
-                prefix = re.match(r"(SYS|SPEC|TASK|SLICE|P)", ref_id).group()
+                prefix = re.match(r"(SYS|SPEC|TASK|SLICE|PHASE)", ref_id).group()
                 pattern = ref_patterns.get(prefix, "")
                 if pattern:
                     matches = list(SCAFFOLD_DIR.glob(f"{pattern}"))

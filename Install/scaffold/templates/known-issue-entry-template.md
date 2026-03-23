@@ -3,7 +3,7 @@
 > **Category:** Gap | Conflict | TBD | Ambiguity
 > **Status:** Open | Resolved
 > **Triggered by:** <!-- What discovered this issue? Examples: TASK-### implementation, iterate-systems SYS-### finding, code-review finding, validate XC-### finding, revise-references drift, revise-style aesthetic escalation, playtest PF-###, seed references gap. -->
-> **Blocking:** <!-- What this blocks: SLICE-###, P#-###, specific system/feature, "future", or "—" if non-blocking. -->
+> **Blocking:** <!-- What this blocks: SLICE-###, PHASE-###, specific system/feature, "future", or "—" if non-blocking. -->
 > **Created:** YYYY-MM-DD
 > **Last Updated:** YYYY-MM-DD
 > **Changelog:**

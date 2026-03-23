@@ -31,7 +31,7 @@
 
 ### When
 
-<!-- P#-### phase, SLICE-### scope, specific trigger condition. Must be concrete — "someday" is not a trigger. -->
+<!-- PHASE-### phase, SLICE-### scope, specific trigger condition. Must be concrete — "someday" is not a trigger. -->
 
 ### How
 

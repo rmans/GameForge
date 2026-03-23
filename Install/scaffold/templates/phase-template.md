@@ -1,4 +1,4 @@
-# P#-### — [Phase Name]
+# PHASE-### — [Phase Name]
 
 > **Authority:** Rank 6
 > **Layer:** Scope
@@ -36,7 +36,7 @@
 
 ### Entry Criteria
 
-<!-- What must be true before this phase can start. Prefer phase IDs (P#-### Complete) for sequencing. -->
+<!-- What must be true before this phase can start. Prefer phase IDs (PHASE-### Complete) for sequencing. -->
 
 ### Exit Criteria
 

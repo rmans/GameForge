@@ -3,7 +3,7 @@
 > **Authority:** Rank 8
 > **Layer:** Execution
 > **Implements:** SPEC-### (link to parent spec)
-> **Phase:** P#-### (link to parent phase)
+> **Phase:** PHASE-### (link to parent phase)
 > **Depends on:** — (TASK-### IDs this task requires to be complete first, or "—")
 > **Task Type:** foundation / behavior / integration / UI / verification / wiring
 > **Created:** YYYY-MM-DD

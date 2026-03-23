@@ -187,7 +187,7 @@ Display what was created, the dependency graph, and any remaining assumptions.
 | `engine` | architecture, system designs | 15 engine convention docs |
 | `style` | design-doc, system designs | style-guide, color-system, ui-kit, interaction-model, feedback-system, audio-direction |
 | `input` | design-doc, interaction-model | action-map, input-philosophy, bindings-kbm, bindings-gamepad, ui-navigation |
-| `phases` | roadmap, design-doc | P#-### phase scope gates |
+| `phases` | roadmap, design-doc | PHASE-### phase scope gates |
 | `slices` | phase, system designs, interfaces | SLICE-### vertical slices |
 | `specs` | slices, system designs, state-transitions | SPEC-### behavior specs |
 | `tasks` | specs, engine docs, architecture | TASK-### implementation tasks |

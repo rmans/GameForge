@@ -24,7 +24,7 @@ Decision documents are the project's feedback mechanism. They record why decisio
 | `--consequences` | No | — | (ADR only) Positive and negative consequences. |
 | `--affected` | No | — | Comma-separated list of affected document paths. |
 | `--fix-options` | No | — | (KI only) Fix options, comma-separated. |
-| `--blocking` | No | — | (KI only) What this blocks: `SLICE-###`, `P#-###`, system name, `future`, or `—`. |
+| `--blocking` | No | — | (KI only) What this blocks: `SLICE-###`, `PHASE-###`, system name, `future`, or `—`. |
 | `--compromise` | No | — | (DD only) What's wrong and what you're living with. |
 | `--why-accepted` | No | — | (DD only) Why acceptable for now. |
 | `--payoff-when` | No | — | (DD only) When this gets fixed (phase, slice, trigger). |

@@ -1,7 +1,7 @@
 ---
 name: scaffold-approve-phases
 description: Lifecycle gate that approves a single Draft phase for slice seeding. Enforces ordering, freshness, entry criteria satisfaction, and content readiness. Renames file, updates index and roadmap.
-argument-hint: P#-###
+argument-hint: PHASE-###
 allowed-tools: Read, Edit, Grep, Glob, Bash
 ---
 
@@ -15,13 +15,13 @@ This skill is a **lifecycle gate**, not a planning-analysis skill. It relies on 
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `P#-###` | Yes | — | The specific phase to approve. Must be the next Draft phase in roadmap order. |
+| `PHASE-###` | Yes | — | The specific phase to approve. Must be the next Draft phase in roadmap order. |
 
 ## Edge Cases
 
-- **Phase file missing** → stop: "P#-### is registered but no file exists."
-- **Phase is already Approved** → stop: "P#-### is already Approved. No action needed."
-- **Phase is Complete** → stop: "P#-### is already Complete."
+- **Phase file missing** → stop: "PHASE-### is registered but no file exists."
+- **Phase is already Approved** → stop: "PHASE-### is already Approved. No action needed."
+- **Phase is Complete** → stop: "PHASE-### is already Complete."
 - **Status-filename mismatch** → run `/scaffold-validate --scope phases` and stop.
 
 ## Preconditions
@@ -36,7 +36,7 @@ This is a **hard stop**.
 
 ### 2. No other phase is Approved but not Complete
 
-If another phase is already Approved and not Complete (active), **stop**: "Another phase is already active: P#-### — [Name] (Status: Approved). Complete it before approving another."
+If another phase is already Approved and not Complete (active), **stop**: "Another phase is already active: PHASE-### — [Name] (Status: Approved). Complete it before approving another."
 
 This is a **hard stop** — only one active phase at a time, matching the single-active-slice discipline at the slice level.
 
@@ -44,7 +44,7 @@ This is a **hard stop** — only one active phase at a time, matching the single
 
 The target must be the next Draft phase in `scaffold/phases/roadmap.md` ordering.
 
-If not, **stop**: "P#-### is not the next Draft phase in roadmap order. P#-### is earlier and still Draft."
+If not, **stop**: "PHASE-### is not the next Draft phase in roadmap order. PHASE-### is earlier and still Draft."
 
 **Override path:** User may explicitly confirm out-of-order approval.
 
@@ -64,17 +64,17 @@ This is a **hard stop** — no override. A phase with unmet entry criteria canno
 ### 5. Review and iterate freshness
 
 Verify an iterate log exists:
-- Glob `scaffold/decisions/review/ITERATE-phase-P#-###-*.md` for the iterate log.
+- Glob `scaffold/decisions/review/ITERATE-phase-PHASE-###-*.md` for the iterate log.
 
-If no iterate log exists, **stop**: "P#-### was never iterated. Run `/scaffold-iterate phase` before approving."
+If no iterate log exists, **stop**: "PHASE-### was never iterated. Run `/scaffold-iterate phase` before approving."
 
-If the phase file was modified after the most recent iterate log, **stop**: "P#-### was modified after its last review (log: YYYY-MM-DD, file modified: YYYY-MM-DD). Rerun `/scaffold-fix phase` and `/scaffold-iterate phase`."
+If the phase file was modified after the most recent iterate log, **stop**: "PHASE-### was modified after its last review (log: YYYY-MM-DD, file modified: YYYY-MM-DD). Rerun `/scaffold-fix phase` and `/scaffold-iterate phase`."
 
 This is a **hard stop**.
 
 ### 6. No unresolved escalated issues from iterate
 
-Read the latest iterate log (`scaffold/decisions/review/ITERATE-phase-P#-###-*.md`). If it contains escalated issues presented to the user (Human Decision Presentation pattern), verify they have been resolved. Unresolved escalations mean the reviewer and Claude could not agree — approval without human resolution is unsafe.
+Read the latest iterate log (`scaffold/decisions/review/ITERATE-phase-PHASE-###-*.md`). If it contains escalated issues presented to the user (Human Decision Presentation pattern), verify they have been resolved. Unresolved escalations mean the reviewer and Claude could not agree — approval without human resolution is unsafe.
 
 If unresolved escalations exist, **stop**: "Iterate log contains N unresolved escalated issues. Resolve them before approving."
 
@@ -120,14 +120,14 @@ If any content readiness or slice readiness check fails, **stop** and suggest ru
 ## Step 1 — Approve the Phase
 
 1. Update `> **Status:**` from `Draft` to `Approved`.
-2. Rename: `P#-###-name_draft.md` → `P#-###-name_approved.md` using `git mv`.
+2. Rename: `PHASE-###-name_draft.md` → `PHASE-###-name_approved.md` using `git mv`.
 3. Update `scaffold/phases/_index.md` with the new filename.
 4. Update `scaffold/phases/roadmap.md` Phase Overview status.
 
 ## Step 2 — Report
 
 ```
-## Phase Approved: P#-### — [Name]
+## Phase Approved: PHASE-### — [Name]
 
 ### Gate Summary
 | Check | Result |
@@ -150,13 +150,13 @@ If any content readiness or slice readiness check fails, **stop** and suggest ru
 ### Remaining Draft Phases
 | Order | Phase | Status |
 |-------|-------|--------|
-| N+1 | P#-### — [Name] | Draft |
+| N+1 | PHASE-### — [Name] | Draft |
 | ... | ... | ... |
 
 ### Next Steps
 - Run `/scaffold-seed slices` to generate vertical slices for this phase
 - Or run `/scaffold-new-slice [slice-name]` to create slices one at a time
-- After implementing this phase, run `/scaffold-revise-phases P#-###` to update remaining phases
+- After implementing this phase, run `/scaffold-revise-phases PHASE-###` to update remaining phases
 ```
 
 ## Rules

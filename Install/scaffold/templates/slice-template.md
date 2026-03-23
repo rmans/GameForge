@@ -1,7 +1,7 @@
 # SLICE-### — [Slice Name]
 
 > **Layer:** Integration
-> **Phase:** P#-### (link to parent phase)
+> **Phase:** PHASE-### (link to parent phase)
 > **Depends on:** — (SLICE-### IDs of slices that must be Complete before this slice can be approved, or "—" if none)
 > **Created:** YYYY-MM-DD
 > **Last Updated:** YYYY-MM-DD

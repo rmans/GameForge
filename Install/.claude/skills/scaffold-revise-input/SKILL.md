@@ -1,7 +1,7 @@
 ---
 name: scaffold-revise-input
 description: Detect Step 6 input doc drift from implementation feedback and apply safe updates or escalate for decisions. Reads ADRs, known issues, spec/task friction, code review findings, interaction model changes, and Step 5 doc changes to identify when input docs no longer match what was actually built or what upstream docs now define. Use after a phase or slice completes, or when revise-foundation detects Step 6 drift.
-argument-hint: [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword,TRIAGE:action,SPEC:keyword,CODE-REVIEW:keyword,STYLE:doc-changed] [--target doc.md]
+argument-hint: [--source PHASE-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword,TRIAGE:action,SPEC:keyword,CODE-REVIEW:keyword,STYLE:doc-changed] [--target doc.md]
 allowed-tools: Read, Edit, Grep, Glob
 ---
 
@@ -22,7 +22,7 @@ This is distinct from:
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `--source` | No | auto-detect | What triggered the revision: `P#-###` (phase completed), `SLICE-###` (slice completed), `foundation-recheck` (dispatched from revise-foundation). If omitted, scans all recent feedback. |
+| `--source` | No | auto-detect | What triggered the revision: `PHASE-###` (phase completed), `SLICE-###` (slice completed), `foundation-recheck` (dispatched from revise-foundation). If omitted, scans all recent feedback. |
 | `--signals` | No | — | Comma-separated list of specific drift signals to process. When provided, skip the broad feedback scan and process only these items. This is the primary dispatch mechanism — `revise-foundation` identifies which signals affect input docs and passes them here. |
 | `--target` | No | all | Target a single input doc by filename (e.g., `--target action-map.md`). When set, only edit that doc; flag cross-doc implications for fix-input. |
 
@@ -307,7 +307,7 @@ After all actions (auto-updates, escalation resolutions), append a revision entr
 # Input Revision: YYYY-MM-DD
 
 **Revision Timestamp:** YYYY-MM-DDTHH:MM:SSZ
-**Source:** [P#-### completed / SLICE-### completed / foundation-recheck / broad scan]
+**Source:** [PHASE-### completed / SLICE-### completed / foundation-recheck / broad scan]
 **Feedback items processed:** N
 **Auto-updated:** N
 **Escalated:** N issues
@@ -364,7 +364,7 @@ After all actions (auto-updates, escalation resolutions), append a revision entr
 ### Summary
 | Field | Value |
 |-------|-------|
-| Source | [P#-### / SLICE-### / foundation-recheck / broad scan] |
+| Source | [PHASE-### / SLICE-### / foundation-recheck / broad scan] |
 | Feedback items | N processed |
 | Auto-updated | N |
 | Escalated | N issues (N resolved, N deferred) |

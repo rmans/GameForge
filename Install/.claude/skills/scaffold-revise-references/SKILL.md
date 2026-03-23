@@ -1,7 +1,7 @@
 ---
 name: scaffold-revise-references
 description: Detect reference/architecture drift from implementation feedback and apply safe updates or escalate for decisions. Reads ADRs, known issues, spec/task friction, code review findings, and system doc changes to identify when Step 3 docs no longer match what was actually built. Use after a phase or slice completes, or when revise-foundation detects Step 3 drift.
-argument-hint: [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword] [--target doc.md]
+argument-hint: [--source PHASE-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword] [--target doc.md]
 allowed-tools: Read, Edit, Grep, Glob
 ---
 
@@ -20,7 +20,7 @@ This is distinct from:
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `--source` | No | auto-detect | What triggered the revision: `P#-###` (phase completed), `SLICE-###` (slice completed), `foundation-recheck` (dispatched from revise-foundation). If omitted, scans all recent feedback. |
+| `--source` | No | auto-detect | What triggered the revision: `PHASE-###` (phase completed), `SLICE-###` (slice completed), `foundation-recheck` (dispatched from revise-foundation). If omitted, scans all recent feedback. |
 | `--signals` | No | — | Comma-separated list of specific drift signals to process. When provided, skip the broad feedback scan and process only these items. Accepted formats: `ADR-###`, `KI:keyword`, `TRIAGE:action-keyword`, `SPEC:friction-keyword`, `CODE-REVIEW:finding-keyword`, `SYSTEM:SYS-###-changed`. This is the primary dispatch mechanism — `revise-foundation` identifies which signals affect reference docs and passes them here. |
 | `--target` | No | all | Target a single doc by filename (e.g., `--target authority.md`). When set, only that doc is edited. Cross-doc implications are flagged but not applied to other docs. |
 
@@ -222,7 +222,7 @@ Apply safe alignment updates within Step 3 docs following canonical direction. F
 ```markdown
 # Reference Revision: YYYY-MM-DD
 
-**Source:** [P#-### completed / SLICE-### completed / foundation-recheck / broad scan]
+**Source:** [PHASE-### completed / SLICE-### completed / foundation-recheck / broad scan]
 **Feedback items processed:** N
 **Auto-updated:** N
 **Escalated:** N issues
@@ -255,7 +255,7 @@ Apply safe alignment updates within Step 3 docs following canonical direction. F
 ### Summary
 | Field | Value |
 |-------|-------|
-| Source | [P#-### / SLICE-### / foundation-recheck / broad scan] |
+| Source | [PHASE-### / SLICE-### / foundation-recheck / broad scan] |
 | Feedback items | N processed |
 | Auto-updated | N |
 | Escalated | N issues (N resolved, N deferred) |

@@ -30,7 +30,7 @@
 | 6 | S3 | [reference/balance-params.md](reference/balance-params.md) | Reference — tunable numbers |
 | 6 | S3 | [reference/enums-and-statuses.md](reference/enums-and-statuses.md) | Reference — shared vocabulary |
 | 7 | S8 | [phases/roadmap.md](phases/roadmap.md) | Scope — project roadmap |
-| 7 | S9 | phases/P#-### | Scope — phase gates |
+| 7 | S9 | phases/PHASE-### | Scope — phase gates |
 | 8 | S10 | slices/SLICE-### | Integration — vertical slice contracts |
 | 9 | S11–12 | specs/SPEC-### | Behavior — atomic specs |
 | 10 | S4 | engine/* | Implementation — engine constraints |
@@ -91,7 +91,7 @@ This table defines what each document reads (influenced by) and what reads it (i
 | **balance-params.md** | design-doc, system designs, resource-definitions | specs, tasks, playtesting |
 | **enums-and-statuses.md** | state-transitions, entity-components | engine coding doc, specs, tasks |
 | **phases/roadmap.md** | design-doc, system designs, architecture, ADRs, playtest patterns | phases, revision loop |
-| **phases/P#-###** | design-doc, system designs, architecture, roadmap, ADRs | slices, tasks |
+| **phases/PHASE-###** | design-doc, system designs, architecture, roadmap, ADRs | slices, tasks |
 | **slices/SLICE-###** | design-doc, system designs, architecture, interfaces, phases, ADRs | specs, tasks, revision loop |
 | **specs/SPEC-###** | system designs, architecture, interfaces, authority, references, state-transitions, interaction-model, feedback-system, slices, ADRs, triage decisions | tasks, code review, completion tracking |
 | **engine/coding-best-practices** | architecture, authority, interfaces, signal-registry, entity-components, enums-and-statuses | All other engine docs (convention source), tasks, code review |
@@ -181,7 +181,7 @@ Architecture, interfaces, and authority are all the same category: technical enf
 | Doc | What | Why | Who reads | Who writes | When created | How it's used |
 |-----|------|-----|-----------|------------|-------------|---------------|
 | **phases/roadmap.md** | Vision checkpoint, phase overview, capability ladder, system coverage, phase boundaries, transition protocol | Defines the PROJECT PLAN from start to ship | Phases, revise-roadmap, revise-phases | new-roadmap, revise-roadmap | Step 8 | Controls phase sequencing. Updated after each phase completes. |
-| **phases/P#-###** | Phase scope gates: goal, capability unlocked, in/out scope, entry/exit criteria, systems covered | Defines WHEN behavior gets built and what milestone it proves | Slices, roadmap | seed phases, revise-phases | Step 9 (planning) | Controls implementation order. Only one phase is Approved at a time. |
+| **phases/PHASE-###** | Phase scope gates: goal, capability unlocked, in/out scope, entry/exit criteria, systems covered | Defines WHEN behavior gets built and what milestone it proves | Slices, roadmap | seed phases, revise-phases | Step 9 (planning) | Controls implementation order. Only one phase is Approved at a time. |
 
 ### Rank 8 — Integration
 

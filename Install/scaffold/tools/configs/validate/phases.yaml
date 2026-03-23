@@ -2,7 +2,7 @@
 
 scope: phases
 display_name: "Phases"
-glob_pattern: "phases/P*-*.md"
+glob_pattern: "phases/PHASE-*-*.md"
 
 activation:
   required_files:
@@ -15,26 +15,26 @@ checks:
       description: "Phase files registered in _index.md"
       detection: index_registration
       index_file: "phases/_index.md"
-      glob_pattern: "phases/P*-*.md"
-      id_pattern: "P\\d+-\\d+"
+      glob_pattern: "phases/PHASE-*-*.md"
+      id_pattern: "PHASE-\\d+"
       severity: FAIL
 
     - id: phases-status-filename-sync
       description: "Filename suffix matches internal Status"
       detection: status_filename_sync
-      glob_pattern: "phases/P*-*.md"
+      glob_pattern: "phases/PHASE-*-*.md"
       severity: FAIL
 
     - id: phases-structure
       description: "Required sections present"
       detection: section_structure
-      glob_pattern: "phases/P*-*.md"
+      glob_pattern: "phases/PHASE-*-*.md"
       required_sections: [Objective, "Capability Unlocked", "In Scope", "Out of Scope", "Entry Criteria", "Exit Criteria", Deliverables]
       severity: FAIL
 
     - id: phases-review-freshness
       description: "Review log post-dates file modification"
       detection: review_freshness
-      glob_pattern: "phases/P*-*.md"
+      glob_pattern: "phases/PHASE-*-*.md"
       review_pattern: "ITERATE-phase-*"
       severity: WARN

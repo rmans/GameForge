@@ -28,7 +28,7 @@ context_files:
   dynamic:
     - pattern: "decisions/architecture-decision-record/ADR-*.md"
       filter: "status: Accepted"
-    - pattern: "phases/P*-*.md"
+    - pattern: "phases/PHASE-*-*.md"
       label: "Phase files for sequence validation"
 
 defaults:

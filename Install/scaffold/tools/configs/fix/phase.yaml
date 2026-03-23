@@ -2,14 +2,14 @@
 
 layer: phase
 display_name: "Phase Scope Gate"
-target_pattern: "phases/P*-*.md"
+target_pattern: "phases/PHASE-*-*.md"
 target_type: range
 template: "scaffold/templates/phase-template.md"
 
 preflight:
   required_files:
     - phases/roadmap.md
-  glob_pattern: "phases/P*-*.md"
+  glob_pattern: "phases/PHASE-*-*.md"
   blocked_message: "No phase files found."
 
 context_files:
@@ -25,7 +25,7 @@ context_files:
   per_target:
     - type: adjacent_phases
 
-editable_files_pattern: "phases/P*-*.md"
+editable_files_pattern: "phases/PHASE-*-*.md"
 
 defaults:
   max_iterations: 10

@@ -1,7 +1,7 @@
 ---
 name: scaffold-revise-roadmap
 description: Update the roadmap after a phase completes. Moves the phase to Completed Phases with delivery notes, updates Current Phase, absorbs ADR feedback, and surfaces roadmap-level changes for decision.
-argument-hint: P#-### (the just-completed phase)
+argument-hint: PHASE-### (the just-completed phase)
 allowed-tools: Read, Edit, Write, Grep, Glob
 ---
 
@@ -17,11 +17,11 @@ This is distinct from `/scaffold-revise-phases` which updates remaining phase *f
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `P#-###` | Yes | — | The phase that was just completed. |
+| `PHASE-###` | Yes | — | The phase that was just completed. |
 
 ## Preconditions
 
-1. **Source phase exists** — glob `scaffold/phases/P#-###-*.md`. If not found, stop.
+1. **Source phase exists** — glob `scaffold/phases/PHASE-###-*.md`. If not found, stop.
 2. **Source phase is Complete** — verify `> **Status:**` is `Complete`. If not Complete, stop.
 3. **Roadmap exists** — verify `scaffold/phases/roadmap.md` exists and is not at template defaults.
 4. **Required sections exist** — verify the roadmap contains: Completed Phases, ADR Feedback Log, Phase Overview, Current Phase, Revision History. If any are missing, stop and instruct to run `/scaffold-fix roadmap` first. Writing into missing sections corrupts the document.
@@ -50,7 +50,7 @@ Read `scaffold/decisions/playtest-feedback.md`. Check for Pattern or ACT NOW ent
 
 ### 1e. Revision log from revise-phases
 
-If a revision log exists at `scaffold/decisions/revision-logs/REVISION-post-P#-###.md`, incorporate its roadmap notes. If not, continue — this skill does not require revise-phases to have run first.
+If a revision log exists at `scaffold/decisions/revision-logs/REVISION-post-PHASE-###.md`, incorporate its roadmap notes. If not, continue — this skill does not require revise-phases to have run first.
 
 ### 1f. Implementation friction signals
 
@@ -68,12 +68,12 @@ Check for signs the phase was harder than expected:
 
 ### 2a. Move to Completed Phases
 
-**Dedupe check:** If P#-### already has a Completed Phases entry, update/append notes rather than duplicate.
+**Dedupe check:** If PHASE-### already has a Completed Phases entry, update/append notes rather than duplicate.
 
 Add (or update) an entry in the Completed Phases section:
 
 ```markdown
-### P#-### — [Name]
+### PHASE-### — [Name]
 - **Completed:** YYYY-MM-DD
 - **Delivered:** [Capability Unlocked text]
 - **Key deliverables:** [list from phase file]
@@ -89,7 +89,7 @@ Add (or update) an entry in the Completed Phases section:
 For each new ADR filed during this phase, add an entry:
 
 ```markdown
-| ADR-### | P#-### | [Brief description] | [Impact on remaining phases] |
+| ADR-### | PHASE-### | [Brief description] | [Impact on remaining phases] |
 ```
 
 ### 2c. Update Phase Overview
@@ -115,7 +115,7 @@ If implementation feedback suggests roadmap-level changes beyond individual phas
 Append to the Revision History section:
 
 ```markdown
-| YYYY-MM-DD | P#-### completed; roadmap advanced to P#-### [status]; N ADRs logged; friction: [level] |
+| YYYY-MM-DD | PHASE-### completed; roadmap advanced to PHASE-### [status]; N ADRs logged; friction: [level] |
 ```
 
 ## Step 3 — Classify Roadmap Changes
@@ -149,7 +149,7 @@ Append to the Revision History section:
 ## Step 5 — Report
 
 ```
-## Roadmap Revised: Post-P#-### — [Name]
+## Roadmap Revised: Post-PHASE-### — [Name]
 
 ### Phase Completion Summary
 - **Capability delivered:** [Capability Unlocked text]
@@ -160,10 +160,10 @@ Append to the Revision History section:
 ### Roadmap Updates Applied
 | # | Section | Change |
 |---|---------|--------|
-| 1 | Completed Phases | Added P#-### entry with delivery notes |
+| 1 | Completed Phases | Added PHASE-### entry with delivery notes |
 | 2 | ADR Feedback Log | Added N ADR entries |
-| 3 | Phase Overview | P#-### → Complete |
-| 4 | Current Phase | [P#-### (Approved) / No active phase — pending approval] |
+| 3 | Phase Overview | PHASE-### → Complete |
+| 4 | Current Phase | [PHASE-### (Approved) / No active phase — pending approval] |
 | 5 | Revision History | Added transition entry |
 
 ### Roadmap-Level Observations
@@ -173,10 +173,10 @@ Append to the Revision History section:
 **Stable / Decreased / Improved** — [Based on: friction level, ADR count, number of roadmap-level observations, whether downstream revisions found major changes.]
 
 ### Next Steps
-- Run `/scaffold-revise-phases P#-###` to update remaining phase files from feedback
-- Run `/scaffold-fix phase P#-###` on the next phase
-- Run `/scaffold-iterate phase P#-###` for adversarial review
-- Run `/scaffold-approve-phases P#-###` to approve the next phase
+- Run `/scaffold-revise-phases PHASE-###` to update remaining phase files from feedback
+- Run `/scaffold-fix phase PHASE-###` on the next phase
+- Run `/scaffold-iterate phase PHASE-###` for adversarial review
+- Run `/scaffold-approve-phases PHASE-###` to approve the next phase
 ```
 
 ## Rules

@@ -1,7 +1,7 @@
 ---
 name: scaffold-revise-engine
 description: Detect engine doc drift from implementation feedback and apply safe updates or escalate for decisions. Reads ADRs, known issues, spec/task friction, code review findings, and Step 3 doc changes to identify when engine docs no longer match what was actually built or what Steps 1-3 now define. Use after a phase or slice completes, or when revise-foundation detects Step 4 drift.
-argument-hint: [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword] [--target doc-stem]
+argument-hint: [--source PHASE-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword] [--target doc-stem]
 allowed-tools: Read, Edit, Grep, Glob
 ---
 
@@ -20,7 +20,7 @@ This is distinct from:
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `--source` | No | auto-detect | What triggered the revision: `P#-###` (phase completed), `SLICE-###` (slice completed), `foundation-recheck` (dispatched from revise-foundation). If omitted, scans all recent feedback. |
+| `--source` | No | auto-detect | What triggered the revision: `PHASE-###` (phase completed), `SLICE-###` (slice completed), `foundation-recheck` (dispatched from revise-foundation). If omitted, scans all recent feedback. |
 | `--signals` | No | — | Comma-separated list of specific drift signals to process. When provided, skip the broad feedback scan and process only these items. Accepted formats: `ADR-###`, `KI:keyword`, `TRIAGE:action-keyword`, `SPEC:friction-keyword`, `CODE-REVIEW:finding-keyword`, `REFS:doc-changed`. This is the primary dispatch mechanism — `revise-foundation` identifies which signals affect engine docs and passes them here. |
 | `--target` | No | all | Target a single engine doc by stem (e.g., `--target coding-best-practices`). When set, only that doc is edited. Cross-engine implications are flagged but not applied to other engine docs. |
 
@@ -299,7 +299,7 @@ This is a lightweight post-edit validation, not a full `/scaffold-validate --sco
 # Engine Revision: YYYY-MM-DD
 
 **Revision Timestamp:** YYYY-MM-DDTHH:MM:SSZ
-**Source:** [P#-### completed / SLICE-### completed / foundation-recheck / broad scan]
+**Source:** [PHASE-### completed / SLICE-### completed / foundation-recheck / broad scan]
 **Feedback items processed:** N
 **Auto-updated:** N
 **Escalated:** N issues
@@ -338,7 +338,7 @@ This is a lightweight post-edit validation, not a full `/scaffold-validate --sco
 ### Summary
 | Field | Value |
 |-------|-------|
-| Source | [P#-### / SLICE-### / foundation-recheck / broad scan] |
+| Source | [PHASE-### / SLICE-### / foundation-recheck / broad scan] |
 | Feedback items | N processed |
 | Auto-updated | N |
 | Escalated | N issues (N resolved, N deferred) |

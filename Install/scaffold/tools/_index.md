@@ -391,7 +391,7 @@ Per-layer YAML configs in `configs/iterate/` define topics, context files, scope
 | `spec.yaml` | Behavior specs | Range (SPEC-###) |
 | `task.yaml` | Implementation tasks | Range (TASK-###) |
 | `roadmap.yaml` | Roadmap | Fixed (roadmap.md) |
-| `phase.yaml` | Phase scope gates | Range (P#-###) |
+| `phase.yaml` | Phase scope gates | Range (PHASE-###) |
 | `slice.yaml` | Vertical slices | Range (SLICE-###) |
 | `references.yaml` | Reference/architecture docs | Multi-doc |
 | `style.yaml` | Style/UX docs | Multi-doc |

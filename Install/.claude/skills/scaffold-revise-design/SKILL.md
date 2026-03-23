@@ -1,7 +1,7 @@
 ---
 name: scaffold-revise-design
 description: Detect design drift from implementation feedback and apply safe updates or dispatch to init-design for decisions. Reads ADRs, known issues, playtest patterns, and downstream friction to identify when the design doc no longer matches what the project is actually building. Use after a phase or slice completes, or when revise-foundation detects Step 1 drift.
-argument-hint: [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:entry,PT:pattern,TRIAGE:action]
+argument-hint: [--source PHASE-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:entry,PT:pattern,TRIAGE:action]
 allowed-tools: Read, Edit, Grep, Glob
 ---
 
@@ -21,7 +21,7 @@ This is distinct from:
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `--source` | No | auto-detect | What triggered the revision: `P#-###` (phase completed), `SLICE-###` (slice completed), `foundation-recheck` (dispatched from revise-foundation). If omitted, scans all recent feedback. |
+| `--source` | No | auto-detect | What triggered the revision: `PHASE-###` (phase completed), `SLICE-###` (slice completed), `foundation-recheck` (dispatched from revise-foundation). If omitted, scans all recent feedback. |
 | `--signals` | No | — | Comma-separated list of specific drift signals to process. When provided, skip the broad feedback scan (Step 1) and process only these items. Accepted formats: `ADR-###` (specific ADR), `KI:description` (known-issue entry keyword), `PT:pattern-name` (playtest pattern), `TRIAGE:action-keyword` (triage upstream action). This is the primary dispatch mechanism — `revise-foundation` identifies which signals affect the design doc and passes them here so revise-design doesn't re-scan everything. |
 
 ## Preconditions
@@ -45,7 +45,7 @@ This is the expected path when dispatched from `revise-foundation`, which has al
 - **No match** → WARN: "Signal [X] could not be resolved to a source document. Skipping." Continue with remaining signals.
 - **Multiple matches** → use the most recent match by date. If dates are ambiguous, present the matches to the user and ask which to process.
 
-**If `--signals` is not provided:** Run the broad scan below. This is the expected path for manual invocation or `--source P#-###`/`SLICE-###`.
+**If `--signals` is not provided:** Run the broad scan below. This is the expected path for manual invocation or `--source PHASE-###`/`SLICE-###`.
 
 Read feedback sources relevant to the `--source` argument:
 
@@ -226,7 +226,7 @@ After all actions in this run (auto-updates applied, reconciliations dispatched,
 ```markdown
 # Design Revision: YYYY-MM-DD
 
-**Source:** [P#-### completed / SLICE-### completed / foundation-recheck / broad scan]
+**Source:** [PHASE-### completed / SLICE-### completed / foundation-recheck / broad scan]
 **Feedback items processed:** N
 **Auto-updated:** N
 **Reconciled:** N sections
@@ -264,7 +264,7 @@ After all actions in this run (auto-updates applied, reconciliations dispatched,
 ### Summary
 | Field | Value |
 |-------|-------|
-| Source | [P#-### / SLICE-### / foundation-recheck / broad scan] |
+| Source | [PHASE-### / SLICE-### / foundation-recheck / broad scan] |
 | Feedback items | N processed |
 | Auto-updated | N |
 | Reconciled | N sections dispatched to init-design |

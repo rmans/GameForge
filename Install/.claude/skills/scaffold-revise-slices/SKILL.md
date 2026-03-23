@@ -104,7 +104,7 @@ Flag as a **new slice candidate** for the user to decide — do not create the s
 For each affected slice, present proposed changes with classification:
 
 ```
-## Slice Revision: Phase P#-### — [Name]
+## Slice Revision: Phase PHASE-### — [Name]
 
 **Completed slice:** SLICE-### — [Name] (Status: Complete)
 **Feedback sources:** N ADRs, N known issues, N triage actions

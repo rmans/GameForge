@@ -2,7 +2,7 @@
 
 > **Revision Timestamp:** YYYY-MM-DDTHH:MM:SSZ
 > **Layer:** Systems | References | Engine
-> **Source:** P#-### completed | SLICE-### completed | foundation-recheck | broad scan
+> **Source:** PHASE-### completed | SLICE-### completed | foundation-recheck | broad scan
 > **Last Updated:** YYYY-MM-DD
 > **Changelog:**
 > - YYYY-MM-DD: Revision completed.

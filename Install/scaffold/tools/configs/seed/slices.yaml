@@ -16,7 +16,7 @@ preflight:
 
 upstream_sources:
   - type: phase
-    glob: "phases/P*-*_approved*.md"
+    glob: "phases/PHASE-*_approved*.md"
     extract: "Phase goals and scope drive slice selection"
   - type: system
     glob: "design/systems/SYS-*-*.md"
