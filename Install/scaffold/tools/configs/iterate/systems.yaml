@@ -114,6 +114,15 @@ l3_sections:
       - "Are feel requirements specific to this system (not generic 'should feel responsive')?"
       - "Does it defer detailed visual/audio to the style and audio docs where appropriate?"
 
+  "### Asset Needs":
+    parent: "## Player Experience"
+    questions:
+      - "Does this list the art and audio assets this system requires at a design level?"
+      - "Is each asset tied to a specific player action, state change, or game event?"
+      - "Are animation sets identified for entities this system controls?"
+      - "Are sound effects identified for key interactions and state changes?"
+      - "Does this avoid production specs (dimensions, file formats) and stay at design-level identity?"
+
   # -- State & Lifecycle --
 
   "### Owned State":

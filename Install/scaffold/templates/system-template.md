@@ -71,6 +71,24 @@ Example:
 
 - ...
 
+### Asset Needs
+
+<!-- What art and audio does this system require? Not production specs — design-level identification of what needs to exist. Specs inherit from this list when identifying their Asset Requirements.
+
+| Asset | Type | Context | Used When |
+|-------|------|---------|-----------|
+
+Type: Sprite, Mesh, Animation, Icon, UI Element, Texture, Tileset, SFX, Music, Ambience, Voice
+Context: brief description of what it looks/sounds like
+Used When: which player action, state, or event triggers it
+
+Examples:
+| Colonist walk cycle | Animation | Smooth locomotion, speed-matched to movement stat | Moving between tasks |
+| Pickaxe strike impact | SFX | Sharp metallic hit, varies by surface material | Mining action tick |
+| Construction scaffold | Mesh | Transparent frame showing planned structure outline | Building is in Planned state |
+| Low health warning | SFX | Subtle heartbeat pulse, increases with severity | Colonist HP below 25% |
+| Build mode grid overlay | UI Element | Semi-transparent grid showing valid placement cells | Player enters build mode | -->
+
 ## State & Lifecycle
 
 ### Owned State

@@ -110,6 +110,18 @@ Downstream docs cite them using `Invariant: <ShortName>`. -->
 ### Audio Direction
 <!-- Sound design philosophy. What does the game sound like? -->
 
+### Entity Presentation
+<!-- How do the major content categories look and sound? Not style guide detail — design-level identity.
+Describe the visual and audio character of each major entity type so downstream docs (style guide, system designs, specs) know what assets are needed.
+
+| Entity / Category | Visual Identity | Animation Set | Sound Identity |
+|-------------------|----------------|---------------|----------------|
+
+Examples:
+| Colonists | 3D low-poly humanoids, distinct silhouettes per role | Walk, run, idle, 2H gun fire, axe side swing, overhead mining, carry, collapse | Footsteps (surface-aware), tool impacts, voice barks (effort, pain, idle chatter) |
+| Buildings | Modular grid-snapped structures, construction scaffolding phase | Build-up sequence (foundation → frame → complete), damage states, destruction | Construction hammering, ambient hum (powered), creak/groan (damaged) |
+| Environment | Procedural terrain with biome-specific vegetation | Wind sway (vegetation), weather particles | Biome ambience loops, weather layers, wildlife | -->
+
 ### Player Information Model
 <!-- What information is always visible, partially visible, hidden, or must be discovered? -->
 

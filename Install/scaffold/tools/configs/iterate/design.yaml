@@ -203,6 +203,15 @@ l3_sections:
       - "Does audio direction support the Place & Time?"
       - "Audio that doesn't match the setting breaks immersion."
 
+  "### Entity Presentation":
+    parent: "## Presentation"
+    questions:
+      - "Are all major content categories represented with visual identity, animations, and sound identity?"
+      - "Do animation sets cover the player verbs and state transitions for each entity type?"
+      - "Does the sound identity support the game's audio direction?"
+      - "Is this specific enough for system designs and specs to inherit asset needs?"
+      - "Are there content categories listed in Content Categories that have no presentation entry?"
+
   "### Player Information Model":
     parent: "## Presentation"
     questions:
