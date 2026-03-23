@@ -84,6 +84,21 @@ defaults:
   max_exchanges: 5
   sleep_between_topics: 10
 
+# Blast radius: when a section changes, also re-verify linked sections
+linked_sections:
+  "### Owned State":
+    - "### Upstream Dependencies"
+    - "### Downstream Consequences"
+    - "### Non-Responsibilities"
+  "### Simulation Responsibility":
+    - "### Owned State"
+    - "### Purpose"
+  "### State Lifecycle":
+    - "### Failure / Friction States"
+  "### Player Actions":
+    - "### System Resolution"
+    - "### Asset Needs"
+
 # ---------------------------------------------------------------------------
 # L3 — Subsection Review (### level)
 # Each subsection is reviewed in isolation for internal quality.

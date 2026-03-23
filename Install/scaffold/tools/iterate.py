@@ -556,7 +556,7 @@ def _rebuild_queue_for_verification(session, config):
     verification_items = []
     added_passes = set()
 
-    # Re-queue only the L3 subsections that had changes
+    # Re-queue the L3 subsections that had changes
     for original_item in queue[:current_idx]:
         if original_item.get("pass") == "l3":
             section = original_item.get("section", "")
@@ -564,10 +564,8 @@ def _rebuild_queue_for_verification(session, config):
                 verification_items.append(dict(original_item))
                 added_passes.add("l3")
 
-    if "l3" in added_passes:
-        verification_items.append({"pass": "l3_apply"})
-
-    # Re-queue L2 parent sections of changed L3 subsections
+    # Blast radius expansion: also re-check sibling sections under the same parent
+    # (e.g., change in ### Owned State should also re-verify ### Dependencies)
     changed_parents = set()
     for original_item in queue[:current_idx]:
         if original_item.get("pass") == "l3" and original_item.get("section", "") in changed_sections:
@@ -575,6 +573,29 @@ def _rebuild_queue_for_verification(session, config):
             if parent:
                 changed_parents.add(parent)
 
+    # Add sibling L3 sections from changed parents (if not already queued)
+    queued_sections = set(changed_sections)
+    linked_sections = config.get("linked_sections", {})
+    for original_item in queue[:current_idx]:
+        if original_item.get("pass") == "l3":
+            section = original_item.get("section", "")
+            parent = original_item.get("parent", "")
+            if section not in queued_sections:
+                # Include if: same parent as a changed section, OR explicitly linked
+                in_changed_parent = parent in changed_parents
+                explicitly_linked = any(
+                    section in linked_sections.get(cs, [])
+                    for cs in changed_sections
+                )
+                if in_changed_parent or explicitly_linked:
+                    verification_items.append(dict(original_item))
+                    queued_sections.add(section)
+                    added_passes.add("l3")
+
+    if "l3" in added_passes:
+        verification_items.append({"pass": "l3_apply"})
+
+    # Re-queue L2 parent sections of all affected L3 subsections
     for original_item in queue[:current_idx]:
         if original_item.get("pass") == "l2" and original_item.get("section", "") in changed_parents:
             verification_items.append(dict(original_item))
@@ -940,11 +961,27 @@ def cmd_resolve(args):
         issue_idx = session.get("current_issue_index", 0)
         issue = issues[issue_idx] if issue_idx < len(issues) else {}
 
-        # If accept, route to scope check first
+        # If accept, decide whether scope-check is needed
         if outcome == "accept":
             scope_guard = config.get("scope_guard", {})
             scope_tests = scope_guard.get("tests", [])
-            if scope_tests:
+
+            # Skip scope-check for quality-only issues (no cross-doc impact)
+            # Only run scope-check when the change touches ownership, authority,
+            # contracts, architecture, or cross-system boundaries
+            severity = issue.get("severity", "MEDIUM").upper()
+            desc_lower = (issue.get("description", "") + " " + result.get("fix_description", "")).lower()
+            needs_scope_check = scope_tests and any(
+                kw in desc_lower
+                for kw in ("ownership", "authority", "contract", "interface",
+                           "architecture", "cross-system", "cross-doc", "upstream",
+                           "another system", "owned by", "violat")
+            )
+            # Always scope-check CRITICAL severity
+            if severity == "CRITICAL":
+                needs_scope_check = bool(scope_tests)
+
+            if needs_scope_check:
                 # Stash the accept details and route to scope check
                 session["_pending_accept_reasoning"] = result.get("reasoning", "")
                 session["_pending_accept_fix"] = result.get("fix_description", "")
@@ -959,9 +996,7 @@ def cmd_resolve(args):
                     "scope_guard": scope_guard,
                 })
                 return
-            else:
-                # No scope tests — accept directly
-                pass
+            # else: no scope check needed — accept directly
 
         # Record adjudication (for non-accept, or accept with no scope tests)
         adjudication = {
@@ -1166,11 +1201,26 @@ def _run_doc_review(cmd):
 # ---------------------------------------------------------------------------
 
 def _extract_root_cause(issue):
+    """Extract a structured root cause tag for deduplication.
+
+    Prefers explicit root_cause field from the reviewer (structured tag like
+    'purpose_is_generic' or 'ownership_conflict_with_SYS-003'). Falls back to
+    section + normalized first 8 words of description as a stable key.
+
+    The reviewer prompt asks for root_cause tags. When the reviewer provides
+    them, deduplication is exact. When it doesn't, the fallback is coarse
+    but stable — same section + same opening words = same root cause."""
     if isinstance(issue, dict):
-        section = issue.get("section", "")
+        # Prefer explicit tag from reviewer
+        tag = issue.get("root_cause", "")
+        if tag:
+            return tag.lower().strip()
+
+        # Fallback: section + first 8 words of description (stable, coarse)
+        section = issue.get("section", "unknown")
         desc = issue.get("description", "")
-        key = f"{section}:{desc}".lower().strip()
-        return re.sub(r"\s+", " ", key)
+        words = re.sub(r"[^a-z0-9\s]", "", desc.lower()).split()[:8]
+        return f"{section}:{'_'.join(words)}" if words else section
     return str(issue).lower().strip()
 
 

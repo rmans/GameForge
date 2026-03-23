@@ -364,9 +364,16 @@ def resolve(config, target_path, section_heading=None, extra_meta=None):
             if isinstance(entry, dict) and _eval_condition(entry.get("condition"), meta):
                 candidates.append({**entry, "_level": "section"})
 
-    # Sort by priority (1 first), then by level (base > target > section)
+    # Sort: priority dominant (1 first), class as tiebreaker within same priority,
+    # then level. This ensures high-priority items load first regardless of class,
+    # and when budget runs out, low-priority items are the ones that get dropped.
+    class_order = {c: i for i, c in enumerate(_CLASS_DROP_ORDER)}  # canonical=4 (loads first), evidence=0 (loads last)
     level_order = {"base": 0, "target": 1, "section": 2}
-    candidates.sort(key=lambda e: (e.get("priority", 3), level_order.get(e.get("_level"), 3)))
+    candidates.sort(key=lambda e: (
+        e.get("priority", 3),
+        -class_order.get(e.get("class", ""), 2),  # higher class value = more important = loads earlier
+        level_order.get(e.get("_level"), 3),
+    ))
 
     # Deduplicate by file+sections
     seen = set()

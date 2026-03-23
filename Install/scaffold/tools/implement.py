@@ -597,6 +597,12 @@ def _advance(session):
                 "attempts": session["build_attempts"],
                 "last_error": build_result.get("error", ""),
                 "message": f"Build failed after {session['build_attempts']} attempts.",
+                "escalation_options": [
+                    "1. Fix manually — edit the code yourself, then run: python scaffold/tools/implement.py resolve --session " + sid,
+                    "2. File a Known Issue — /scaffold-file-decision --type ki 'Build failure in " + session["task_id"] + "'",
+                    "3. Revise the task — re-run /scaffold-review task " + session["task_id"] + " to reconsider the approach",
+                    "4. Skip this task — mark as blocked and continue with independent tasks",
+                ],
             })
             return
         else:
@@ -656,6 +662,11 @@ def _advance(session):
                 "attempts": session["build_attempts"],
                 "last_error": build_result.get("error", ""),
                 "message": f"Post-review build failed after {session['build_attempts']} attempts.",
+                "escalation_options": [
+                    "1. Fix manually — edit the code yourself, then run: python scaffold/tools/implement.py resolve --session " + sid,
+                    "2. Revert review changes — code review may have introduced the break",
+                    "3. File a Known Issue — /scaffold-file-decision --type ki 'Post-review build failure in " + session["task_id"] + "'",
+                ],
             })
             return
         else:

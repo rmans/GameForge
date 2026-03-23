@@ -477,7 +477,29 @@ def sync_reference_docs(changed_files=None, scaffold_dir=None):
                             "detail": f"Property '{prop}' found in {f} but not in entity-components",
                         })
 
-    return {"updates": updates, "count": len(updates)}
+    # Confidence filter: only surface findings that are likely real
+    # Keep: concrete declarations (ADD_SIGNAL, bind_method) — these are always real
+    # Keep: findings that appear across ≥2 files
+    # Filter: single-file vague pattern matches
+    confident_updates = []
+    name_counts = {}
+    for u in updates:
+        # Extract the identifier name from the detail string
+        name_match = re.search(r"'(\w+)'", u.get("detail", ""))
+        name = name_match.group(1) if name_match else u.get("detail", "")
+        key = f"{u['type']}:{name}"
+        name_counts[key] = name_counts.get(key, 0) + 1
+
+    for u in updates:
+        name_match = re.search(r"'(\w+)'", u.get("detail", ""))
+        name = name_match.group(1) if name_match else u.get("detail", "")
+        key = f"{u['type']}:{name}"
+        # Concrete declarations are always kept; vague matches need ≥2 occurrences
+        if u["type"] in ("new_signal", "new_property") or name_counts.get(key, 0) >= 2:
+            confident_updates.append(u)
+
+    return {"updates": confident_updates, "count": len(confident_updates),
+            "filtered_out": len(updates) - len(confident_updates)}
 
 
 # ---------------------------------------------------------------------------
