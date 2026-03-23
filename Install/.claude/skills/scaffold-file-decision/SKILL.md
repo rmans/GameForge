@@ -18,9 +18,20 @@ Decision documents are the project's feedback mechanism. They record why decisio
 | `--type` | Yes | — | `adr` (Architecture Decision Record), `ki` (Known Issue), or `dd` (Design Debt) |
 | title/description | Yes | — | Brief title or description of the decision/issue/debt. Can be a quoted string or free-form text after the type flag. |
 | `--triggered-by` | No | — | What prompted this filing (e.g., `TASK-015`, `iterate-systems SYS-005`, `code-review CR-003`). If not provided, ask the user. |
+| `--context` | No | — | (ADR) What situation prompted this. (KI) What's wrong. (DD) What's compromised. Calling skills pass this to skip the interview. |
+| `--decision` | No | — | (ADR only) What was decided. |
+| `--alternatives` | No | — | (ADR only) Alternatives considered, comma-separated or multi-line. |
+| `--consequences` | No | — | (ADR only) Positive and negative consequences. |
+| `--affected` | No | — | Comma-separated list of affected document paths. |
+| `--fix-options` | No | — | (KI only) Fix options, comma-separated. |
 | `--blocking` | No | — | (KI only) What this blocks: `SLICE-###`, `P#-###`, system name, `future`, or `—`. |
+| `--compromise` | No | — | (DD only) What's wrong and what you're living with. |
+| `--why-accepted` | No | — | (DD only) Why acceptable for now. |
+| `--payoff-when` | No | — | (DD only) When this gets fixed (phase, slice, trigger). |
+| `--payoff-how` | No | — | (DD only) How the fix looks. |
 | `--priority` | No | Medium | (DD only) `High`, `Medium`, or `Low`. |
 | `--status` | No | Proposed (ADR) / Open (KI) / Active (DD) | Initial status. ADRs start as Proposed; use `--status accepted` to file as already decided. |
+| `--skip-review` | No | false | Skip the automatic review after filing. Use when the calling skill will handle review separately. |
 
 ## Phase 1 — Gather Context
 
@@ -36,31 +47,47 @@ Decision documents are the project's feedback mechanism. They record why decisio
    - KI: `scaffold/templates/known-issue-entry-template.md`
    - DD: `scaffold/templates/design-debt-entry-template.md`
 
-4. **Gather context from the user.** Based on the type, collect the information needed to fill the template. Use the title/description provided in the arguments as a starting point, then ask for missing pieces:
+4. **Gather context.** Check which arguments were provided. If all required fields for the type have values (from arguments or the calling skill's context), skip the interview and go to confirmation.
+
+   **Required fields per type:**
+
+   | Type | Required | Optional |
+   |------|----------|----------|
+   | ADR | `--context`, `--decision` | `--alternatives`, `--consequences`, `--affected` |
+   | KI | `--context` | `--fix-options`, `--blocking`, `--affected` |
+   | DD | `--context` (or `--compromise`), `--payoff-when` | `--why-accepted`, `--payoff-how`, `--affected` |
+
+   **If all required fields are provided** (common when called by another skill):
+   - Skip the interview
+   - Confirm: "Filing [type] from [triggered-by]. Here's what I'll write: [summary]. Proceed?"
+   - This enables seamless chaining — triage-specs can file a KI without stopping for an interview
+
+   **If required fields are missing** (common when called by the user directly):
+   - Ask only for the missing pieces. Don't re-ask for fields already provided.
+
+   **Full interview questions (when needed):**
 
    **For ADR:**
-   - What situation or conflict prompted this? (Context)
-   - What was decided? (Decision — be concrete)
-   - What alternatives were considered? (at least 1)
-   - What documents need to change? (Updated Documents)
-   - What are the positive and negative consequences?
+   - What situation or conflict prompted this? (`--context`)
+   - What was decided? (`--decision` — be concrete)
+   - What alternatives were considered? (`--alternatives` — at least 1)
+   - What documents need to change? (`--affected`)
+   - What are the positive and negative consequences? (`--consequences`)
    - Is there implementation scope? (Scope & Migration — or skip for design-only)
 
    **For KI:**
-   - What's wrong, missing, or ambiguous? (Description)
+   - What's wrong, missing, or ambiguous? (`--context`)
    - What category? Gap / Conflict / TBD / Ambiguity
-   - What documents are affected?
-   - What are the fix options? (at least 2 if known)
-   - Does this block anything?
+   - What documents are affected? (`--affected`)
+   - What are the fix options? (`--fix-options` — at least 2 if known)
+   - Does this block anything? (`--blocking`)
 
    **For DD:**
-   - What's the compromise? (Compromise)
-   - Why is it acceptable for now? (Why Accepted)
-   - What documents are affected?
-   - What's the payoff plan — when and how will this be fixed?
-   - What area does this affect? (System/domain)
-
-   If the user provided enough context in the arguments or conversation to fill these fields, don't re-ask — just confirm: "I have enough context to file this. Here's what I'll write: [summary]. Proceed?"
+   - What's the compromise? (`--compromise` or `--context`)
+   - Why is it acceptable for now? (`--why-accepted`)
+   - What documents are affected? (`--affected`)
+   - What's the payoff plan — when and how? (`--payoff-when`, `--payoff-how`)
+   - What area? (System/domain)
 
 ## Phase 2 — Write the Entry
 
@@ -101,7 +128,7 @@ After filing, update affected documents:
 
 ## Phase 4 — Review
 
-After filing, automatically run the review pipeline on the new decision doc:
+Unless `--skip-review` is set, automatically run the review pipeline on the new decision doc:
 
 ```
 /scaffold-review <type> <ID>
@@ -115,6 +142,8 @@ This chains fix → iterate → validate on the decision doc:
 - **Validate:** Structural checks pass
 
 If the user filed with `--status accepted` (ADR), the review is especially important — an accepted ADR that's vague will cause downstream confusion.
+
+If `--skip-review` is set, skip this phase. Use when the calling skill handles review separately or when filing a batch of related decisions that will be reviewed together.
 
 ## Phase 5 — Report
 
