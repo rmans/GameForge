@@ -33,14 +33,27 @@ PROJECT_ROOT = SCAFFOLD_DIR.parent
 # Complete — Mark doc as Complete
 # ---------------------------------------------------------------------------
 
-def complete_doc(doc_path, scaffold_dir=None):
-    """Mark a scaffold document as Complete. Updates status, renames file, updates index."""
+def complete_doc(doc_path, scaffold_dir=None, ripple=True):
+    """Mark a scaffold document as Complete. Updates status, renames file, updates index.
+    If ripple=True, checks parent docs and completes them if all children are done."""
     sd = Path(scaffold_dir) if scaffold_dir else SCAFFOLD_DIR
     abs_path = sd / doc_path if not Path(doc_path).is_absolute() else Path(doc_path)
 
     if not abs_path.exists():
         return {"status": "error", "message": f"File not found: {doc_path}"}
 
+    result = _complete_single(abs_path, sd)
+
+    # Ripple upward: task → spec → slice → phase
+    if ripple:
+        rippled = _ripple_complete(abs_path, sd)
+        result["rippled"] = rippled
+
+    return result
+
+
+def _complete_single(abs_path, sd):
+    """Mark one doc as Complete. Returns result dict."""
     content = abs_path.read_text(encoding="utf-8")
 
     # Update status field
@@ -81,9 +94,7 @@ def complete_doc(doc_path, scaffold_dir=None):
     if index_files:
         index_path = index_files[0]
         index_content = index_path.read_text(encoding="utf-8")
-        # Replace old filename with new
         index_content = index_content.replace(old_name, new_name)
-        # Update status in index table if present
         index_content = re.sub(
             rf"(\|\s*\[?{re.escape(old_name.split('_')[0])}[^\|]*\|[^\|]*\|)\s*\w+\s*\|",
             rf"\1 Complete |",
@@ -97,6 +108,124 @@ def complete_doc(doc_path, scaffold_dir=None):
         "old_name": old_name,
         "new_name": new_name,
     }
+
+
+def _ripple_complete(completed_path, sd):
+    """Check if completing this doc triggers parent completion. Ripples upward."""
+    rippled = []
+    name = completed_path.name
+
+    # Determine doc type and find parent
+    if "TASK-" in name:
+        # Task → Spec: check if all tasks for parent spec are Complete
+        parent_spec_id = _find_parent_ref(completed_path, "Implements")
+        if parent_spec_id:
+            spec_files = list(sd.glob(f"specs/{parent_spec_id}-*.md"))
+            if spec_files and _all_children_complete(sd, spec_files[0], "tasks", "Implements"):
+                result = _complete_single(spec_files[0], sd)
+                rippled.append({"doc": result.get("file", ""), "type": "spec"})
+                # Spec → Slice
+                rippled.extend(_ripple_complete(spec_files[0], sd))
+
+    elif "SPEC-" in name:
+        # Spec → Slice: check if all specs in parent slice are Complete
+        parent_slice = _find_parent_slice(completed_path, sd)
+        if parent_slice:
+            if _all_specs_in_slice_complete(sd, parent_slice):
+                result = _complete_single(parent_slice, sd)
+                rippled.append({"doc": result.get("file", ""), "type": "slice"})
+                # Slice → Phase
+                rippled.extend(_ripple_complete(parent_slice, sd))
+
+    elif "SLICE-" in name:
+        # Slice → Phase: check if all slices in parent phase are Complete
+        parent_phase = _find_parent_ref(completed_path, "Phase")
+        if parent_phase:
+            phase_files = list(sd.glob(f"phases/{parent_phase}-*.md"))
+            if phase_files and _all_children_complete_by_phase(sd, phase_files[0]):
+                result = _complete_single(phase_files[0], sd)
+                rippled.append({"doc": result.get("file", ""), "type": "phase"})
+
+    return rippled
+
+
+def _find_parent_ref(doc_path, field_name):
+    """Extract a parent reference field (e.g., Implements: SPEC-001) from a doc."""
+    if not doc_path.exists():
+        return None
+    content = doc_path.read_text(encoding="utf-8")
+    match = re.search(rf">\s*\*\*{field_name}:\*\*\s*(\S+)", content)
+    if match:
+        val = match.group(1).strip()
+        if val != "—" and val != "None":
+            return val
+    return None
+
+
+def _find_parent_slice(spec_path, sd):
+    """Find which slice contains this spec by scanning slice files."""
+    spec_id = re.search(r"SPEC-\d+", spec_path.name)
+    if not spec_id:
+        return None
+    spec_id = spec_id.group()
+    for slice_file in sd.glob("slices/SLICE-*-*.md"):
+        content = slice_file.read_text(encoding="utf-8")
+        if spec_id in content:
+            return slice_file
+    return None
+
+
+def _all_children_complete(sd, parent_path, child_dir, ref_field):
+    """Check if all children referencing this parent are Complete."""
+    parent_id = re.search(r"(SYS|SPEC|TASK|SLICE|PHASE)-\d+", parent_path.name)
+    if not parent_id:
+        return False
+    parent_id = parent_id.group()
+
+    for child_file in sd.glob(f"{child_dir}/*-*.md"):
+        if child_file.name.startswith("_"):
+            continue
+        content = child_file.read_text(encoding="utf-8")
+        # Check if this child references our parent
+        if parent_id in content:
+            ref_match = re.search(rf">\s*\*\*{ref_field}:\*\*\s*{re.escape(parent_id)}", content)
+            if ref_match:
+                status_match = re.search(r">\s*\*\*Status:\*\*\s*(\w+)", content)
+                if status_match and status_match.group(1) != "Complete":
+                    return False
+    return True
+
+
+def _all_specs_in_slice_complete(sd, slice_path):
+    """Check if all specs listed in a slice's Specs table are Complete."""
+    content = slice_path.read_text(encoding="utf-8")
+    spec_ids = re.findall(r"SPEC-\d+", content)
+    for spec_id in set(spec_ids):
+        spec_files = list(sd.glob(f"specs/{spec_id}-*.md"))
+        if spec_files:
+            spec_content = spec_files[0].read_text(encoding="utf-8")
+            status = re.search(r">\s*\*\*Status:\*\*\s*(\w+)", spec_content)
+            if status and status.group(1) != "Complete":
+                return False
+    return True
+
+
+def _all_children_complete_by_phase(sd, phase_path):
+    """Check if all slices in a phase are Complete."""
+    phase_id = re.search(r"PHASE-\d+", phase_path.name)
+    if not phase_id:
+        return False
+    phase_id = phase_id.group()
+
+    for slice_file in sd.glob("slices/SLICE-*-*.md"):
+        content = slice_file.read_text(encoding="utf-8")
+        if phase_id in content:
+            phase_ref = re.search(rf">\s*\*\*Phase:\*\*\s*{re.escape(phase_id)}", content)
+            if phase_ref:
+                status = re.search(r">\s*\*\*Status:\*\*\s*(\w+)", content)
+                if status and status.group(1) != "Complete":
+                    return False
+    return True
 
 
 # ---------------------------------------------------------------------------
