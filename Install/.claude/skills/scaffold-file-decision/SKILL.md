@@ -99,10 +99,27 @@ After filing, update affected documents:
 **For DD:**
 - If the DD has a payoff plan targeting a specific phase/slice → add a note in that phase/slice referencing DD-###.
 
-## Phase 4 — Report
+## Phase 4 — Review
+
+After filing, automatically run the review pipeline on the new decision doc:
 
 ```
-## Decision Filed
+/scaffold-review <type> <ID>
+```
+
+Where `<type>` is `adr`, `ki`, or `dd` and `<ID>` is the newly created entry (e.g., `ADR-015`, `KI-007`, `DD-003`).
+
+This chains fix → iterate → validate on the decision doc:
+- **Fix:** Cleans up template text, glossary compliance, missing sections
+- **Iterate:** External LLM reviews: is the decision sound? are alternatives honest? are consequences complete?
+- **Validate:** Structural checks pass
+
+If the user filed with `--status accepted` (ADR), the review is especially important — an accepted ADR that's vague will cause downstream confusion.
+
+## Phase 5 — Report
+
+```
+## Decision Filed and Reviewed
 
 | Field | Value |
 |-------|-------|
@@ -113,6 +130,7 @@ After filing, update affected documents:
 | Triggered by | [source] |
 | Blocking | [what it blocks, or "—"] |
 | File | decisions/[subdir]/[filename].md |
+| Review | PASS / WARN / FAIL |
 
 ### Affected Documents
 | Document | Impact |
