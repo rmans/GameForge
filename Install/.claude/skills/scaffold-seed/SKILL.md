@@ -26,7 +26,7 @@ The key difference from the old seed skill: Claude only thinks about one thing a
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `<layer>` | Yes | — | What to seed: `systems`, `references`, `engine`, `style`, `input`, `phases`, `slices`, `specs`, `tasks` |
+| `<layer>` | Yes | — | What to seed: `design`, `systems`, `references`, `engine`, `style`, `input`, `phases`, `slices`, `specs`, `tasks` |
 | `--target` | No | — | Scope within layer (e.g., `SLICE-001` to seed specs for one slice) |
 | `--auto-fill` | No | false | Fill coverage gaps automatically without asking. Default: present gaps for user decision (fill/defer/dismiss). |
 
@@ -176,6 +176,7 @@ Display what was created, the dependency graph, and any remaining assumptions.
 
 | Layer | Upstream Sources | Creates |
 |-------|-----------------|---------|
+| `design` | project file system + user interview | design-doc.md (with Technical Stack from auto-detection) |
 | `systems` | design-doc.md | SYS-### system designs |
 | `references` | system designs | architecture, authority, interfaces, state-transitions, entity-components, resource-definitions, signal-registry, balance-params, enums |
 | `engine` | architecture, system designs | 15 engine convention docs |
@@ -185,6 +186,19 @@ Display what was created, the dependency graph, and any remaining assumptions.
 | `slices` | phase, system designs, interfaces | SLICE-### vertical slices |
 | `specs` | slices, system designs, state-transitions | SPEC-### behavior specs |
 | `tasks` | specs, engine docs, architecture | TASK-### implementation tasks |
+
+### Design Layer (special)
+
+`/scaffold-seed design` is different from other layers — it has no upstream docs to read (it IS the upstream). Instead:
+
+1. **Scans the project** — engine, languages, test frameworks, build system, CI, dependencies
+2. **Presents findings** — "I see Godot 4, GDScript, GUT, no C++. Correct?"
+3. **Interviews the user** — one section group at a time (Identity, Shape, Control, etc.)
+4. **Writes the design doc** — with Technical Stack pre-filled from the scan
+5. **Verifies** — all sections filled, governance populated, scope honest
+6. **Reviews** — fix + iterate + validate
+
+This replaces `/scaffold-init-design`. The Technical Stack section becomes the authoritative source for what tools the project uses — all downstream seeds read it instead of guessing.
 
 ## Rules
 

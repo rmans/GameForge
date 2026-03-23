@@ -334,6 +334,13 @@ l3_sections:
     questions:
       - "Are targets realistic given the simulation depth described?"
 
+  "### Technical Stack":
+    parent: "## Scope"
+    questions:
+      - "Does the Technical Stack match what's actually in the project?"
+      - "Are engine, languages, test frameworks, and build system all specified?"
+      - "Are key dependencies listed — no hidden assumptions about what's installed?"
+
 # ---------------------------------------------------------------------------
 # L2 — Section Review (## level)
 # ---------------------------------------------------------------------------

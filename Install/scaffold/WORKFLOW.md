@@ -121,13 +121,15 @@ Each step feeds the gate:
 
 > **Output:** `design/design-doc.md` with all sections filled and reviewed. **Proceed when:** iterate passes with no critical issues. **Surfaces for Step 7:** core simulation pressures, player verbs, content categories.
 
-### 1a — Initialize
+### 1a — Seed
 
 ```
-/scaffold-init-design [--mode seed|fill-gaps|reconcile|refresh]
+/scaffold-seed design
 ```
 
-Ingests existing project material, classifies each design doc section (Complete/Partial/Conflicted/Missing), pre-fills what can be inferred from other docs, and only interviews for genuine gaps. Supports 4 modes: `seed` (first time), `fill-gaps` (incomplete sections), `reconcile` (contradiction resolution), `refresh` (rethink specific sections). This is the highest-authority document — everything else flows from it.
+Scans the project (engine, languages, test frameworks, build system, CI, dependencies), presents findings for confirmation, then interviews the user one section group at a time (Identity, Shape, Control, World, Presentation, Content, System Domains, Philosophy, Scope). Technical Stack is pre-filled from the scan. The design doc is the highest-authority document — everything else flows from it.
+
+> For an existing design doc that needs updates: `/scaffold-init-design --mode fill-gaps|reconcile|refresh`
 
 ### 1b — Review (fix + iterate)
 

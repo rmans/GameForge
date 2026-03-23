@@ -197,6 +197,28 @@ Failure Signal: <what indicates the design is breaking> -->
 ### Performance Targets
 <!-- Frame rate, entity count, map size targets. -->
 
+### Technical Stack
+
+<!-- Project-level technical context. Captured during init so all downstream docs know what's available. -->
+
+#### Engine
+<!-- Which engine and version? e.g., Godot 4.3, Unity 2024, Unreal 5.4 -->
+
+#### Languages
+<!-- What languages are used? e.g., GDScript, C++ via GDExtension, C#, Rust -->
+
+#### Build System
+<!-- How is the project built? e.g., SConstruct, CMake, dotnet build, cargo -->
+
+#### Test Frameworks
+<!-- What testing tools are available? e.g., GUT (GDScript), regression tests (C++), gdlint -->
+
+#### CI/CD
+<!-- What's the CI setup? e.g., GitHub Actions, none yet -->
+
+#### Key Dependencies
+<!-- Major plugins, addons, or libraries the project relies on. e.g., GDExtension addon, navigation plugin -->
+
 ---
 
 ## System Design Index
