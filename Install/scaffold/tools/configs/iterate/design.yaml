@@ -461,6 +461,23 @@ l1_questions:
   - "If you had to generate SYS-### docs from this document right now, what systems would you be forced to invent because the design implies behavior but never names a system for it?"
   - "What will the player confidently believe about a mechanic that is actually wrong? Where will misinterpretation cause them to quit?"
 
+system_coverage_audit:
+  reviewer_instruction: "You are a hostile designer trying to prove this game is incomplete. Your job is NOT to validate what exists — it is to discover what is ABSENT. Assume the design is wrong until proven otherwise. For every behavior, mechanic, and loop described: what system would you have to write to make that sentence real? If the answer is 'I'd have to invent one,' that's a missing system."
+  adjudication_rules:
+    - "Missing systems are flagged, not invented — the design doc should acknowledge them, not define them"
+    - "Overloaded systems are flagged for splitting consideration"
+    - "Classify as: missing_system (needs SYS-### created), underdefined (exists but incomplete), overloaded (should split), or already_covered (cite the system)"
+    - "Every finding must name the specific behavior that requires the system and what breaks without it"
+  questions:
+    - "System discovery: list every gameplay system that is implied by the loops, mechanics, verbs, and world but is NOT explicitly named in System Domains. For each: name it, what player behavior requires it, what breaks without it."
+    - "Genre gap analysis: what systems typically exist in colony sims / management games that are absent here? For each: is it intentionally excluded (cite Design Boundaries) or accidentally missing?"
+    - "Overloaded systems: which named systems are doing 3+ unrelated jobs? What would a clean split look like?"
+    - "Underdefined systems: which named systems lack enough behavioral description to generate a SYS-### doc? What specific behaviors are missing?"
+    - "Infrastructure gap: what connective tissue systems are needed but unnamed? (scheduling, prioritization, conflict resolution, event routing, decay/timer management, state persistence, UI data binding)"
+    - "Player action gap: walk through every Player Verb — what system receives and processes each one? Flag any verb with no clear system handler."
+    - "Failure cascade gap: trace every failure scenario in Failure Philosophy and Pressure Tests — what systems participate in each cascade? Are any steps unowned?"
+    - "Data authority gap: for every piece of game state mentioned (health, mood, instability, skills, position, inventory) — what system writes it? Flag any state with no clear writer or multiple implied writers."
+
 stress_test:
   mode: interrogation
   reviewer_instruction: "You are NOT checking documentation. You are trying to break the game design. Think as a player, a critic, and a rival designer simultaneously. Every issue must describe a concrete gameplay scenario, not a document structure concern."
@@ -481,6 +498,9 @@ stress_test:
     - "Laziest viable strategy: what happens if the player ignores half the systems? What is the minimum engagement that avoids collapse?"
     - "Exploit surface: what mechanics can be spammed safely? What penalties can be avoided entirely? What systems can be ignored without consequence?"
     - "Accidental reward: what behavior does the system reward that the design didn't intend?"
+    - "Collapse scenario: what happens if the player does nothing for 30 minutes? What happens if they min-max one system exclusively? Can they soft-lock themselves?"
+    - "Long-term decay: what changes after 10 hours that wasn't true at hour 1? What prevents repetition? What systems evolve, unlock, or scale?"
+    - "Speedrunner abuse: what would a player trying to break the game exploit first? What degenerate loop produces the most reward for the least risk?"
 
 identity_check:
   questions:
