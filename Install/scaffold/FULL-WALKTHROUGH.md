@@ -137,8 +137,9 @@ USER: /scaffold-seed design
 PYTHON: seed.py preflight --layer design
   → loads configs/seed/design.yaml
   → checks required_files from config (empty for design — always passes)
-  → checks check_existing: if design-doc.md already exists, blocks with message
-  → status: ready
+  → checks check_existing=true: if design/design-doc.md already exists on disk → blocks
+    with message "Design doc already exists. Use /scaffold-review design to review it."
+  → status: ready (if doc doesn't exist yet)
 ```
 
 **Session init:**
@@ -172,7 +173,9 @@ CLAUDE reads action.json → presents inventory to user:
 USER: confirms or corrects
 
 CLAUDE ← result.json: { corrections: {}, additions: {} }
-PYTHON: seed.py resolve → phase: interview (because has_interview=true)
+PYTHON: seed.py resolve
+  → if existing docs found → phase: review_existing (present delta first)
+  → else → phase: interview (because has_interview=true: interview_sections populated AND no upstream requirements)
 ```
 
 Design uses an **interview** phase instead of propose — seed.py sends one section group at a time from `design.yaml`'s `project_context.interview_sections`: ✅

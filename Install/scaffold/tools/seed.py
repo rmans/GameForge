@@ -727,6 +727,16 @@ def cmd_preflight(args):
         _output({"status": "blocked", "message": preflight.get("blocked_message", "Preflight failed."), "issues": issues})
         return
 
+    # Check if target doc already exists (for fixed-target layers like design)
+    if preflight.get("check_existing"):
+        target = config.get("target", "")
+        if target and (SCAFFOLD_DIR / target).exists():
+            _output({
+                "status": "blocked",
+                "message": preflight.get("existing_message", f"{target} already exists."),
+            })
+            return
+
     _output({"status": "ready", "layer": args.layer})
 
 
@@ -1052,7 +1062,9 @@ def _update_upstream_after_creation(layer, created_file, candidate, config):
             spec_ref = spec_match.group()
             for slice_file in SCAFFOLD_DIR.glob("slices/SLICE-*-*.md"):
                 content = slice_file.read_text(encoding="utf-8")
-                if spec_ref in content and new_id not in content:
+                # Match spec ID only in Specs Included section (not in notes/changelog)
+                specs_section = _extract_section_content(content, "### Specs Included")
+                if specs_section and spec_ref in specs_section and new_id not in content:
                     # Find the Tasks table and add a row
                     content = _add_table_row(
                         content, "### Tasks",
@@ -1251,9 +1263,9 @@ def cmd_resolve(args):
 
     elif phase == "interview":
         # Design interview — Claude filled one section group, advance to next
-        filled_group = result.get("group", "")
-        if filled_group:
-            session["interview_index"] = session.get("interview_index", 0) + 1
+        # Always advance — if Claude didn't return a group name, still move forward
+        # to prevent infinite loops on the same group
+        session["interview_index"] = session.get("interview_index", 0) + 1
         _save_session(args.session, session)
         _advance(session, config)
 
