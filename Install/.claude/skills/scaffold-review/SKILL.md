@@ -66,24 +66,26 @@ Runs preflight for both fix and iterate. Both must pass.
 python scaffold/tools/review.py next-action --layer <layer> --target <relative-path> [args]
 ```
 
-review.py starts the fix phase by delegating to local-review.py. The dispatcher loop is identical. Loop **continuously without pausing for user input** — the entire loop runs in one turn:
+review.py starts the fix phase by delegating to local-review.py. The dispatcher loop is identical. Loop **continuously without pausing for user input** — the entire loop runs in one turn.
+
+**File locations:** action.json and result.json are always at `scaffold/.reviews/review/` (NOT `.reviews/fix/` or `.reviews/iterate/` — review.py copies actions from sub-orchestrators to its own directory). Every action.json includes `review_session_id` — **always use that ID** when calling `review.py resolve`.
 
 ```
 loop:
-  read action.json
+  read scaffold/.reviews/review/action.json
   switch action.type:
 
     "apply":
       call /scaffold-review-apply               ← follow the sub-skill instructions inline
-      python review.py resolve --session <id>
+      python review.py resolve --session <review_session_id>
 
     "adjudicate":
       call /scaffold-review-adjudicate          ← follow the sub-skill instructions inline
-      python review.py resolve --session <id>
+      python review.py resolve --session <review_session_id>
 
     "scope_check":
       call /scaffold-review-scope-check         ← follow the sub-skill instructions inline
-      python review.py resolve --session <id>
+      python review.py resolve --session <review_session_id>
 
     "self_review":
       Review the section yourself using action.section_content and action.questions.
@@ -92,15 +94,15 @@ loop:
       Each issue: {"severity": "HIGH|MEDIUM|LOW", "section": "...", "description": "...", "suggestion": "..."}
       Be adversarial — find real problems, don't rubber-stamp.
       If no issues found, write: {"_self_review": true, "issues": []}
-      python review.py resolve --session <id>
+      python review.py resolve --session <review_session_id>
 
     "report":
       call /scaffold-review-report              ← follow the sub-skill instructions inline
-      python review.py resolve --session <id>
+      python review.py resolve --session <review_session_id>
 
     "no_issues":
       log action.message
-      python review.py resolve --session <id>
+      python review.py resolve --session <review_session_id>
 
     "phase_complete":
       log action.message

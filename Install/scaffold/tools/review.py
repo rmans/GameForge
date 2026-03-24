@@ -97,6 +97,8 @@ def _run_sub(script, args_list):
     cmd = [sys.executable, str(script)] + args_list
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=600, cwd=str(SCAFFOLD_DIR))
+        if result.returncode != 0 and result.stderr:
+            return {"_error": True, "message": result.stderr.strip()[:500]}
         stdout = result.stdout.strip()
         if stdout:
             try:
@@ -104,15 +106,20 @@ def _run_sub(script, args_list):
             except json.JSONDecodeError:
                 pass
         return None
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        return None
+    except subprocess.TimeoutExpired:
+        return {"_error": True, "message": "Sub-orchestrator timed out"}
+    except FileNotFoundError:
+        return {"_error": True, "message": f"Script not found: {script}"}
 
 
-def _copy_action_from_sub(sub_action_file):
-    """Copy the sub-orchestrator's action.json to our action.json, adding phase tag."""
+def _copy_action_from_sub(sub_action_file, parent_session_id=None):
+    """Copy the sub-orchestrator's action.json to our action.json.
+    Adds review_session_id so the dispatcher knows which ID to use for resolve."""
     if sub_action_file.exists():
         with open(sub_action_file, encoding="utf-8") as f:
             data = json.load(f)
+        if parent_session_id:
+            data["review_session_id"] = parent_session_id
         _write_action(data)
         return data
     return None
@@ -218,20 +225,32 @@ def cmd_next_action(args):
     phase = session.get("phase", "fix")
 
     if phase == "fix":
+        # Clear stale fix action file before starting
+        if FIX_ACTION.exists() and not session.get("fix_session_id"):
+            FIX_ACTION.unlink()
+
         # Start or resume fix phase
         fix_args = ["next-action", "--layer", args.layer, "--target", args.target]
         if args.iterations:
             fix_args.extend(["--iterations", str(args.iterations)])
-        _run_sub(LOCAL_REVIEW, fix_args)
+        sub_result = _run_sub(LOCAL_REVIEW, fix_args)
+
+        if sub_result and sub_result.get("_error"):
+            _write_action({"action": "blocked", "session_id": session_id,
+                           "message": f"Fix phase error: {sub_result['message']}"})
+            return
 
         # Copy fix's action.json to our action.json
-        action = _copy_action_from_sub(FIX_ACTION)
-        if action and action.get("action") == "done":
+        action = _copy_action_from_sub(FIX_ACTION, session_id)
+        if not action:
+            _write_action({"action": "blocked", "session_id": session_id,
+                           "message": "Fix phase produced no action — local-review.py may have failed silently."})
+            return
+        if action.get("action") == "done":
             # Fix phase complete — transition to iterate
             session["phase"] = "iterate"
             session["fix_report"] = action.get("report_summary", "")
             _save_session(session_id, session)
-            # Write a phase transition action for the dispatcher
             _write_action({
                 "action": "phase_complete",
                 "session_id": session_id,
@@ -242,6 +261,10 @@ def cmd_next_action(args):
         return
 
     if phase == "iterate":
+        # Clear stale iterate action file before starting
+        if ITERATE_ACTION.exists() and not session.get("iterate_session_id"):
+            ITERATE_ACTION.unlink()
+
         # Start or resume iterate phase
         iter_args = ["next-action", "--layer", args.layer, "--target", args.target]
         if args.iterations:
@@ -254,11 +277,20 @@ def cmd_next_action(args):
             iter_args.extend(["--sections", args.sections])
         if args.fast:
             iter_args.append("--fast")
-        _run_sub(ITERATE, iter_args)
+        sub_result = _run_sub(ITERATE, iter_args)
+
+        if sub_result and sub_result.get("_error"):
+            _write_action({"action": "blocked", "session_id": session_id,
+                           "message": f"Iterate phase error: {sub_result['message']}"})
+            return
 
         # Copy iterate's action.json to our action.json
-        action = _copy_action_from_sub(ITERATE_ACTION)
-        if action and action.get("action") == "done":
+        action = _copy_action_from_sub(ITERATE_ACTION, session_id)
+        if not action:
+            _write_action({"action": "blocked", "session_id": session_id,
+                           "message": "Iterate phase produced no action — iterate.py may have failed silently."})
+            return
+        if action.get("action") == "done":
             # Iterate complete — transition to validate
             session["phase"] = "validate"
             session["iterate_report"] = action.get("report_summary", "")
@@ -278,7 +310,7 @@ def cmd_next_action(args):
         _run_sub(VALIDATE, ["run", "--scope", scope])
 
         # Copy validate's action.json to our action.json
-        action = _copy_action_from_sub(VALIDATE_ACTION)
+        action = _copy_action_from_sub(VALIDATE_ACTION, session_id)
         if action:
             # Validate is a single run — always completes in one call
             session["validate_report"] = action
@@ -337,7 +369,7 @@ def cmd_resolve(args):
             _run_sub(LOCAL_REVIEW, ["resolve", "--session", fix_session_id])
 
         # Copy fix's next action to our action
-        action = _copy_action_from_sub(FIX_ACTION)
+        action = _copy_action_from_sub(FIX_ACTION, args.session)
         if action and action.get("action") == "done":
             # Fix complete — transition to iterate
             session["phase"] = "iterate"
@@ -369,7 +401,7 @@ def cmd_resolve(args):
             _run_sub(ITERATE, ["resolve", "--session", iterate_session_id])
 
         # Copy iterate's next action to our action
-        action = _copy_action_from_sub(ITERATE_ACTION)
+        action = _copy_action_from_sub(ITERATE_ACTION, args.session)
         if action and action.get("action") == "done":
             # Iterate complete — transition to validate phase
             session["iterate_report"] = action.get("report_summary", "")
