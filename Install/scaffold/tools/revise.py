@@ -64,11 +64,17 @@ def _count_indent(line):
 
 
 def load_yaml(path):
+    """Load a YAML file. Uses PyYAML if available, falls back to custom parser."""
     path = Path(path)
     if not path.exists():
         return None
-    lines = path.read_text(encoding="utf-8").splitlines()
-    return _parse_yaml_block(lines, 0, 0)[0]
+    content = path.read_text(encoding="utf-8")
+    try:
+        import yaml
+        return yaml.safe_load(content)
+    except ImportError:
+        lines = content.splitlines()
+        return _parse_yaml_block(lines, 0, 0)[0]
 
 
 def _parse_yaml_block(lines, start, base_indent):
