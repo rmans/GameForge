@@ -911,16 +911,15 @@ If findings == 0:
 **Phase 8: Complete (Python)**
 ```
 PYTHON: utils.py complete tasks/TASK-007-wall-validation_draft.md
-  → Status → Complete
-  → renames file (_draft → _complete)
-  → updates tasks/_index.md
+  → _complete_single(): Status → Complete, rename _draft → _complete, update tasks/_index.md
   → _ripple_complete():
-    checks: are all tasks for SPEC-003 Complete?
-    → if yes: SPEC-003 → Complete, updates specs/_index.md
-      checks: are all specs for SLICE-001 Complete?
-      → if yes: SLICE-001 → Complete, updates slices/_index.md
-        checks: are all slices for PHASE-001 Complete?
-        → if yes: PHASE-001 → Complete → triggers outer loop
+    updates slice Tasks table → TASK-007 Complete
+    checks: all tasks with Implements: SPEC-003 Complete? (requires ≥1 task)
+    → if yes: SPEC-003 → Complete, updates specs/_index.md, updates slice Specs table
+      checks: all specs in SLICE-001 Specs Included table Complete? (requires ≥1 spec)
+      → if yes: SLICE-001 → Complete, updates slices/_index.md, updates phase table
+        checks: all slices with Phase: PHASE-001 Complete? (requires ≥1 slice)
+        → if yes: PHASE-001 → Complete, updates roadmap table + completion date
 
 PYTHON → action.json: { action: "done", task: "TASK-007", files_created: [...], files_modified: [...], build: "PASS", review: "converged after 3 iterations" }
 ```
@@ -941,10 +940,33 @@ USER: /scaffold-implement TASK-009
 
 When the last task completes, `utils.py complete` ripples upward:
 ```
-PYTHON: _ripple_complete()
-  TASK-009 → Complete
-  All tasks for SPEC-003 done → SPEC-003 → Complete
-  All specs for SLICE-001 done → SLICE-001 → Complete
+PYTHON: complete_doc("tasks/TASK-009-...md")
+  → _complete_single(): Status → Complete, rename file, update tasks/_index.md
+  → _ripple_complete():
+
+  1. TASK → SPEC:
+     updates parent slice's Tasks table (TASK-009 → Complete)
+     finds Implements: SPEC-003
+     _all_children_complete(): scans ALL tasks with Implements: SPEC-003
+       → all Complete? (requires ≥1 task — zero tasks = NOT complete)
+       → yes → _complete_single(SPEC-003): Status → Complete, rename, update index
+       → updates parent slice's Specs table (SPEC-003 → Complete)
+
+  2. SPEC → SLICE:
+     _all_specs_in_slice_complete(): reads SLICE-001's ### Specs Included table
+       → extracts SPEC IDs from that section only (not whole file)
+       → all Complete? (requires ≥1 spec)
+       → yes → _complete_single(SLICE-001): Status → Complete, rename, update index
+       → updates parent phase's table (SLICE-001 → Complete)
+
+  3. SLICE → PHASE:
+     _all_children_complete_by_phase(): scans all slices with Phase: PHASE-001
+       → all Complete? (requires ≥1 slice)
+       → yes → _complete_single(PHASE-001): Status → Complete, rename, update index
+       → _update_roadmap_phase_status(): updates roadmap table + adds completion date
+
+  4. PHASE → ROADMAP:
+     updates roadmap.md Phase Overview table: PHASE-001 → Complete (2026-03-23)
 ```
 
 **Revise remaining slices:**

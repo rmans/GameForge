@@ -242,12 +242,15 @@ def _find_parent_slice(spec_path, sd):
 
 
 def _all_children_complete(sd, parent_path, child_dir, ref_field):
-    """Check if all children referencing this parent are Complete."""
+    """Check if all children referencing this parent are Complete.
+    Returns False if there are zero children (no vacuous truth — a spec
+    with no tasks is not 'done')."""
     parent_id = re.search(r"(SYS|SPEC|TASK|SLICE|PHASE)-\d+", parent_path.name)
     if not parent_id:
         return False
     parent_id = parent_id.group()
 
+    found_any = False
     for child_file in sd.glob(f"{child_dir}/*-*.md"):
         if child_file.name.startswith("_"):
             continue
@@ -256,42 +259,66 @@ def _all_children_complete(sd, parent_path, child_dir, ref_field):
         if parent_id in content:
             ref_match = re.search(rf">\s*\*\*{ref_field}:\*\*\s*{re.escape(parent_id)}", content)
             if ref_match:
+                found_any = True
                 status_match = re.search(r">\s*\*\*Status:\*\*\s*(\w+)", content)
                 if status_match and status_match.group(1) != "Complete":
                     return False
-    return True
+
+    return found_any  # False if no children exist
 
 
 def _all_specs_in_slice_complete(sd, slice_path):
-    """Check if all specs listed in a slice's Specs table are Complete."""
+    """Check if all specs listed in a slice's Specs Included table are Complete.
+    Returns False if no specs found (empty slice can't be Complete)."""
     content = slice_path.read_text(encoding="utf-8")
-    spec_ids = re.findall(r"SPEC-\d+", content)
-    for spec_id in set(spec_ids):
+    # Extract spec IDs only from the Specs Included section, not the whole file
+    specs_section = ""
+    in_section = False
+    for line in content.splitlines():
+        if "### Specs Included" in line:
+            in_section = True
+            continue
+        if in_section and line.strip().startswith("##"):
+            break
+        if in_section:
+            specs_section += line + "\n"
+
+    spec_ids = set(re.findall(r"SPEC-\d+", specs_section))
+    if not spec_ids:
+        return False  # no specs = not complete
+
+    for spec_id in spec_ids:
         spec_files = list(sd.glob(f"specs/{spec_id}-*.md"))
         if spec_files:
             spec_content = spec_files[0].read_text(encoding="utf-8")
             status = re.search(r">\s*\*\*Status:\*\*\s*(\w+)", spec_content)
             if status and status.group(1) != "Complete":
                 return False
+        else:
+            return False  # spec file missing = not complete
     return True
 
 
 def _all_children_complete_by_phase(sd, phase_path):
-    """Check if all slices in a phase are Complete."""
+    """Check if all slices in a phase are Complete.
+    Returns False if no slices found (empty phase can't be Complete)."""
     phase_id = re.search(r"PHASE-\d+", phase_path.name)
     if not phase_id:
         return False
     phase_id = phase_id.group()
 
+    found_any = False
     for slice_file in sd.glob("slices/SLICE-*-*.md"):
         content = slice_file.read_text(encoding="utf-8")
         if phase_id in content:
             phase_ref = re.search(rf">\s*\*\*Phase:\*\*\s*{re.escape(phase_id)}", content)
             if phase_ref:
+                found_any = True
                 status = re.search(r">\s*\*\*Status:\*\*\s*(\w+)", content)
                 if status and status.group(1) != "Complete":
                     return False
-    return True
+
+    return found_any  # False if no slices exist for this phase
 
 
 # ---------------------------------------------------------------------------
