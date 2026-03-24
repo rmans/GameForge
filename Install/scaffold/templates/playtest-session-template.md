@@ -3,7 +3,7 @@
 > **Date:** YYYY-MM-DD
 > **Type:** In-person / Remote / Self-play
 > **Focus Area:** *TODO: What part of the game is being tested?*
-> **Phase:** P#-###
+> **Phase:** PHASE-###
 > **Testers:** *TODO: Number and brief description (e.g., "4 — 2 experienced gamers, 2 new to genre")*
 > **Hypothesis:** *TODO: What do you expect to learn? (e.g., "Players will discover the build rotation within 30 seconds")*
 > **Last Updated:** YYYY-MM-DD

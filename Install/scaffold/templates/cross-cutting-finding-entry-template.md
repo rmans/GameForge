@@ -24,7 +24,7 @@
 <!-- Fill when resolved. -->
 
 <!-- **Action taken:** [resolved TODO, ran missing iterate pass, confirmed downstream still valid, filed ADR-###, added to KI-###]
-**Resolved by:** [/scaffold-fix-cross-cutting, manual edit, pipeline step that was run]
+**Resolved by:** [/scaffold-fix cross-cutting, manual edit, pipeline step that was run]
 **Date:** YYYY-MM-DD -->
 
 ## Acknowledgment

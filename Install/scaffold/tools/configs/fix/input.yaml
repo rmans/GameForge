@@ -1,0 +1,144 @@
+# input.yaml — Fix config for Step 6 input docs
+
+layer: input
+display_name: "Input System"
+target_docs:
+  - action-map.md
+  - input-philosophy.md
+  - default-bindings-kbm.md
+  - default-bindings-gamepad.md
+  - ui-navigation.md
+target_type: multi_doc
+
+preflight:
+  required_files:
+    - design/design-doc.md
+  blocked_message: "Design doc required as context."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Control"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  on_demand:
+    - file: design/interaction-model.md
+      class: adjacent
+      priority: 3
+      condition: exists
+    - file: design/ui-kit.md
+      class: adjacent
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files:
+  - inputs/action-map.md
+  - inputs/input-philosophy.md
+  - inputs/default-bindings-kbm.md
+  - inputs/default-bindings-gamepad.md
+  - inputs/ui-navigation.md
+
+defaults:
+  max_iterations: 10
+
+mechanical_checks:
+
+  per_doc_common:
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      auto_fix: true
+      fix_action: "Remove template text"
+
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+  action_map:
+    - id: action_id_naming
+      description: "Action ID not lowercase snake_case with correct prefix"
+      detection: naming_convention
+      pattern: "^(player_|ui_|camera_|debug_)[a-z][a-z0-9_]*$"
+      auto_fix: true
+      fix_action: "Normalize to snake_case with correct prefix"
+
+    - id: action_id_uniqueness
+      description: "Duplicate action IDs"
+      detection: duplicate_check
+      auto_fix: false
+      user_action: "Resolve duplicate — which action should this be?"
+
+    - id: orphan_binding
+      description: "Binding references non-existent action"
+      detection: cross_doc_check
+      auto_fix: true
+      fix_action: "Remove orphan binding"
+
+    - id: stale_deprecated
+      description: "Binding entries for deprecated actions"
+      detection: deprecated_check
+      auto_fix: true
+      fix_action: "Remove bindings for deprecated actions"
+
+  bindings:
+    - id: context_collision
+      description: "Same-context binding collision"
+      detection: collision_check
+      auto_fix: false
+      signal: binding_conflict
+
+    - id: key_name_normalization
+      description: "Inconsistent key/button names"
+      detection: naming_convention
+      auto_fix: true
+      fix_action: "Normalize to standard names"
+
+    - id: excessive_modifiers
+      description: "Ctrl+Shift+Alt multi-key modifier"
+      detection: pattern_match
+      pattern: "Ctrl\\+Shift\\+Alt"
+      auto_fix: false
+      signal: heavy_modifier
+
+judgment_checks:
+
+  coverage:
+    - id: missing_player_verb
+      description: "Design doc player verb has no action"
+      question: "Does every player verb in the design doc have a corresponding action?"
+
+    - id: action_bloat
+      description: "Too many actions for the game's complexity"
+      question: "Are there actions that could be merged or removed?"
+
+    - id: gamepad_navigation_gap
+      description: "UI screens not navigable with gamepad"
+      question: "Can every screen be fully navigated with gamepad alone?"
+
+signals:
+
+  usability:
+    - id: button_exhaustion
+      description: "Gamepad running out of buttons"
+    - id: philosophy_mismatch
+      description: "Actual bindings contradict input philosophy"
+
+report:
+  log_name_pattern: "FIX-input-{target}-{date}.md"
+
+rules:
+  - "Only edit input docs"
+  - "Action map is the source of truth for action IDs"
+  - "Binding collisions are always flagged, never auto-resolved"

@@ -1,0 +1,156 @@
+# roadmap.yaml — Iterate config for roadmap.md (Step 7)
+# Roadmap has no ### subsections in the template, so L3 is skipped.
+# Review runs L2 (sections) → L1 (document).
+
+layer: roadmap
+display_name: "Roadmap"
+target: phases/roadmap.md
+target_type: fixed
+
+preflight:
+  required_files:
+    - phases/roadmap.md
+    - design/design-doc.md
+  blocked_message: "No roadmap to review. Run `/scaffold-new-roadmap` first."
+
+context:
+  budget: 30000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## System Domains", "## Scope"]
+      priority: 1
+    - file: design/systems/_index.md
+      class: evidence
+      priority: 2
+
+  per_target: []
+
+  per_section:
+    "### Phase Overview":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 2
+        condition: exists
+    "### System Coverage Map":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 1
+    "### Capability Ladder":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Progression Arc", "### Player Goals"]
+        priority: 2
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L3 — Skipped (roadmap template has no ### subsections)
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# Each roadmap section gets targeted questions.
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Phase Overview":
+    questions:
+      - "Does every design doc promise map to at least one phase?"
+      - "Are there phases that deliver things the design doc doesn't mention?"
+      - "Is every gameplay-facing system assigned to at least one phase or explicitly deferred?"
+
+  "## Phase Boundaries":
+    questions:
+      - "Do boundaries align with phase goals?"
+      - "Are boundaries testable — can you tell when one phase ends and the next begins?"
+
+  "## Capability Ladder":
+    questions:
+      - "Does it match the Phase Overview?"
+      - "Does each rung represent genuine capability growth, not just task completion?"
+      - "Does the player experience improve meaningfully with each rung?"
+
+  "## Current Phase":
+    questions:
+      - "Does Current Phase match the earliest non-complete phase?"
+      - "Is the status accurate?"
+
+  "## Upcoming Phases":
+    questions:
+      - "Do they align with Phase Overview order?"
+      - "Are dependencies between phases clear?"
+
+  "## Risk Assessment":
+    questions:
+      - "Is risk spread across phases, or concentrated in one critical phase?"
+      - "Are the highest-risk technical and design challenges addressed early?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Does the roadmap cover everything the design doc promises, and nothing it doesn't?"
+  - "Can each phase be built given only what previous phases have delivered?"
+  - "Are milestones real player-visible capabilities, not just task completions?"
+  - "Is risk spread across phases, or concentrated in one critical phase?"
+  - "Does the player experience improve meaningfully with each phase?"
+  - "Is the core gameplay loop playable early enough to validate the design?"
+
+scope_guard:
+  upward: "design doc — game design decisions"
+  downward: "phase details, slice scope, implementation"
+  tests:
+    - name: upward_leakage
+      question: "Does this change modify what the game is (design doc territory)?"
+      guidance: "The roadmap sequences delivery of the design doc's vision — it doesn't change the vision."
+    - name: downward_leakage
+      question: "Does this change introduce phase-internal details or implementation specifics?"
+      guidance: "The roadmap defines the arc; phases define the details."
+
+adjudication:
+  editable_files:
+    - phases/roadmap.md
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-roadmap-{date}.md"
+  final_questions:
+    - name: "Most Dangerous Issue"
+      prompt: "The issue most likely to cause project-level schedule or scope failure."
+    - name: "Undetected Risk"
+      prompt: "Risks not covered by any phase or milestone."
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (scope not covered, sequencing illogical)"
+      2: "major issues (significant gaps in coverage or dangerous sequencing)"
+      3: "workable but soft (some gaps, minor sequencing concerns)"
+      4: "solid roadmap (good coverage, logical sequencing, clear milestones)"
+      5: "strong roadmap (complete coverage, optimal sequencing, risk well-distributed)"
+
+rules:
+  - "Project documents and authority order win"
+  - "Only edit the roadmap file"
+  - "Never blindly accept"
+  - "Pushback is expected and healthy"
+  - "Resolved issues are locked across iterations by root cause"

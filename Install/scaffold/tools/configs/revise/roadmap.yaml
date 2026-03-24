@@ -1,0 +1,14 @@
+layer: roadmap
+display_name: "Roadmap"
+editable_files: [phases/roadmap.md]
+preflight:
+  required_files: [phases/roadmap.md]
+  blocked_message: "No roadmap to revise."
+feedback_sources:
+  - type: adr
+    glob: "decisions/architecture-decision-record/ADR-*_accepted*.md"
+  - type: playtest
+    glob: "decisions/playtest-feedback/PF-*.md"
+    filter: "Status: Pattern"
+safe_patterns: ["Phase completion update", "ADR feedback log entry", "Stale reference"]
+escalation_patterns: ["Phase ordering change", "Scope widening", "System coverage gap"]

@@ -1,0 +1,43 @@
+# foundation.yaml — Validate config for foundation architecture gate
+
+scope: foundation
+display_name: "Foundation Architecture"
+
+activation:
+  required_files:
+    - design/architecture.md
+  skip_message: "Step 3 hasn't started. Skipping foundation validation."
+
+checks:
+  deterministic:
+    - id: foundation-architecture
+      description: "architecture.md exists and has content"
+      detection: section_health
+      target_files: ["design/architecture.md"]
+      fail_threshold: 0.3
+      warn_threshold: 0.5
+      severity: FAIL
+
+    - id: foundation-authority
+      description: "authority.md exists and has content"
+      detection: section_health
+      target_files: ["design/authority.md"]
+      fail_threshold: 0.3
+      warn_threshold: 0.5
+      severity: WARN
+
+    - id: foundation-interfaces
+      description: "interfaces.md exists and has content"
+      detection: section_health
+      target_files: ["design/interfaces.md"]
+      fail_threshold: 0.3
+      warn_threshold: 0.5
+      severity: WARN
+
+    - id: foundation-state-transitions
+      description: "state-transitions.md exists and has content"
+      detection: section_health
+      target_files: ["design/state-transitions.md"]
+      fail_threshold: 0.3
+      warn_threshold: 0.5
+      severity: WARN

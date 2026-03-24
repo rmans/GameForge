@@ -1,6 +1,6 @@
 # Triage Logs — Index
 
-> **Purpose:** Decision records from `/scaffold-triage-specs` and `/scaffold-triage-tasks`. Each triage session produces a log documenting decisions made (split, merge, reassign, defer, create new) and upstream actions identified.
+> **Purpose:** Decision records from `/scaffold-triage specs` and `/scaffold-triage tasks`. Each triage session produces a log documenting decisions made (split, merge, reassign, defer, create new) and upstream actions identified.
 
 ## Logs
 

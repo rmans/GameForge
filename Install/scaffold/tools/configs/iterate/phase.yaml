@@ -1,0 +1,229 @@
+# phase.yaml — Iterate config for phase scope gates (Step 7)
+# Three-pass review: L3 (subsections) → L2 (sections) → L1 (document)
+
+layer: phase
+display_name: "Phase Scope Gate"
+target_pattern: "phases/PHASE-*-*.md"
+target_type: range
+
+preflight:
+  required_files:
+    - design/design-doc.md
+    - phases/roadmap.md
+  glob_pattern: "phases/PHASE-*-*.md"
+  blocked_message: "No phase docs found. Run `/scaffold-new-phase` first."
+
+context:
+  budget: 30000
+
+  base:
+    - file: phases/roadmap.md
+      class: canonical
+      sections: ["### Phase Overview", "### Capability Ladder", "### System Coverage Map"]
+      priority: 1
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## System Domains", "## Scope"]
+      priority: 2
+
+  per_target:
+    - type: adjacent_phases
+      sections: ["### Objective", "### Exit Criteria"]
+      priority: 3
+      class: adjacent
+
+  per_section:
+    "### Entry Criteria":
+      - file: phases/roadmap.md
+        class: canonical
+        sections: ["### Phase Overview"]
+        priority: 1
+    "### Slice Strategy":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 2
+        condition: exists
+    "### System Readiness":
+      - file: design/systems/_index.md
+        class: evidence
+        priority: 2
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L3 — Subsection Review (### level)
+# ---------------------------------------------------------------------------
+
+l3_sections:
+
+  "### Objective":
+    parent: "## Goal"
+    questions:
+      - "Is this one sentence that describes what this phase delivers?"
+      - "Does it match what the roadmap says?"
+
+  "### Capability Unlocked":
+    parent: "## Goal"
+    questions:
+      - "Is this a real capability, not just 'system X is done'?"
+      - "Could QA run a scenario and see the difference?"
+
+  "### In Scope":
+    parent: "## Scope"
+    questions:
+      - "Are items specific enough to derive slices from?"
+      - "Are they behaviors, not just system names?"
+
+  "### Out of Scope":
+    parent: "## Scope"
+    questions:
+      - "Are exclusions specific — things that could plausibly be in this phase but aren't?"
+
+  "### Non-Goals":
+    parent: "## Scope"
+    questions:
+      - "Do non-goals prevent scope creep into future phases?"
+
+  "### Entry Criteria":
+    parent: "## Criteria"
+    questions:
+      - "Are criteria testable — can you verify each one before starting?"
+      - "Do they reference what prior phases deliver (PHASE-### Complete)?"
+
+  "### Exit Criteria":
+    parent: "## Criteria"
+    questions:
+      - "Are criteria demonstrable in a playtest or dev demo?"
+      - "Do they match the Capability Unlocked?"
+
+  "### Deliverables":
+    parent: "## Criteria"
+    questions:
+      - "Are deliverables concrete outputs (systems, features, slices)?"
+      - "Do they support the exit criteria?"
+
+  "### Slice Strategy":
+    parent: "## Planning"
+    questions:
+      - "Does it guide how slices should look in this phase?"
+      - "Are verticality expectations clear?"
+
+  "### System Readiness":
+    parent: "## Planning"
+    questions:
+      - "Is expected maturity realistic for each system?"
+      - "Are all in-scope systems listed?"
+
+  "### Risk Focus":
+    parent: "## Planning"
+    questions:
+      - "Are the right risks identified — the unknowns this phase should reduce?"
+
+  "### Phase Demo":
+    parent: "## Planning"
+    questions:
+      - "Is the demo clear enough to anchor slice demo scripts?"
+
+  "### Architectural Constraints":
+    parent: "## Constraints"
+    questions:
+      - "Are constraints real — do they come from architecture.md or ADRs?"
+
+  "### Dependencies":
+    parent: "## Constraints"
+    questions:
+      - "Are all upstream dependencies identified (phases, systems, decisions)?"
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Goal":
+    questions:
+      - "Do Objective and Capability Unlocked describe the same achievement?"
+      - "Is the capability player-visible, not just internal progress?"
+
+  "## Scope":
+    questions:
+      - "Do In Scope, Out of Scope, and Non-Goals together define a clear, bounded phase?"
+      - "Is In Scope sliceable — can you derive vertical slices from it?"
+
+  "## Criteria":
+    questions:
+      - "Does the previous phase's exit criteria satisfy this phase's entry criteria?"
+      - "Does this phase's exit criteria provide what the next phase needs?"
+      - "Are deliverables sufficient to meet exit criteria?"
+
+  "## Planning":
+    questions:
+      - "Do Slice Strategy, System Readiness, Risk Focus, and Phase Demo form a coherent plan?"
+      - "Is the demo achievable given the scope and system readiness?"
+
+  "## Constraints":
+    questions:
+      - "Are architectural constraints and dependencies complete?"
+      - "Are there hidden dependencies not listed?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Is it immediately clear what this phase delivers and why?"
+  - "Can this phase start given what the previous phase delivers?"
+  - "Does it deliver what the next phase needs?"
+  - "Are the right systems included, and none that shouldn't be?"
+  - "Does the scope reflect current reality rather than stale assumptions?"
+
+scope_guard:
+  upward: "roadmap — phase sequencing and overall arc"
+  downward: "slices, specs, tasks — implementation details"
+  tests:
+    - name: upward_leakage
+      question: "Does this change modify the roadmap's phase sequencing or overall project arc?"
+      guidance: "Phases define scope within the roadmap's plan — they don't change the plan."
+    - name: downward_leakage
+      question: "Does this change introduce slice, spec, or task-level detail?"
+      guidance: "Phases define what gets built; slices and specs define how it breaks down."
+
+adjudication:
+  editable_files_pattern: "phases/PHASE-*-*.md"
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-phase-{target}-{date}.md"
+  final_questions:
+    - name: "Most Dangerous Thing"
+      prompt: "The most dangerous assumption or gap in this phase."
+    - name: "Undetected Failure Risk"
+      prompt: "What could go wrong that the entry/exit criteria wouldn't catch?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (goals unclear, chain broken)"
+      2: "major issues (significant gaps in scope or criteria)"
+      3: "workable but soft (some gaps, minor chain issues)"
+      4: "solid phase (clear goals, good criteria, minor soft spots)"
+      5: "strong phase (unambiguous goals, airtight chain, realistic scope)"
+
+rules:
+  - "Project documents and authority order win"
+  - "Only edit the phase file being reviewed"
+  - "Never blindly accept"
+  - "Pushback is expected and healthy"
+  - "Resolved issues are locked across iterations by root cause"

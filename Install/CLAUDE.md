@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This project uses ClaudeScaffold — a document-driven pipeline for game development. Every design decision, system behavior, and implementation constraint lives in `scaffold/` as a versioned markdown file with a clear authority rank.
+This project uses GameForge — a document-driven pipeline for game development. Every design decision, system behavior, and implementation constraint lives in `scaffold/` as a versioned markdown file with a clear authority rank.
 
 ## Rules
 
@@ -32,7 +32,7 @@ Never load entire directories. Follow this protocol:
 | 4 | `design/architecture.md`, `design/interfaces.md`, `design/authority.md` | Canon — engineering conventions, contracts, data ownership |
 | 5 | `design/systems/SYS-###`, `design/state-transitions.md` | Canon — systems, states |
 | 6 | `reference/*` | Reference — data tables |
-| 7 | `phases/roadmap.md`, `phases/P#-###` | Scope — roadmap and phase gates |
+| 7 | `phases/roadmap.md`, `phases/PHASE-###` | Scope — roadmap and phase gates |
 | 8 | `slices/SLICE-###` | Integration — vertical slice contracts |
 | 9 | `specs/SPEC-###` | Behavior — atomic specs |
 | 10 | `engine/*` | Implementation — engine constraints |
@@ -58,14 +58,14 @@ Never load entire directories. Follow this protocol:
 
 ## When Creating or Modifying Systems
 
-- **Use `/scaffold-bulk-seed-systems` to create systems from the design doc.** For individual systems, use `/scaffold-new-system`. Both use the template, assign IDs, and register in indexes automatically.
+- **Use `/scaffold-seed systems` to create systems from the design doc.** For individual systems, use `/scaffold-seed systems --single`. Both use the template, assign IDs, and register in indexes automatically.
 - If creating manually: use the template at `scaffold/templates/system-template.md`, assign sequential SYS-### IDs (never skip or reuse), and register in both `scaffold/design/systems/_index.md` AND the System Design Index in `scaffold/design/design-doc.md`.
 - Write in player-visible behavior only. Technical contracts belong in `scaffold/design/interfaces.md` and `scaffold/reference/signal-registry.md`.
 
 ## When Planning (Phases, Slices, Specs, Tasks)
 
 - Follow the order: Roadmap → Phases → Slices → Specs → Tasks.
-- **Use bulk-seed skills to create planning docs:** `/scaffold-bulk-seed-phases`, `/scaffold-bulk-seed-slices`, `/scaffold-bulk-seed-specs`, `/scaffold-bulk-seed-tasks`. For individual docs, use `/scaffold-new-phase`, `/scaffold-new-slice`, `/scaffold-new-spec`, `/scaffold-new-task`.
+- **Use seed skill to create planning docs:** `/scaffold-seed phases`, `/scaffold-seed slices`, `/scaffold-seed specs`, `/scaffold-seed tasks`. For individual docs, use `/scaffold-seed phases --single`, `/scaffold-seed slices --single`, `/scaffold-seed specs --single`, `/scaffold-seed tasks --single`.
 - Before creating a phase, spec, or task, read all ADRs filed during prior work. ADRs may change scope.
 - Before creating a phase, read `scaffold/decisions/playtest-feedback/` for Pattern-status entries. Playtest patterns may affect phase scope alongside ADRs.
 - Slices define vertical end-to-end chunks within a phase. Specs define behavior within a slice. Tasks implement specs.
@@ -79,7 +79,7 @@ Every scaffold document carries a `> **Status:**` field in its blockquote header
 - **Draft** — set automatically when a document is created (via templates and create/seed skills).
 - **Review** — set manually by the user when the document is ready for adversarial review.
 - **Approved** — set automatically by `/scaffold-iterate` after a successful adversarial review (consensus reached, no unresolved HIGH issues).
-- **Complete** — set by `/scaffold-complete` when implementation is done and verified. Applies to planning-layer docs only (phases, slices, specs, tasks). Ripples upward: when all tasks for a spec are Complete, the spec becomes Complete, and so on through slices and phases.
+- **Complete** — set by `utils.py complete` when implementation is done and verified. Applies to planning-layer docs only (phases, slices, specs, tasks). Ripples upward: when all tasks for a spec are Complete, the spec becomes Complete, and so on through slices and phases.
 - **Deprecated** — set via ADR (filed with `/scaffold-file-decision --type adr`) when a document is no longer active. The document remains in its directory (IDs are permanent) but reviews flag references to it.
 
 ADRs use their own status lifecycle (`Proposed | Accepted | Deprecated | Superseded`) and are not part of this system.
@@ -112,7 +112,7 @@ Follow the step-by-step recipe in `scaffold/WORKFLOW.md` for the full 24-step pi
 
 ## External Review Setup
 
-The `/scaffold-iterate-*` skills use an external LLM for adversarial review via `scaffold/tools/doc-review.py`. Configuration lives in `scaffold/tools/review_config.json`:
+The `/scaffold-iterate` skill uses an external LLM for adversarial review via `scaffold/tools/iterate.py` (which calls `scaffold/tools/adversarial-review.py`). Configuration lives in `scaffold/tools/review_config.json`:
 
 - **Primary provider:** Set `"provider"` (default: `"openai"`).
 - **Fallback chain:** Set `"fallback_order"` (default: `["openai", "anthropic"]`). If the primary provider fails with a billing/quota error, the script automatically tries the next provider. If all providers are exhausted, iterate skills fall back to self-review (Claude reviews directly, weaker but functional).
@@ -135,8 +135,8 @@ The project version is tracked in `VERSION.md` in the project root. Format: `MAJ
 | Segment | When to bump | Examples |
 |---------|-------------|----------|
 | **MAJOR** | Full release / ship | 1.0.0.0 — v1 release |
-| **PHASE** | Phase completion (`/scaffold-complete` on a phase) | 0.1.0.0 — Phase 1 complete |
-| **SLICE** | Slice completion (`/scaffold-complete` on a slice) | 0.1.1.0 — first slice of Phase 1 complete |
+| **PHASE** | Phase completion (`utils.py complete` on a phase) | 0.1.0.0 — Phase 1 complete |
+| **SLICE** | Slice completion (`utils.py complete` on a slice) | 0.1.1.0 — first slice of Phase 1 complete |
 | **PATCH** | Task completion, bug fixes, doc creation, any other incremental work | 0.1.1.1 — first patch after slice |
 
 **Rules:**
@@ -204,7 +204,7 @@ When creating or modifying scaffold documents, check and update these related fi
 | When you change... | Also update... |
 |---------------------|---------------|
 | `phases/roadmap.md` | `phases/_index.md` must match Phase Overview |
-| `phases/P#-###` (new phase) | `phases/_index.md`, `phases/roadmap.md` Phase Overview and Capability Ladder |
+| `phases/PHASE-###` (new phase) | `phases/_index.md`, `phases/roadmap.md` Phase Overview and Capability Ladder |
 | `slices/SLICE-###` (new slice) | `slices/_index.md`, parent phase file Slice Strategy section |
 | `specs/SPEC-###` (new spec) | `specs/_index.md`, parent slice Specs table |
 | `tasks/TASK-###` (new task) | `tasks/_index.md`, parent slice Tasks table |

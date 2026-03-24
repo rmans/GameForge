@@ -1,0 +1,121 @@
+# playtest-session.yaml — Iterate config for playtest session logs (PT-YYYY-MM-DD)
+# No L3 (no ### subsections). Review is L2 (sections) → L1 (document).
+
+layer: playtest-session
+display_name: "Playtest Session"
+target_pattern: "decisions/playtest-feedback/PT-*.md"
+target_type: range
+
+preflight:
+  required_files: []
+  glob_pattern: "decisions/playtest-feedback/PT-*.md"
+  critical_sections: [Observations, Summary]
+  blocked_message: "Playtest session log is too incomplete for review. Fill in Observations and Summary first."
+
+context:
+  budget: 15000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Control"]
+      priority: 2
+
+  per_target: []
+  per_section: {}
+  on_demand: []
+
+defaults:
+  max_iterations: 3
+  max_exchanges: 3
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Observations":
+    questions:
+      - "Are observations specific — tester, time, type, system?"
+      - "Are there enough observations? A session with 2 entries for 4 testers suggests observations were lost."
+      - "Are observation types correctly classified (Confusion/Frustration/Delight/Suggestion/Bug)?"
+      - "Are system references accurate?"
+
+  "## Post-Test Questions":
+    questions:
+      - "Are answers verbatim from testers, not paraphrased?"
+      - "Are all questions answered, or are there blanks?"
+
+  "## Metrics":
+    questions:
+      - "Were relevant metrics tracked?"
+      - "Do metric values have targets for comparison?"
+      - "Do metrics support or contradict the observations?"
+
+  "## Summary":
+    questions:
+      - "Does the summary focus on surprises — what was unexpected?"
+      - "Is it honest — does it acknowledge problems, not just celebrate successes?"
+      - "Does it match the observations, or does it tell a different story?"
+
+  "## Feedback Entries Created":
+    questions:
+      - "Were PF-### entries created for significant observations?"
+      - "Are there observations in the table that deserve their own PF entry but didn't get one?"
+
+  "## Metadata":
+    questions:
+      - "Is the hypothesis stated — what did you expect to learn?"
+      - "Does the Focus Area match what was actually tested?"
+      - "Is the tester description useful (experience level, background)?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Does the summary honestly reflect what the observations show?"
+  - "Were all significant observations promoted to PF-### entries?"
+  - "Did the session test what the hypothesis claimed?"
+  - "Is there enough data here to inform design decisions, or is this a box-checking exercise?"
+  - "What would a second session need to focus on based on these results?"
+
+scope_guard:
+  upward: null
+  downward: null
+  tests: []
+
+adjudication:
+  editable_files_pattern: "decisions/playtest-feedback/PT-*.md"
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+  rules:
+    - "Don't rewrite observations — improve completeness and accuracy"
+    - "Summaries that ignore negative observations should be flagged"
+    - "Missing PF entries for significant observations is a real finding"
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-pt-{target}-{date}.md"
+  final_questions:
+    - name: "Session Value"
+      prompt: "Did this session produce actionable insights, or was it a box-checking exercise?"
+    - name: "Follow-Up"
+      prompt: "What should the next playtest session focus on?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "unusable (observations missing, summary fabricated)"
+      2: "weak (sparse observations, summary doesn't match data)"
+      3: "workable (observations exist, summary needs more honesty)"
+      4: "solid session (good observations, honest summary, metrics tracked)"
+      5: "strong session (rich observations, honest summary, hypothesis tested, all PF entries created)"
+
+rules:
+  - "Don't rewrite tester observations"
+  - "Dishonest summaries are the most important finding"
+  - "Never blindly accept"
+  - "Resolved issues are locked across iterations by root cause"

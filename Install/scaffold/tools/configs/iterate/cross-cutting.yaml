@@ -1,0 +1,88 @@
+# cross-cutting.yaml — Iterate config for cross-cutting findings
+# Reviews resolved/acknowledged/deferred findings for quality.
+
+layer: cross-cutting
+display_name: "Cross-Cutting Findings"
+target: decisions/cross-cutting-findings.md
+target_type: fixed
+
+preflight:
+  required_files:
+    - decisions/cross-cutting-findings.md
+  blocked_message: "No cross-cutting findings file."
+
+context:
+  budget: 20000
+
+  base:
+    - file: decisions/cross-cutting-findings.md
+      class: evidence
+      priority: 1
+      condition: exists
+
+  per_target: []
+  per_section: {}
+  on_demand: []
+
+defaults:
+  max_iterations: 3
+  max_exchanges: 3
+  sleep_between_topics: 10
+
+l2_sections:
+
+  "## Finding":
+    questions:
+      - "Is the finding specific enough to act on?"
+      - "Is the evidence concrete — citing specific check output?"
+
+  "## Resolution":
+    questions:
+      - "Does the resolution actually address the finding?"
+      - "Is the action taken traceable — referencing what was fixed?"
+
+  "## Acknowledgment":
+    questions:
+      - "Is the acknowledgment reason honest — not just 'acknowledged'?"
+
+  "## Deferral":
+    questions:
+      - "Is the deferral tracked with a real reference (KI-### or ADR-###)?"
+      - "Is the reason specific about what needs to happen before resolution?"
+
+l1_questions:
+  - "Are all Open findings genuinely unresolved, or have some been fixed but not updated?"
+  - "Are Acknowledged findings truly acceptable risks, or are they sweeping problems under the rug?"
+
+scope_guard:
+  upward: null
+  downward: null
+  tests: []
+
+adjudication:
+  editable_files:
+    - decisions/cross-cutting-findings.md
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-cross-cutting-{date}.md"
+  final_questions:
+    - name: "Finding Quality"
+      prompt: "Are findings specific and actionable?"
+    - name: "Resolution Completeness"
+      prompt: "Are resolved findings actually fixed?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "findings vague, resolutions incomplete"
+      2: "some findings actionable, many unresolved"
+      3: "most findings clear, some resolutions weak"
+      4: "findings specific, resolutions traceable"
+      5: "all findings clear, all resolutions complete and tracked"
+
+rules:
+  - "Only edit the cross-cutting findings file"
+  - "Don't resolve findings — improve how they're documented"

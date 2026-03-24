@@ -5,44 +5,55 @@
 ## Connection to the Main Pipeline
 
 ```
-Main Pipeline                          Art Pipeline
-─────────────                          ────────────
+Design Pipeline                        Art Pipeline
+───────────────                        ────────────
+Design doc ──→ Entity Presentation ──→ What entities look like (high-level)
+                      │
+System designs ──→ Asset Needs ──→ Per-system art requirements
+                      │
 Specs approved ──→ Asset Requirements ──→ Scan existing assets
                    (what's needed)        ├── Reusable? → mark Ready
                                           └── Needed? → enter Art Pipeline
                                                 │
-                                                ├── Reference & Concept
-                                                ├── Production (discipline-specific)
-                                                ├── Technical Prep
-                                                ├── Import & Validate In-Game
-                                                ├── Iterate
-                                                ├── Accept → mark Ready in spec
-                                                └── Register → update index
-                                                │
-Tasks seeded ←── Asset paths from spec ──────────┘
-Tasks implement ── wire Ready assets
+Task seeding ──→ TASK-###_art created             │
+                 (file paths + prompts)           │
+                      │                           │
+                      ├── Reference & Concept     │
+                      ├── Production (discipline) │
+                      ├── Technical Prep          │
+                      ├── Import & Validate       │
+                      ├── Iterate                 │
+                      ├── Place at listed paths ──┘
+                      └── /scaffold-implement auto-completes task
+                           └── wiring tasks unblock
 ```
 
-**Art does not block spec approval.** Specs can be approved with Needed assets. Art blocks **task completion**, not spec completion.
+**Art does not block spec approval.** Specs can be approved with Needed assets. Art blocks **task implementation** — `/scaffold-implement` checks if assets exist at the file paths listed in the art task's Asset Delivery table. Missing assets block; all present auto-completes the task.
 
-## Asset Types and Skills
+## Asset Types
 
-| Type | Skill | Output Directory | Disciplines |
-|------|-------|-----------------|-------------|
-| Concept art | `/scaffold-art-concept` | `assets/concept/` | 2D illustration |
-| Character art | `/scaffold-art-character` | `assets/entities/[entity]/` | 2D illustration, 3D modeling |
-| Environment art | `/scaffold-art-environment` | `assets/environment/` | 2D illustration, 3D modeling |
-| Sprite art | `/scaffold-art-sprite` | `assets/entities/[entity]/` | 2D pixel art, 2D illustration |
-| Icon art | `/scaffold-art-icon` | `assets/ui/` or `assets/entities/[entity]/` | 2D graphic design |
-| UI mockup | `/scaffold-art-ui-mockup` | `assets/ui/` | UI/UX design |
-| Promo art | `/scaffold-art-promo` | `assets/promo/` | 2D illustration, composition |
+| Type | Output Directory | Disciplines |
+|------|-----------------|-------------|
+| Concept art | `assets/concept/` | 2D illustration |
+| Character art | `assets/entities/[entity]/` | 2D illustration, 3D modeling |
+| Environment art | `assets/environment/` | 2D illustration, 3D modeling |
+| Sprite art | `assets/entities/[entity]/` | 2D pixel art, 2D illustration |
+| Icon art | `assets/ui/` or `assets/entities/[entity]/` | 2D graphic design |
+| UI mockup | `assets/ui/` | UI/UX design |
+| Promo art | `assets/promo/` | 2D illustration, composition |
+| Texture | `assets/entities/[entity]/` or `assets/environment/` | Texture painting |
+| Tileset | `assets/environment/` | Tile design |
 
 ---
 
 ## Phase 1 — Identify Requirements
 
-**When:** After specs are approved (or during spec creation).
-**Source:** The spec's `## Asset Requirements` table.
+**When:** Asset identification happens at three levels, progressively more specific:
+1. **Design doc** (`### Entity Presentation`) — high-level visual identity per content category
+2. **System designs** (`### Asset Needs`) — per-system art requirements tied to actions/states
+3. **Specs** (`### Asset Requirements`) — per-behavior asset list with Status: Needed/Ready
+
+**Source for production:** The art task's `## Asset Delivery` table (auto-generated during task seeding from spec Asset Requirements). Each row has file path, dimensions, and a generation prompt.
 
 Before marking anything as Needed:
 1. **Scan existing assets** — glob `assets/` subdirectories for assets that match.
@@ -53,15 +64,17 @@ Before marking anything as Needed:
 
 **Before producing any asset**, gather reference material:
 
-1. **Read design context:**
+1. **Read the art task** — the Asset Delivery table has generation prompts pre-built from style context. Use these as starting points.
+
+2. **Read design context** (if the prompts need refinement):
    - `design/style-guide.md` — art style, visual tone, aesthetic pillars, rendering approach
    - `design/color-system.md` — palette, color roles, semantic tokens
    - `design/ui-kit.md` — component dimensions, spacing (for icons and UI)
-   - `design/design-doc.md` — world setting, mood, genre
+   - `design/design-doc.md` — Entity Presentation table, world setting, mood, genre
 
-2. **Gather visual references** — mood boards, style examples, existing assets in the same category for consistency.
+3. **Gather visual references** — mood boards, style examples, existing assets in the same category for consistency.
 
-3. **Create concept art if needed** — for complex or ambiguous assets, rough out the idea before committing to production. Use `/scaffold-art-concept` or sketch manually.
+4. **Create concept art if needed** — for complex or ambiguous assets, rough out the idea before committing to production.
 
 ---
 
@@ -125,7 +138,7 @@ For games with equippable items that must fit varying body shapes:
 | **6. Asset slicing** | 9-patch, atlas packing, icon sheets | Slice components for engine use. 9-patch for stretchable panels. Atlas pack small icons. Export individual elements where the engine needs them separate. |
 | **7. Export** | Correct formats and sizes | PNG for raster elements. SVG for scalable elements. Maintain naming convention consistent with ui-kit component names. |
 
-**AI-assisted shortcut:** AI can generate mockup compositions (`/scaffold-art-ui-mockup`) for exploration and layout validation. The output is a reference image, not usable UI assets — steps 3-7 (component design through export) always require manual work or dedicated UI tools.
+**AI-assisted shortcut:** AI can generate mockup compositions for exploration and layout validation. The output is a reference image, not usable UI assets — steps 3-7 (component design through export) always require manual work or dedicated UI tools.
 
 ---
 

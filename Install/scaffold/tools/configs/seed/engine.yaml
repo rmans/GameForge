@@ -1,0 +1,44 @@
+# engine.yaml — Seed config for engine convention docs
+
+layer: engine
+display_name: "Engine Conventions"
+template: null
+index_file: "engine/_index.md"
+output_pattern: "engine/*.md"
+
+preflight:
+  required_files:
+    - design/architecture.md
+    - design/design-doc.md
+  blocked_message: "Architecture and design doc must exist before seeding engine docs."
+
+upstream_sources:
+  - type: architecture
+    glob: "design/architecture.md"
+    extract: "Architecture decisions drive engine conventions"
+    extract_sections:
+      - "## Foundation Areas"
+      - "## Core API Boundary"
+      - "## Tick Order"
+  - type: system
+    glob: "design/systems/SYS-*-*.md"
+    extract: "System behaviors inform engine implementation patterns"
+    extract_sections:
+      - "### Purpose"
+      - "### Player Actions"
+      - "### Owned State"
+      - "### State Lifecycle"
+  - type: references
+    glob: "reference/*.md"
+    extract: "Reference data informs engine data handling"
+
+dependency_checks:
+  - type: engine_config
+    check: "Engine type is selected"
+    inventory_key: "godot4.project_file"
+    creates_if_missing: null
+
+coverage_rules:
+  - "Every architecture section has a corresponding engine doc"
+  - "Engine docs cover all system implementation domains"
+  - "No engine doc contradicts architecture.md"

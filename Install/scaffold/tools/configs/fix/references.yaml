@@ -1,0 +1,196 @@
+# references.yaml — Fix config for Step 3 reference/architecture docs
+
+layer: references
+display_name: "References & Architecture"
+target_docs:
+  - architecture.md
+  - authority.md
+  - interfaces.md
+  - state-transitions.md
+  - entity-components.md
+  - resource-definitions.md
+  - signal-registry.md
+  - balance-params.md
+  - enums-and-statuses.md
+target_type: multi_doc
+
+preflight:
+  required_files:
+    - design/design-doc.md
+  blocked_message: "Design doc required as context."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## System Domains"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+    - file: design/systems/_index.md
+      class: adjacent
+      priority: 3
+
+  on_demand:
+    - file: design/architecture.md
+      class: constraint
+      sections: ["## Foundation Areas"]
+      priority: 3
+      condition: exists
+    - file: design/authority.md
+      class: constraint
+      sections: ["## Authority Table"]
+      priority: 3
+      condition: exists
+    - file: design/interfaces.md
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: design/state-transitions.md
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files:
+  - design/architecture.md
+  - design/authority.md
+  - design/interfaces.md
+  - design/state-transitions.md
+  - reference/entity-components.md
+  - reference/resource-definitions.md
+  - reference/signal-registry.md
+  - reference/balance-params.md
+  - reference/enums-and-statuses.md
+
+defaults:
+  max_iterations: 10
+
+mechanical_checks:
+
+  per_doc_common:
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      auto_fix: true
+      fix_action: "Remove template text"
+
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+    - id: missing_sections
+      description: "Template section absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section stub"
+
+    - id: system_id_resolution
+      description: "SYS-### reference doesn't exist in systems/_index.md"
+      detection: id_resolution
+      auto_fix: false
+      user_action: "Verify system ID"
+
+  authority:
+    - id: table_columns
+      description: "Authority table missing required columns"
+      detection: table_columns
+      required_columns: [Variable, "Owning System", "Write Mode", "Authority Type", Persistence, Readers]
+      auto_fix: true
+      fix_action: "Add missing columns"
+
+    - id: duplicate_variables
+      description: "Same variable appears twice in authority table"
+      detection: duplicate_check
+      auto_fix: false
+      user_action: "Resolve ownership conflict"
+
+  interfaces:
+    - id: table_columns
+      description: "Interface table missing required columns"
+      detection: table_columns
+      required_columns: [Source, Target, "Data Exchanged", Direction, "Realization Path", Timing]
+      auto_fix: true
+      fix_action: "Add missing columns"
+
+    - id: direction_values
+      description: "Invalid Direction value"
+      detection: enum_check
+      valid_values: [Push, Pull, Request, TBD]
+      auto_fix: false
+      user_action: "Fix direction value"
+
+  signal_registry:
+    - id: signal_naming
+      description: "Signal not in past_tense_with_underscores convention"
+      detection: naming_convention
+      auto_fix: true
+      fix_action: "Normalize signal name"
+
+    - id: duplicate_signals
+      description: "Duplicate signal names"
+      detection: duplicate_check
+      auto_fix: false
+      user_action: "Resolve duplicate signal"
+
+  state_transitions:
+    - id: terminal_states
+      description: "Terminal states not marked with *(terminal)*"
+      detection: terminal_check
+      auto_fix: true
+      fix_action: "Add *(terminal)* marker"
+
+    - id: state_enum_consistency
+      description: "State names don't match enums-and-statuses.md"
+      detection: cross_doc_check
+      auto_fix: false
+      signal: state_drift
+
+  entity_components:
+    - id: authority_alignment
+      description: "Authority column doesn't match authority.md"
+      detection: cross_doc_check
+      auto_fix: true
+      fix_action: "Update entity-components to match authority.md (authority.md wins)"
+
+judgment_checks:
+
+  architecture:
+    - id: dependency_cycle
+      description: "System dependency graph contains cycles"
+      question: "Is this cycle a legitimate feedback loop or design confusion?"
+
+    - id: authority_mismatch
+      description: "System Owned State conflicts with authority table"
+      question: "Does the system or authority table need updating?"
+
+    - id: orphan_signal
+      description: "Signal has no consumer"
+      question: "Is this signal unused or is a consumer missing?"
+
+signals:
+
+  consistency:
+    - id: tbd_clustering
+      description: "High concentration of TBD values in one doc"
+    - id: over_entityfication
+      description: "Too many entity types for game complexity"
+    - id: interface_without_realization
+      description: "Interface contract with no signal or intent defined"
+
+report:
+  log_name_pattern: "FIX-references-{target}-{date}.md"
+
+rules:
+  - "Only edit reference docs listed in editable_files"
+  - "authority.md wins on ownership conflicts"
+  - "Single-writer rule is non-negotiable"
+  - "Cross-doc alignment uses authority.md as source of truth"

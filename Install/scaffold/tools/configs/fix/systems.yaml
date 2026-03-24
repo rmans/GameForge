@@ -1,0 +1,316 @@
+# systems.yaml — Fix config for system design docs
+# Defines mechanical checks, judgment checks, and signal detection for fix.py.
+
+layer: systems
+display_name: "System Design"
+target_pattern: "design/systems/SYS-*.md"
+target_type: range
+template: "scaffold/templates/system-template.md"
+
+preflight:
+  required_files:
+    - design/design-doc.md
+    - design/glossary.md
+  glob_pattern: "design/systems/SYS-*-*.md"
+  blocked_message: "No system files found."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Control", "## System Domains"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+    - file: design/systems/_index.md
+      class: adjacent
+      priority: 3
+
+  per_target:
+    - type: interaction_partners
+      sections: ["### Purpose", "### Owned State"]
+      priority: 3
+      class: adjacent
+
+  per_section:
+    "### Owned State":
+      - file: design/authority.md
+        class: constraint
+        sections: ["## Authority Table"]
+        priority: 1
+        condition: exists
+
+  on_demand:
+    - file: design/interfaces.md
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: design/state-transitions.md
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files_pattern: "design/systems/SYS-*.md"
+
+defaults:
+  max_iterations: 10
+
+# ---------------------------------------------------------------------------
+# Mechanical Checks — fix.py runs these in Python (regex, pattern matching)
+# Each returns issues that are either auto-fixed or flagged for user.
+# ---------------------------------------------------------------------------
+
+mechanical_checks:
+
+  completeness:
+    - id: missing_sections
+      description: "Section required by template is absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section heading with template comment"
+
+    - id: stale_seeded_markers
+      description: "Section has <!-- SEEDED --> marker but has authored content"
+      detection: "marker_with_content"
+      pattern: "<!-- SEEDED"
+      min_content_length: 50
+      auto_fix: true
+      fix_action: "Remove the SEEDED marker"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used as authoritative design terminology"
+      detection: glossary_not_column
+      exclude_contexts: [examples, quotes, adr_references, changelog, comparative_language]
+      auto_fix: true
+      fix_action: "Replace NOT-column term with canonical term"
+
+    - id: index_registration
+      description: "System missing from design/systems/_index.md"
+      detection: index_check
+      index_file: "design/systems/_index.md"
+      auto_fix: true
+      fix_action: "Add system to index"
+
+    - id: status_filename_sync
+      description: "Filename status suffix doesn't match internal Status field"
+      detection: status_vs_filename
+      auto_fix: false
+      user_action: "Flag for git mv — user confirms"
+
+    - id: id_format
+      description: "File doesn't follow SYS-###-name_status.md convention"
+      detection: filename_pattern
+      pattern: "^SYS-\\d{3}-.+_(draft|review|approved|complete|deprecated)\\.md$"
+      auto_fix: false
+      user_action: "Report for manual rename"
+
+  structural_quality:
+    - id: owned_state_columns
+      description: "Owned State table missing Description or Persistence columns"
+      detection: table_columns
+      section: "### Owned State"
+      required_columns: [State, Description, Persistence]
+      auto_fix: true
+      fix_action: "Add missing columns to table"
+
+  implementation_language:
+    - id: code_constructs
+      description: "Signals, methods, nodes, classes, engine constructs in system doc"
+      detection: implementation_patterns
+      patterns:
+        - "emit_signal|connect\\(|signal\\s+\\w+\\("
+        - "func\\s+\\w+|class\\s+\\w+|extends\\s+\\w+"
+        - "_ready\\(\\)|_process\\(|_physics_process\\("
+        - "\\$\\w+|get_node\\(|NodePath"
+        - "res://|preload\\(|load\\("
+      auto_fix: true
+      fix_action: "Replace with design language (e.g., 'emit signal' → 'notify dependent systems')"
+
+    - id: ui_visual_detail
+      description: "Detailed UI layout, animation timing, color values, icon specs"
+      detection: presentation_patterns
+      patterns:
+        - "#[0-9a-fA-F]{6}"
+        - "\\d+px|\\d+ms|\\d+fps"
+        - "Color\\(|theme_override"
+      auto_fix: false
+      signal: layer_breach_presentation
+
+    - id: input_detail
+      description: "Key mappings, controller buttons, input action names"
+      detection: input_patterns
+      patterns:
+        - "KEY_\\w+|BUTTON_\\w+|JOY_\\w+"
+        - "ui_accept|ui_cancel|ui_focus"
+        - "InputEvent\\w+"
+      auto_fix: false
+      signal: layer_breach_input
+
+  registration:
+    - id: design_doc_index
+      description: "System absent from design-doc.md System Design Index"
+      detection: design_doc_index_check
+      auto_fix: false
+      user_action: "Flag for human action — this skill does not auto-edit design-doc.md"
+
+  non_responsibilities:
+    - id: vague_non_responsibilities
+      description: "Non-Responsibility entry doesn't name the owning system"
+      detection: non_responsibility_ownership
+      section: "### Non-Responsibilities"
+      auto_fix: conditional
+      condition: "Ownership is explicit in authority.md or unambiguous Owned State entry"
+      fix_action: "Append '(owned by SYS-###)' when ownership is unambiguous"
+      fallback: "Report for user clarification if multiple candidates"
+
+# ---------------------------------------------------------------------------
+# Judgment Checks — routed to /scaffold-review-adjudicate via action.json
+# These need Claude to read and evaluate — not pattern-matchable.
+# ---------------------------------------------------------------------------
+
+judgment_checks:
+
+  structural_quality:
+    - id: purpose_clarity
+      description: "Purpose is buried in prose, not concise/scannable"
+      section: "### Purpose"
+      question: "Is the Purpose one clear sentence naming what the player experiences?"
+
+    - id: player_actions_structure
+      description: "Actions in paragraph form, not numbered/bulleted"
+      section: "### Player Actions"
+      question: "Are Player Actions a numbered list of observable steps, not prose?"
+
+    - id: system_resolution_consequences
+      description: "System Resolution just says 'the system processes it' without observable outcomes"
+      section: "### System Resolution"
+      question: "Does every resolution describe player-visible consequences, not just 'it processes'?"
+
+    - id: state_lifecycle_transitions
+      description: "State list without explicit transition flows"
+      section: "### State Lifecycle"
+      question: "Does the lifecycle show explicit transitions between states with triggers?"
+
+    - id: edge_cases_specificity
+      description: "Vague edge cases without specific scenarios"
+      section: "### Edge Cases & Ambiguity Killers"
+      question: "Are edge cases specific ('what if target tile destroyed mid-build?') not vague ('what if something goes wrong?')?"
+
+# ---------------------------------------------------------------------------
+# Signal Detection — detected and reported, never fixed
+# These feed into /scaffold-iterate for adversarial review.
+# ---------------------------------------------------------------------------
+
+signals:
+
+  governance:
+    - id: invariant_signal
+      description: "System behavior may conflict with a Design Invariant"
+      detection: "Compare system Player Actions and Resolution against design doc Invariants"
+
+    - id: boundary_signal
+      description: "System scope may exceed Design Boundaries"
+      detection: "Compare system purpose/scope against design doc Boundaries"
+
+    - id: control_model_signal
+      description: "Player Actions may not match Player Control Model"
+      detection: "Check if actions are direct vs indirect relative to design doc Control Model"
+
+    - id: simulation_depth_signal
+      description: "System complexity may exceed Simulation Depth Target"
+      detection: "Count state transitions, failure modes, lifecycle phases relative to depth target"
+
+  ownership:
+    - id: owned_state_gameplay
+      description: "Owned State contains implementation structures (caches, nodes, registries)"
+      detection: "Check Owned State entries for engine/implementation terms"
+
+    - id: single_writer_conflict
+      description: "Same state name appears in Owned State of multiple systems"
+      detection: "Cross-compare Owned State tables across systems in range"
+      range_only: true
+
+    - id: authority_mismatch
+      description: "Owned State doesn't match authority.md entries"
+      detection: "Cross-compare Owned State with authority.md"
+      requires: "design/authority.md"
+
+  cross_system:
+    - id: dependency_asymmetry
+      description: "System A lists B as upstream but B doesn't list A as downstream"
+      detection: "Cross-compare dependency tables"
+      auto_fix_if: "Relation directly inferable from explicit dependency table within processed range"
+
+    - id: interface_coverage
+      description: "Two systems interact per dependency tables but no interface contract exists"
+      detection: "Cross-compare dependencies with interfaces.md"
+      requires: "design/interfaces.md"
+
+    - id: orphan_system
+      description: "System has zero dependencies and zero consequences but implies simulation participation"
+      detection: "Check dependency tables are both empty while purpose implies state exchange"
+      exempt: "Player-facing UI/oversight systems with legitimately minimal dependencies"
+
+  layer_boundary:
+    - id: implementation_detail
+      description: "Substantial engine/code-level detail in system doc"
+      detection: "Pattern match for code constructs beyond isolated terms"
+
+    - id: presentation_detail
+      description: "Detailed UI/visual/audio specifications in system doc"
+      detection: "Pattern match for visual/audio specification patterns"
+
+  cross_system_pass:
+    - id: dependency_cycle
+      description: "Directed dependency graph contains cycles"
+      detection: "DFS cycle detection across full system set"
+      range_only: true
+
+    - id: redundant_systems
+      description: "Two systems have overlapping purpose, similar owned state, or near-identical actions"
+      detection: "Similarity analysis across systems in range"
+      range_only: true
+
+    - id: missing_coverage
+      description: "Design doc mechanics not covered by any system"
+      detection: "Compare design doc Core Loop, Major Mechanics, Domains against system set"
+      range_only: true
+
+    - id: state_machine_mismatch
+      description: "System lifecycle doesn't match state-transitions.md"
+      detection: "Cross-compare State Lifecycle with state-transitions.md"
+      requires: "design/state-transitions.md"
+
+# ---------------------------------------------------------------------------
+# Report
+# ---------------------------------------------------------------------------
+
+report:
+  log_name_pattern: "FIX-systems-{target}-{date}.md"
+  single_target:
+    summary_fields: [passes, auto_fixed, user_pending, signals, final_status]
+  range:
+    summary_fields: [per_system_table, cross_system_signals]
+
+# ---------------------------------------------------------------------------
+# Rules
+# ---------------------------------------------------------------------------
+
+rules:
+  - "Only edit system files in the reviewed range"
+  - "Never change purpose, simulation responsibility, or design constraints"
+  - "Never add new behavior or owned state — only clarify/restructure existing"
+  - "Never infer missing design intent — report instead"
+  - "Never edit design-doc.md, authority.md, interfaces.md"
+  - "Auto-fix only when evidence is direct (dependency table, interface contract, owned-state)"
+  - "Replace terminology only when used as authoritative design term, not in examples/quotes/changelog"
+  - "Cross-system pass runs AFTER all individual systems fixed"
+  - "Tighten wording, never alter intent"

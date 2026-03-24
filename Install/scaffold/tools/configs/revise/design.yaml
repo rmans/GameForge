@@ -1,0 +1,19 @@
+layer: design
+display_name: "Design Document"
+editable_files: [design/design-doc.md]
+preflight:
+  required_files: [design/design-doc.md]
+  blocked_message: "No design doc to revise."
+feedback_sources:
+  - type: adr
+    glob: "decisions/architecture-decision-record/ADR-*_accepted*.md"
+  - type: ki
+    glob: "decisions/known-issues/KI-*.md"
+    filter: "Status: Open"
+  - type: playtest
+    glob: "decisions/playtest-feedback/PF-*.md"
+    filter: "Status: Pattern"
+  - type: triage
+    glob: "decisions/triage-log/TRIAGE-*.md"
+safe_patterns: ["Stale ADR reference", "Terminology drift", "System index sync"]
+escalation_patterns: ["Governance change", "Scope widening", "Core Fantasy drift", "New mechanic from downstream"]

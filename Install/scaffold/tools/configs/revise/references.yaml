@@ -1,0 +1,13 @@
+layer: references
+display_name: "References & Architecture"
+editable_files: [design/architecture.md, design/authority.md, design/interfaces.md, design/state-transitions.md, reference/entity-components.md, reference/resource-definitions.md, reference/signal-registry.md, reference/balance-params.md, reference/enums-and-statuses.md]
+preflight:
+  required_files: [design/architecture.md]
+  blocked_message: "No reference docs to revise."
+feedback_sources:
+  - type: adr
+    glob: "decisions/architecture-decision-record/ADR-*_accepted*.md"
+  - type: code_review
+    glob: "decisions/code-review/CR-*.md"
+safe_patterns: ["Missing registration", "Stale reference", "Column update"]
+escalation_patterns: ["Authority change", "Architecture change", "Contract change", "State machine change"]

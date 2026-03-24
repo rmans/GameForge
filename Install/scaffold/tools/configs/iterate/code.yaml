@@ -1,0 +1,121 @@
+# code.yaml — Iterate config for code review (used with --reviewer code)
+# Reviews implementation code against 7 topics via code-review.py.
+
+layer: code
+display_name: "Code Review"
+target_type: file
+reviewer: code
+
+preflight:
+  required_files: []
+  blocked_message: "No files to review."
+
+context:
+  budget: 25000
+
+  base:
+    - file: design/architecture.md
+      class: constraint
+      sections: ["## Foundation Areas", "## Core API Boundary", "## Coding Conventions"]
+      priority: 1
+      condition: exists
+
+  per_target: []
+  per_section: {}
+  on_demand: []
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 5
+
+# Code review uses L2 topics (no L3 subsections — code doesn't have ### structure)
+
+l2_sections:
+
+  "## Architecture":
+    questions:
+      - "Does this code respect system boundaries and ownership rules?"
+      - "Is the tick order placement correct per architecture.md?"
+      - "Does data flow follow the single-writer rule?"
+
+  "## Code Structure":
+    questions:
+      - "Is the class layout clean — single responsibility, clear interfaces?"
+      - "Are functions focused and testable?"
+      - "Is coupling minimized between components?"
+
+  "## Simulation Design":
+    questions:
+      - "Is the simulation pipeline robust — handles interruption, stale targets, partial state?"
+      - "Are state machines correctly implemented with all transitions?"
+      - "Are edge cases from the spec covered?"
+
+  "## Performance":
+    questions:
+      - "Are there hot-path concerns (per-tick operations, O(n²) patterns)?"
+      - "Is memory allocation appropriate (pooling, avoiding per-frame allocs)?"
+      - "Are queries efficient?"
+
+  "## Project Organization":
+    questions:
+      - "Are files in the right directories per engine conventions?"
+      - "Do file names follow project naming conventions?"
+      - "Is the include/import structure clean?"
+
+  "## Engine Correctness":
+    questions:
+      - "Are engine lifecycle methods used correctly (_ready, _process, _notification)?"
+      - "Is memory management correct (no leaks, proper cleanup on destroy)?"
+      - "Are signals connected and disconnected correctly?"
+      - "Is node ownership and lifetime handled properly?"
+
+  "## Maintainability":
+    questions:
+      - "Would a new developer understand this code without the author explaining it?"
+      - "Are magic numbers extracted to constants or balance params?"
+      - "Is the code resilient to future changes in adjacent systems?"
+
+l1_questions:
+  - "Does this implementation correctly fulfill the parent spec's acceptance criteria?"
+  - "Would this code survive a change in an adjacent system's interface?"
+  - "What's the single riskiest thing in this implementation?"
+
+scope_guard:
+  upward: null
+  downward: null
+  tests: []
+
+adjudication:
+  editable_files: []
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+  rules:
+    - "Code review fixes must improve correctness or maintainability"
+    - "Style-only changes are low priority unless they harm readability"
+    - "Performance concerns need evidence, not speculation"
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "CR-{target}-{date}.md"
+  final_questions:
+    - name: "Riskiest Code"
+      prompt: "What's the single riskiest part of this implementation?"
+    - name: "Missing Tests"
+      prompt: "What behavior could break that isn't covered by tests?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (wrong architecture, data corruption risk)"
+      2: "major issues (significant bugs, missing error handling)"
+      3: "workable (some concerns, minor issues)"
+      4: "solid code (correct, well-structured, minor improvements)"
+      5: "strong code (clean, robust, well-tested, maintainable)"
+
+rules:
+  - "Review code, not design — design decisions belong in scaffold docs"
+  - "Engine conventions from engine docs are authoritative"
+  - "Performance claims need evidence"
+  - "Never blindly accept"
+  - "Resolved issues are locked across iterations by root cause"

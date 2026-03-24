@@ -1,0 +1,48 @@
+# input.yaml — Validate config for Step 6 input docs
+
+scope: input
+display_name: "Input System"
+
+activation:
+  required_files:
+    - inputs/action-map.md
+  skip_message: "No action-map.md found. Skipping input validation."
+
+checks:
+  deterministic:
+    - id: input-action-id-uniqueness
+      description: "No duplicate action IDs"
+      detection: pattern_absent
+      target_files: ["inputs/action-map.md"]
+      pattern: "duplicate"
+      severity: FAIL
+
+    - id: input-binding-orphans
+      description: "Every binding references existing action"
+      detection: pattern_present
+      target_files: ["inputs/default-bindings-kbm.md", "inputs/default-bindings-gamepad.md"]
+      pattern: "player_|ui_|camera_|debug_"
+      severity: WARN
+
+    - id: input-review-freshness
+      description: "Review log post-dates file modification"
+      detection: review_freshness
+      target_files: ["inputs/action-map.md", "inputs/input-philosophy.md"]
+      review_pattern: "ITERATE-input-*"
+      severity: WARN
+
+    - id: input-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_docs:
+        - "design/design-doc.md"
+
+  heuristic:
+    - id: input-philosophy-binding-compliance
+      description: "Bindings don't violate philosophy constraints"
+      detection: pattern_absent
+      target_files: ["inputs/default-bindings-kbm.md"]
+      pattern: "Ctrl\\+Shift\\+Alt"
+      severity: WARN
+      label: "[ADVISORY]"

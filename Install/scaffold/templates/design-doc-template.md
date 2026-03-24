@@ -110,6 +110,18 @@ Downstream docs cite them using `Invariant: <ShortName>`. -->
 ### Audio Direction
 <!-- Sound design philosophy. What does the game sound like? -->
 
+### Entity Presentation
+<!-- How do the major content categories look and sound? Not style guide detail — design-level identity.
+Describe the visual and audio character of each major entity type so downstream docs (style guide, system designs, specs) know what assets are needed.
+
+| Entity / Category | Visual Identity | Animation Set | Sound Identity |
+|-------------------|----------------|---------------|----------------|
+
+Examples:
+| Colonists | 3D low-poly humanoids, distinct silhouettes per role | Walk, run, idle, 2H gun fire, axe side swing, overhead mining, carry, collapse | Footsteps (surface-aware), tool impacts, voice barks (effort, pain, idle chatter) |
+| Buildings | Modular grid-snapped structures, construction scaffolding phase | Build-up sequence (foundation → frame → complete), damage states, destruction | Construction hammering, ambient hum (powered), creak/groan (damaged) |
+| Environment | Procedural terrain with biome-specific vegetation | Wind sway (vegetation), weather particles | Biome ambience loops, weather layers, wildlife | -->
+
 ### Player Information Model
 <!-- What information is always visible, partially visible, hidden, or must be discovered? -->
 
@@ -197,6 +209,28 @@ Failure Signal: <what indicates the design is breaking> -->
 ### Performance Targets
 <!-- Frame rate, entity count, map size targets. -->
 
+### Technical Stack
+
+<!-- Project-level technical context. Captured during init so all downstream docs know what's available. -->
+
+#### Engine
+<!-- Which engine and version? e.g., Godot 4.3, Unity 2024, Unreal 5.4 -->
+
+#### Languages
+<!-- What languages are used? e.g., GDScript, C++ via GDExtension, C#, Rust -->
+
+#### Build System
+<!-- How is the project built? e.g., SConstruct, CMake, dotnet build, cargo -->
+
+#### Test Frameworks
+<!-- What testing tools are available? e.g., GUT (GDScript), regression tests (C++), gdlint -->
+
+#### CI/CD
+<!-- What's the CI setup? e.g., GitHub Actions, none yet -->
+
+#### Key Dependencies
+<!-- Major plugins, addons, or libraries the project relies on. e.g., GDExtension addon, navigation plugin -->
+
 ---
 
 ## System Design Index
@@ -212,7 +246,7 @@ Failure Signal: <what indicates the design is breaking> -->
 ## Rules
 
 1. This document is the highest authority for game intent, player experience, and design rules.
-2. Sections marked Complete are locked canon — use `/scaffold-init-design --mode refresh` to change them.
+2. Sections marked Complete are locked canon — use `/scaffold-seed design --mode refresh` to change them.
 3. Design Invariants are non-breakable. Features that violate invariants are wrong.
 4. Decision Anchors resolve ambiguous design choices without debate.
 5. System truth, reference truth, and engine truth live in their own documents, not here.

@@ -1,6 +1,6 @@
 # Revision Logs — Index
 
-> **Purpose:** Records from `/scaffold-revise-systems`, `/scaffold-revise-references`, `/scaffold-revise-engine`, and `/scaffold-revise-style`. Each revision run produces a dated log documenting what drift was detected, what was auto-updated, what was escalated, and what was deferred.
+> **Purpose:** Records from `/scaffold-revise systems`, `/scaffold-revise references`, `/scaffold-revise engine`, and `/scaffold-revise style`. Each revision run produces a dated log documenting what drift was detected, what was auto-updated, what was escalated, and what was deferred.
 
 ## Logs
 

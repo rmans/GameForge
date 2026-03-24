@@ -1,0 +1,150 @@
+# task.yaml — Fix config for implementation tasks
+
+layer: task
+display_name: "Implementation Task"
+target_pattern: "tasks/TASK-*.md"
+target_type: range
+template: "scaffold/templates/task-template.md"
+
+preflight:
+  required_files: []
+  glob_pattern: "tasks/TASK-*-*.md"
+  blocked_message: "No task files found."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+    - file: design/architecture.md
+      class: constraint
+      sections: ["## Foundation Areas", "## Core API Boundary"]
+      priority: 2
+      condition: exists
+
+  per_target:
+    - type: parent_spec
+      sections: ["### Acceptance Criteria", "### Steps", "### Out of Scope"]
+      priority: 1
+      class: upstream
+    - type: parent_system
+      sections: ["### Purpose", "### Owned State"]
+      priority: 2
+      class: upstream
+    - type: referenced_engine
+      priority: 3
+      class: constraint
+
+  on_demand:
+    - file: reference/signal-registry.md
+      class: evidence
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files_pattern: "tasks/TASK-*.md"
+
+defaults:
+  max_iterations: 10
+
+mechanical_checks:
+
+  completeness:
+    - id: missing_sections
+      description: "Section required by template is absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section heading with template comment"
+
+    - id: missing_task_type
+      description: "Task Type header field missing"
+      detection: header_field_check
+      field: "Task Type"
+      auto_fix: true
+      fix_action: "Infer from steps and files"
+
+    - id: missing_depends_on
+      description: "Depends on header field missing"
+      detection: header_field_check
+      field: "Depends on"
+      auto_fix: true
+      fix_action: "Add — or infer from prerequisites"
+
+  structural_quality:
+    - id: vague_objective
+      description: "Objective not one specific sentence"
+      detection: vague_content
+      section: "### Objective"
+      auto_fix: true
+      fix_action: "Rewrite to one specific sentence from spec"
+
+    - id: weak_verification
+      description: "Verification section lacks concrete checks"
+      detection: vague_content
+      section: "### Summary"
+      auto_fix: true
+      fix_action: "Rewrite with concrete checks from spec ACs"
+
+    - id: incomplete_files
+      description: "Files Created/Modified missing files referenced in steps"
+      detection: step_file_cross_check
+      auto_fix: true
+      fix_action: "Add files referenced in steps"
+
+    - id: missing_verification_mapping
+      description: "Verification Mapping section empty"
+      detection: empty_section
+      section: "### Verification Mapping"
+      auto_fix: true
+      fix_action: "Map verification to spec ACs"
+
+    - id: bad_step_order
+      description: "Steps in wrong execution order"
+      detection: step_dependency_check
+      auto_fix: true
+      fix_action: "Reorder steps within task"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+    - id: missing_adr_reference
+      description: "Relevant ADR not referenced in Notes"
+      detection: adr_impact_check
+      auto_fix: true
+      fix_action: "Add ADR reference to Notes"
+
+judgment_checks:
+
+  scope:
+    - id: task_too_large
+      description: "Task may need splitting"
+      question: "Does this task try to do too much for a single implementation unit?"
+
+    - id: spec_mismatch
+      description: "Task implementation doesn't match spec ACs"
+      question: "Do the steps actually implement what the parent spec describes?"
+
+    - id: boundary_creep
+      description: "Task establishes conventions belonging in engine docs"
+      question: "Does this task introduce patterns that should be in engine docs instead?"
+
+    - id: ownership_ambiguity
+      description: "Task touches data owned by another system"
+      question: "Does this task write to state that authority.md assigns to a different system?"
+
+report:
+  log_name_pattern: "FIX-task-{target}-{date}.md"
+
+rules:
+  - "Only edit the task file"
+  - "Tasks implement specs — don't redefine behavior"
+  - "Convention changes belong in engine docs, not tasks"

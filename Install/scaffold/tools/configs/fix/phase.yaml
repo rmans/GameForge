@@ -1,0 +1,144 @@
+# phase.yaml — Fix config for phase scope gates
+
+layer: phase
+display_name: "Phase Scope Gate"
+target_pattern: "phases/PHASE-*-*.md"
+target_type: range
+template: "scaffold/templates/phase-template.md"
+
+preflight:
+  required_files:
+    - phases/roadmap.md
+  glob_pattern: "phases/PHASE-*-*.md"
+  blocked_message: "No phase files found."
+
+context:
+  budget: 20000
+
+  base:
+    - file: phases/roadmap.md
+      class: upstream
+      sections: ["## Phase Overview", "## Capability Ladder"]
+      priority: 1
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Scope", "## Identity"]
+      priority: 2
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  per_target:
+    - type: adjacent_phases
+      sections: ["### Goal", "### Exit Criteria"]
+      priority: 3
+      class: adjacent
+
+  on_demand:
+    - file: decisions/known-issues.md
+      class: evidence
+      priority: 4
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files_pattern: "phases/PHASE-*-*.md"
+
+defaults:
+  max_iterations: 10
+
+mechanical_checks:
+
+  completeness:
+    - id: missing_sections
+      description: "Section required by template is absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section heading with template comment"
+
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      patterns: ["<!-- TODO:", "*TODO:"]
+      auto_fix: true
+      fix_action: "Replace with roadmap/design-derived content"
+
+    - id: missing_depends_field
+      description: "Dependencies section empty"
+      detection: empty_section
+      section: "### Dependencies"
+      auto_fix: true
+      fix_action: "Add dependencies implied by entry criteria"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+    - id: missing_adr_reflection
+      description: "ADR affecting this phase not reflected"
+      detection: adr_impact_check
+      auto_fix: true
+      fix_action: "Add to scope or deliverables"
+
+    - id: broken_system_reference
+      description: "System reference broken (unambiguous rename)"
+      detection: stale_reference
+      auto_fix: true
+      condition: "Unambiguous rename"
+      fix_action: "Update to current name"
+
+  structural_quality:
+    - id: vague_entry_criteria
+      description: "Entry criteria not specific"
+      detection: vague_content
+      section: "### Entry Criteria"
+      auto_fix: true
+      condition: "Prerequisite is unambiguous"
+      fix_action: "Tighten to specific phase/system ID"
+
+    - id: vague_exit_criteria
+      description: "Exit criteria not falsifiable"
+      detection: vague_content
+      section: "### Exit Criteria"
+      auto_fix: true
+      condition: "Goal has explicit outcome language"
+      fix_action: "Tighten to falsifiable condition"
+
+judgment_checks:
+
+  scope:
+    - id: goal_task_oriented
+      description: "Goal describes tasks, not outcomes"
+      question: "Does this goal describe what's deliverable, or just what work happens?"
+
+    - id: scope_too_broad
+      description: "Phase scope exceeds what one phase should deliver"
+      question: "Is this phase trying to do too much?"
+
+    - id: entry_exit_chain_broken
+      description: "Previous phase exit doesn't satisfy this phase's entry"
+      question: "Can this phase actually start given what the previous phase delivers?"
+
+    - id: capability_not_demonstrable
+      description: "Capability Unlocked can't be demonstrated"
+      question: "Could QA run a scenario and see the difference this phase makes?"
+
+    - id: risk_concentration
+      description: "Too many risks concentrated in this phase"
+      question: "Is this phase carrying too much risk? Should some be moved earlier?"
+
+    - id: adr_contradicts_scope
+      description: "Accepted ADR conflicts with phase scope"
+      question: "Does an accepted ADR require scope changes to this phase?"
+
+report:
+  log_name_pattern: "FIX-phase-{target}-{date}.md"
+
+rules:
+  - "Only edit the phase file"
+  - "Phases define scope, not behavior"
+  - "Never auto-fix entry/exit criteria when chain is ambiguous"

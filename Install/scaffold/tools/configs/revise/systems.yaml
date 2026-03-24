@@ -1,0 +1,18 @@
+layer: systems
+display_name: "System Designs"
+editable_files_pattern: "design/systems/SYS-*-*.md"
+preflight:
+  required_files: [design/systems/_index.md]
+  blocked_message: "No systems to revise."
+feedback_sources:
+  - type: adr
+    glob: "decisions/architecture-decision-record/ADR-*_accepted*.md"
+  - type: ki
+    glob: "decisions/known-issues/KI-*.md"
+    filter: "Status: Open"
+  - type: triage
+    glob: "decisions/triage-log/TRIAGE-*.md"
+  - type: code_review
+    glob: "decisions/code-review/CR-*.md"
+safe_patterns: ["Dependency entry update", "Edge case addition", "Stale reference", "Terminology drift"]
+escalation_patterns: ["Ownership shift", "Authority violation", "Behavior gap", "System split or merge"]

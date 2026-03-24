@@ -1,0 +1,122 @@
+# glossary.yaml — Iterate config for design/glossary.md
+# No L3 (no ### subsections). Review is L2 (sections) → L1 (document).
+
+layer: glossary
+display_name: "Glossary"
+target: design/glossary.md
+target_type: fixed
+
+preflight:
+  required_files:
+    - design/glossary.md
+    - design/design-doc.md
+  blocked_message: "No glossary to review. Run `/scaffold-bulk-seed-systems` to create it."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## System Domains"]
+      priority: 1
+    - file: design/systems/_index.md
+      class: evidence
+      priority: 2
+
+  per_target: []
+  per_section: {}
+  on_demand: []
+
+defaults:
+  max_iterations: 5
+  max_exchanges: 3
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Purpose":
+    questions:
+      - "Is the purpose clear — this is the canonical term list, all docs must use these terms?"
+
+  "## Terms":
+    questions:
+      - "Is each term defined unambiguously — could two people read the definition and agree on meaning?"
+      - "Does every term from the design doc's Core Fantasy, Pillars, and System Domains appear here?"
+      - "Are NOT-column entries specific enough to catch misuse? 'Don't say worker' is useful. 'Don't use synonyms' is vague."
+      - "Are there terms used across system designs that aren't in the glossary?"
+      - "Are definitions player-facing (behavioral) not implementation-facing (technical)?"
+      - "Are there near-synonyms that should be disambiguated (e.g., 'task' vs 'job' vs 'work order')?"
+
+  "## Deprecated Terms":
+    questions:
+      - "Is each deprecated term mapped to its replacement?"
+      - "Is the reason for deprecation clear?"
+      - "Are there deprecated terms still in use in other docs?"
+
+  "## Term Hierarchy":
+    questions:
+      - "Is the hierarchy clear — which terms are parents of which?"
+      - "Does the hierarchy match how terms are actually used in system designs?"
+
+  "## Rules":
+    questions:
+      - "Are rules enforceable — could validate check compliance automatically?"
+      - "Is the NOT-column rule clear — what happens when a doc uses a NOT term?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Does the glossary cover all terms a new team member would need to understand the project?"
+  - "Are there terms that are defined but never actually used in any scaffold doc?"
+  - "Are there terms used heavily across docs that aren't in the glossary?"
+  - "Is the glossary consistent with the design doc's terminology?"
+  - "Would two developers reading this glossary use the same words for the same concepts?"
+
+scope_guard:
+  upward: "design doc — if a term conflicts with design doc usage, the design doc wins"
+  downward: null
+  tests:
+    - name: design_doc_alignment
+      question: "Does this change conflict with how the design doc uses this term?"
+      guidance: "The glossary canonicalizes terms from the design doc — it doesn't redefine them."
+
+adjudication:
+  editable_files:
+    - design/glossary.md
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+  rules:
+    - "Adding terms is safe — removing or redefining terms affects all docs and should be escalated"
+    - "NOT-column additions are high value — they prevent terminology drift"
+    - "Term definitions must be player-facing, not implementation-facing"
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-glossary-{date}.md"
+  final_questions:
+    - name: "Coverage"
+      prompt: "Are there terms missing that should be in the glossary?"
+    - name: "Ambiguity"
+      prompt: "Which term is most likely to be misused because its definition is unclear?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (key terms missing, definitions ambiguous)"
+      2: "major issues (significant gaps or confusing definitions)"
+      3: "workable (most terms covered, some definitions need tightening)"
+      4: "solid glossary (good coverage, clear definitions, useful NOT column)"
+      5: "strong glossary (complete coverage, unambiguous definitions, thorough NOT column)"
+
+rules:
+  - "Glossary is Rank 2 authority — only the design doc outranks it"
+  - "Term removals or redefinitions affect every doc and should be escalated"
+  - "Never blindly accept"
+  - "Resolved issues are locked across iterations by root cause"

@@ -17,13 +17,15 @@ OUTER LOOP (architecture stability)
 │
 ├─ INNER LOOP (planning + implementation)
 │   │
-│   ├─ Planning: Roadmap (Step 8: create→fix→iterate→validate)
-│   │            → Phases (Step 9: seed→fix→iterate→validate→approve)
-│   │                         → Slices (seed→fix→iterate→validate→approve)
-│   │                         → Specs (seed→fix→iterate→triage→validate→approve)
-│   │                         → Tasks (seed→fix→iterate→triage→validate→reorder→approve)
+│   ├─ Planning: Roadmap (Step 8: create→review→validate)
+│   │            → Phases (Step 9: seed→review→validate→approve)
+│   │                         → Slices (seed→review→validate→approve)
+│   │                         → Specs (seed→review→triage→validate→approve)
+│   │                         → Tasks (seed→review→triage→validate→reorder→approve)
 │   ├─ Building: Implement → Test → Review → Complete
 │   └─ Feedback: ADRs, known issues, triage logs
+│
+│   review = /scaffold-review (fix then iterate, chained)
 │
 ├─ Feedback Absorption (Step 14, outer loop)
 │   Revise roadmap → revise phases → review ADRs, triage logs, playtest patterns
@@ -74,7 +76,7 @@ When a skill processes a range (e.g., `SPEC-001-SPEC-010`, `TASK-001-TASK-020`),
 
 **Failure handling:** If an item fails during parallel processing, items that depend on it are skipped (they can't proceed). Independent items continue.
 
-**Rate limiting:** For skills that call external APIs (iterate-* skills using doc-review.py), add `sleep 10` between parallel batches to respect rate limits. Do not fire all API calls simultaneously.
+**Rate limiting:** For skills that call external APIs (iterate-* skills using adversarial-review.py), add `sleep 10` between parallel batches to respect rate limits. Do not fire all API calls simultaneously.
 
 **Sequential fallback:** If no dependency information exists (field is absent or all items say "—"), process sequentially in range order. Don't assume independence when dependency data is missing.
 
@@ -91,9 +93,9 @@ When a skill requires human input (triage, seed confirmation, revision proposals
 7. **Record decisions persistently** — triage decisions go in triage logs. Revision decisions go in revision logs. Seed decisions are implicit in the confirmed candidate set.
 
 This pattern applies to:
-- `/scaffold-triage-tasks` and `/scaffold-triage-specs` (the original triage skills)
-- `/scaffold-bulk-seed-slices` and `/scaffold-bulk-seed-phases` (candidate confirmation)
-- `/scaffold-revise-slices` and `/scaffold-revise-phases` (revision proposals)
+- `/scaffold-triage tasks` and `/scaffold-triage specs` (the original triage skills)
+- `/scaffold-seed slices` and `/scaffold-seed phases` (candidate confirmation)
+- `/scaffold-revise slices` and `/scaffold-revise phases` (revision proposals)
 - Any skill with a "user must confirm" or "override" path
 
 ---
@@ -119,33 +121,31 @@ Each step feeds the gate:
 
 > **Output:** `design/design-doc.md` with all sections filled and reviewed. **Proceed when:** iterate passes with no critical issues. **Surfaces for Step 7:** core simulation pressures, player verbs, content categories.
 
-### 1a — Initialize
+### 1a — Seed
 
 ```
-/scaffold-init-design [--mode seed|fill-gaps|reconcile|refresh]
+/scaffold-seed design
 ```
 
-Ingests existing project material, classifies each design doc section (Complete/Partial/Conflicted/Missing), pre-fills what can be inferred from other docs, and only interviews for genuine gaps. Supports 4 modes: `seed` (first time), `fill-gaps` (incomplete sections), `reconcile` (contradiction resolution), `refresh` (rethink specific sections). This is the highest-authority document — everything else flows from it.
+Scans the project (engine, languages, test frameworks, build system, CI, dependencies), presents findings for confirmation, then interviews the user one section group at a time (Identity, Shape, Control, World, Presentation, Content, System Domains, Philosophy, Scope). Technical Stack is pre-filled from the scan. The design doc is the highest-authority document — everything else flows from it.
 
-### 1b — Fix (mechanical cleanup)
+> For an existing design doc that needs updates: `/scaffold-seed design --mode fill-gaps|reconcile|refresh`
 
-```
-/scaffold-fix-design
-```
-
-Auto-fixes template text, incomplete governance formats (invariants, pressure tests), terminology drift, system index mismatches, and missing section stubs. Surfaces strategic issues (contradictions, invariant violations from downstream, unescalated mechanics, layer violations, philosophy drift) for human decision.
-
-> `/scaffold-review-design` provides a read-only audit at any time.
-
-### 1c — Iterate (adversarial review)
+### 1b — Review (fix + iterate)
 
 ```
-/scaffold-iterate-design
+/scaffold-review design
 ```
 
-Adversarial per-topic review by an external LLM across 5 topics: vision coherence, player experience model, world & presentation integrity, governance mechanism quality, scope & content realism. Catches structural design weaknesses self-review misses. A passing review sets the document's status to `Approved`.
+Runs the full review pipeline: mechanical cleanup (fix) then adversarial review (iterate), chained automatically.
 
-> The generic `/scaffold-iterate design/design-doc.md` also works but lacks the design-specific topic structure, governance checks, and final questions (biggest contradiction, accidental player experience, weakest governance mechanism).
+**Fix phase:** Auto-fixes template text, incomplete governance formats (invariants, pressure tests), terminology drift, system index mismatches, and missing section stubs. Surfaces strategic issues (contradictions, invariant violations, layer violations) for human decision.
+
+**Iterate phase:** Three-pass adversarial review by an external LLM — L3 (subsections), L2 (sections), L1 (whole document). Catches structural design weaknesses self-review misses.
+
+A passing iterate review sets the document's status to `Approved`.
+
+> Run `/scaffold-fix design` or `/scaffold-iterate design` independently when you only need one phase.
 
 ### 1d — Validate (structural gate)
 
@@ -158,10 +158,10 @@ Deterministic structural gate: 13 checks covering existence, section structure (
 ### 1e — Revise (post-implementation feedback loop)
 
 ```
-/scaffold-revise-design [--source P#-###|SLICE-###|foundation-recheck]
+/scaffold-revise design [--source PHASE-###|SLICE-###|foundation-recheck]
 ```
 
-Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 1 drift. Reads ADRs, known issues, playtest patterns, and downstream friction. Classifies drift as design-led (intentional) vs implementation-led (unapproved divergence). Auto-updates safe mechanical changes; dispatches to `init-design --mode reconcile/refresh` for design decisions; escalates governance impacts to the user. After revise-design runs, re-run the stabilization loop: **revise-design → fix-design (1b) → iterate-design (1c) → validate --scope design (1d)**.
+Called from the outer loop (Step 14) or when `/scaffold-revise foundation --mode recheck` detects Step 1 drift. Reads ADRs, known issues, playtest patterns, and downstream friction. Classifies drift as design-led (intentional) vs implementation-led (unapproved divergence). Auto-updates safe mechanical changes; dispatches to `init-design --mode reconcile/refresh` for design decisions; escalates governance impacts to the user. After revise-design runs, re-run the stabilization loop: **revise-design → `/scaffold-review design` (1b) → validate --scope design (1c)**.
 
 ---
 
@@ -172,7 +172,7 @@ Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode
 ### 2a — Create
 
 ```
-/scaffold-bulk-seed-systems
+/scaffold-seed systems
 ```
 
 Proposes systems from simulation responsibilities and owned player-facing concerns — not raw verbs. Reads Design Invariants, Player Control Model, Major System Domains, and Simulation Depth Target to shape proposals. Audits for overlap, missing coverage, invariant conflicts, and system category coverage before creation. Seeds glossary terms and creates system stubs with pre-filled purpose, simulation responsibility, design constraints, owned state, and dependencies.
@@ -180,26 +180,26 @@ Proposes systems from simulation responsibilities and owned player-facing concer
 To add a single system after initial seeding (e.g., when `revise-systems` detects emergent subsystem pressure, `validate` finds a design-to-systems gap, or a split is needed), use:
 
 ```
-/scaffold-new-system [name] [--split-from SYS-###] [--trigger ADR-###|KI:keyword]
+/scaffold-seed systems --single [name] [--split-from SYS-###] [--trigger ADR-###|KI:keyword]
 ```
 
 Performs the same overlap/authority/invariant audit as bulk-seed but for one system. When `--split-from` is provided, also updates the parent system's Non-Responsibilities and dependency tables.
 
-### 2b — Fix (mechanical cleanup)
+### 2b — Review (fix + iterate)
 
 ```
-/scaffold-fix-systems SYS-###-SYS-###
+/scaffold-review systems SYS-###-SYS-###
 ```
 
-Mechanical cleanup pass — normalizes structure, repairs terminology drift, fixes registration gaps, detects dependency asymmetry. Detects design signals (invariant violations, ownership conflicts, layer breaches) and reports them for adversarial review. All individual fix loops run in parallel; a cross-system pass runs after to catch inter-system issues.
+Runs the full review pipeline on each system: mechanical cleanup (fix) then adversarial review (iterate), chained automatically.
 
-### 2c — Iterate (adversarial review)
+**Fix phase:** Normalizes structure, repairs terminology drift, fixes registration gaps, detects dependency asymmetry. Detects design signals (invariant violations, ownership conflicts, layer breaches) and reports them for the iterate phase.
 
-```
-/scaffold-iterate-systems SYS-###-SYS-###
-```
+**Iterate phase:** Three-pass adversarial review (L3 subsections → L2 sections → L1 document) covering ownership correctness, behavioral completeness, design governance, cross-system coherence, and simulation fitness.
 
-Adversarial per-topic review via external LLM. Consumes design signals from fix-systems. Reviews system designs for ownership correctness, design governance compliance, cross-system coherence, and behavioral completeness. A passing review sets the document's status to `Approved`.
+A passing iterate review sets the document's status to `Approved`.
+
+> Run `/scaffold-fix systems SYS-###` or `/scaffold-iterate systems SYS-###` independently when you only need one phase.
 
 ### 2c-ii — Manual Review (human pass)
 
@@ -210,7 +210,7 @@ After iterate-systems completes, manually review two sections in each system doc
 
 **If this review changes your understanding of the design** — for example, an edge case reveals a gap in the design doc's failure philosophy, or an open question exposes an unaddressed control model ambiguity — update `design/design-doc.md` to reflect the clarification. The design doc is the highest authority; system docs derive from it. If the system review surfaced something the design doc should have addressed, fix it upstream.
 
-After manual review, proceed to validate. If the design doc was updated, re-run the Step 1 stabilization loop (`fix-design → iterate-design → validate --scope design`) before continuing.
+After manual review, proceed to validate. If the design doc was updated, re-run the Step 1 stabilization loop (``/scaffold-review design` → validate --scope design`) before continuing.
 
 ### 2d — Validate (structural gate)
 
@@ -223,10 +223,10 @@ Deterministic structural gate: 16 checks covering index registration, design-doc
 ### 2e — Revise (post-implementation feedback loop)
 
 ```
-/scaffold-revise-systems [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword]
+/scaffold-revise systems [--source PHASE-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword]
 ```
 
-Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 2 drift. Reads ADRs, known issues, spec/task friction, and code review findings. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (dependency entries, edge cases, stale references); escalates ownership shifts, authority violations, and behavior gaps. After revise-systems runs, re-run the stabilization loop: **revise-systems → fix-systems (2b) → iterate-systems (2c) → validate --scope systems (2d)**.
+Called from the outer loop (Step 14) or when `/scaffold-revise foundation --mode recheck` detects Step 2 drift. Reads ADRs, known issues, spec/task friction, and code review findings. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (dependency entries, edge cases, stale references); escalates ownership shifts, authority violations, and behavior gaps. After revise-systems runs, re-run the stabilization loop: **revise-systems → `/scaffold-review systems` (2b) → validate --scope systems (2c)**.
 
 ---
 
@@ -237,26 +237,20 @@ Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode
 ### 3a — Create
 
 ```
-/scaffold-bulk-seed-references
+/scaffold-seed references
 ```
 
 Reads all system designs and bulk-populates: architecture (foundation area definitions derived from system patterns), authority table, interface contracts, state transitions, entity components (including identity semantics — handle format, invalidation, persistence mapping), resource definitions, signal registry (with event-level taxonomy: gameplay/domain/engine), balance parameters, and shared enums/statuses. These docs surface the cross-cutting architecture assumptions that must be locked in Step 7.
 
-### 3b — Fix (mechanical cleanup)
+### 3b — Review (fix + iterate)
 
 ```
-/scaffold-fix-references
+/scaffold-review references
 ```
 
-Mechanical cleanup pass for all 9 Step 3 docs. Per-doc checks (section structure, table columns, terminology, registration) followed by cross-doc consistency pass (authority→entity-components, interfaces→signals, state-transitions→enums, architecture→scene tree). Auto-fixes alignment issues and detects design signals for adversarial review. Supports `--target doc.md` for single-doc focus (used by revise-foundation when only one doc was revised).
+Full review pipeline for all 9 Step 3 docs. Fix phase: per-doc structural checks, table columns, terminology, cross-doc consistency (authority→entity-components, interfaces→signals, state-transitions→enums). Iterate phase: three-pass adversarial review covering architectural coherence, ownership model, contract quality, data model fitness, cross-doc consistency, simulation readiness. Supports `--target doc.md` for single-doc focus. A passing iterate review sets the documents' status to `Approved`.
 
-### 3c — Iterate (adversarial review)
-
-```
-/scaffold-iterate-references
-```
-
-Adversarial per-topic review via external LLM across 6 topics (architectural coherence, ownership & authority model, contract & interface quality, data model fitness, cross-doc consistency, simulation readiness). Consumes design signals from fix-references. Supports `--target doc.md` for single-doc focus and `--topics` for scoped review. A passing review sets the documents' status to `Approved`.
+> Run `/scaffold-fix references` or `/scaffold-iterate references` independently when needed.
 
 ### 3d — Validate
 
@@ -269,10 +263,10 @@ Deterministic checks in two layers: (1) Python script — system IDs, authority 
 ### 3e — Revise (post-implementation feedback loop)
 
 ```
-/scaffold-revise-references [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword] [--target doc.md]
+/scaffold-revise references [--source PHASE-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword] [--target doc.md]
 ```
 
-Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 3 drift. Reads ADRs, known issues, system doc changes, spec/task friction, and code review findings. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (missing registrations, stale references, column updates); escalates authority changes, architecture changes, contract changes, and state machine changes. Respects canonical direction (authority→entity-components, interfaces→signal-registry, state-transitions→enums). After revise-references runs, re-run the stabilization loop: **revise-references → fix-references (3b) → iterate-references (3c) → validate --scope refs (3d)**.
+Called from the outer loop (Step 14) or when `/scaffold-revise foundation --mode recheck` detects Step 3 drift. Reads ADRs, known issues, system doc changes, spec/task friction, and code review findings. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (missing registrations, stale references, column updates); escalates authority changes, architecture changes, contract changes, and state machine changes. Respects canonical direction (authority→entity-components, interfaces→signal-registry, state-transitions→enums). After revise-references runs, re-run the stabilization loop: **revise-references → `/scaffold-review references` → validate --scope refs (3d)**.
 
 ---
 
@@ -285,28 +279,20 @@ Step 4 runs after systems and references are defined, so engine decisions have f
 ### 4a — Create
 
 ```
-/scaffold-bulk-seed-engine
+/scaffold-seed engine
 ```
 
 Asks which engine and implementation stack, then seeds all 14 engine docs from templates in one pass — no per-doc confirmation. Reads Step 1-3 outputs to align with architecture decisions. Confidence-tiered pre-fill: Strong (engine conventions known + Step 3 locked), Constrained TODO (Step 3 is TBD), Open TODO (no basis). Reports architecture alignment and constrained TODOs.
 
-### 4b — Fix (mechanical cleanup)
+### 4b — Review (fix + iterate)
 
 ```
-/scaffold-fix-engine [--target doc-stem]
+/scaffold-review engine [--target doc-stem]
 ```
 
-Mechanical cleanup pass for all 15 engine docs. Per-doc checks (section structure, terminology, registration, constrained TODO currency) plus alignment signal detection (architecture contradictions, authority assumptions, interface timing mismatches, layer breaches). Cross-doc pass checks convention consistency, architecture alignment coverage, and maturity imbalance. Supports `--target` for single-doc focus.
+Full review pipeline for all 15 engine docs. Fix phase: per-doc structural checks, terminology, registration, constrained TODO currency, alignment signal detection. Iterate phase: three-pass adversarial review covering architecture fidelity, authority compliance, convention quality, cross-engine consistency, implementation sufficiency. Supports `--target` for single-doc focus. A passing iterate review sets the document's status to `Approved`.
 
-### 4c — Iterate (adversarial review)
-
-```
-/scaffold-iterate-engine [--target doc-stem] [--topics "1,2,5"] [--iterations N]
-```
-
-Adversarial per-topic review of all 15 engine docs via external LLM across 6 topics (architecture implementation fidelity, authority & contract compliance, engine convention quality, cross-engine consistency, implementation sufficiency, simulation-layer fitness). Consumes alignment signals from fix-engine. Reviews whether engine docs correctly implement Steps 1-3 decisions using sound engine patterns. Supports `--target` for single-doc focus and `--topics` for scoped review. A passing review sets the document's status to `Approved`.
-
-Includes safeguards: scope collapse guard (engine docs implement, not define), ambiguous upstream handling (flags for revise-references instead of forcing interpretations), review consistency lock (resolved issues stay resolved across iterations), and practicality check (rejects changes that optimize for review criteria over developer usability).
+> Run `/scaffold-fix engine` or `/scaffold-iterate engine` independently when needed.
 
 ### 4d — Validate (structural gate)
 
@@ -319,10 +305,10 @@ Deterministic validation of engine doc structural integrity: index registration,
 ### 4e — Revise (post-implementation feedback loop)
 
 ```
-/scaffold-revise-engine [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,REFS:doc-stem] [--target doc-stem]
+/scaffold-revise engine [--source PHASE-###|SLICE-###|foundation-recheck] [--signals ADR-###,REFS:doc-stem] [--target doc-stem]
 ```
 
-Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 4 drift. Reads ADRs, known issues, spec/task friction, code review findings, and Step 3 doc changes to identify when engine docs no longer match what was actually built or what Steps 1-3 now define. Signal-driven with explicit resolution table. Classifies drift as design-led (Step 3 changed, engine follows) vs implementation-led (code diverged without authority). Auto-updates safe changes (stale references, Step 3 alignment, constrained TODO resolution, new implementation patterns). Escalates convention changes, performance budget revisions, and architecture implementation changes with CRITICAL/HIGH/MEDIUM priority weighting. Includes early exit when no engine-impacting signals remain, repeated divergence escalation (forced decision at 2+ runs), duplicate pattern guard for implementation-patterns.md, partial Step 3 instability suppression, and post-edit reference integrity check. After revise-engine runs, re-run the stabilization loop: **fix-engine (4b) → iterate-engine (4c) → validate --scope engine (4d)**.
+Called from the outer loop (Step 14) or when `/scaffold-revise foundation --mode recheck` detects Step 4 drift. Reads ADRs, known issues, spec/task friction, code review findings, and Step 3 doc changes to identify when engine docs no longer match what was actually built or what Steps 1-3 now define. Signal-driven with explicit resolution table. Classifies drift as design-led (Step 3 changed, engine follows) vs implementation-led (code diverged without authority). Auto-updates safe changes (stale references, Step 3 alignment, constrained TODO resolution, new implementation patterns). Escalates convention changes, performance budget revisions, and architecture implementation changes with CRITICAL/HIGH/MEDIUM priority weighting. Includes early exit when no engine-impacting signals remain, repeated divergence escalation (forced decision at 2+ runs), duplicate pattern guard for implementation-patterns.md, partial Step 3 instability suppression, and post-edit reference integrity check. After revise-engine runs, re-run the stabilization loop: **`/scaffold-review engine` → validate --scope engine (4d)**.
 
 ---
 
@@ -335,7 +321,7 @@ Step 5 runs after engine constraints are locked, so visual/UX decisions have ful
 ### 5a — Create
 
 ```
-/scaffold-bulk-seed-style
+/scaffold-seed style
 ```
 
 Reads the design doc and system designs (primary), architecture/reference/engine docs (secondary constraints), and theory docs (advisory) to seed all 6 docs. Auto-writes high-confidence sections directly, tags medium-confidence sections with rationale in the changelog, and leaves low-confidence sections as TODOs. Only pauses for user confirmation on ambiguous style direction, competing visual interpretations, major UX model choices, or decisions that would materially change downstream docs. Phases are processed in order (style-guide → color-system → ui-kit → interaction-model → feedback-system → audio-direction) but ui-kit and interaction-model may reveal back-propagation needs — these are noted in the report, not silently fixed. Skips already-authored docs.
@@ -392,21 +378,15 @@ After seeding, review the report for medium-confidence assumptions and low-confi
 - **Animation & transitions** — panel open/close, hover/press timing, easing curves
 - **Sound feedback** — per-component sounds only (click, hover, toggle); cross-modal coordination is in feedback-system
 
-### 5b — Fix (mechanical cleanup)
+### 5b — Review (fix + iterate)
 
 ```
-/scaffold-fix-style
+/scaffold-review style [--target doc.md]
 ```
 
-Mechanical cleanup pass for all 6 Step 5 docs. Auto-fixes template text, terminology drift, cross-doc inconsistencies, token normalization, and boundary violations. Detects design signals (tone mismatches, component gaps, scope creep, priority conflicts) for adversarial review. Supports `--target` for single-doc focus. Authority flows downstream within Step 5: style-guide → color-system → ui-kit; interaction-model ↔ feedback-system (peers); audio-direction derives priority from feedback-system.
+Full review pipeline for all 6 Step 5 docs. Fix phase: template text, terminology, cross-doc inconsistencies, token normalization, boundary violations. Iterate phase: per-doc adversarial review (visual identity, color semantics, UI components, interaction clarity, response coverage, audio tone) plus cross-doc integration check. Supports `--target` for single-doc focus. A passing iterate review sets the document's status to `Approved`.
 
-### 5c — Iterate (adversarial review)
-
-```
-/scaffold-iterate-style
-```
-
-Adversarial review of all 6 Step 5 docs using an external LLM. Each doc gets its own specialized review lens targeting its unique failure modes: (1) visual identity & readability, (2) color semantics & accessibility, (3) UI component model, (4) input clarity & command structure, (5) response coverage & priority logic, (6) audio tone & boundary discipline. Then Topic 7 checks the cross-doc seams — whether the 6 docs work together as one system. Topic 7 runs first when budget is tight. Supports `--target` for single-doc focus and `--topics` for scoped review. A passing review sets the document's status to `Approved`.
+> Run `/scaffold-fix style` or `/scaffold-iterate style` independently when needed.
 
 ### 5d — Validate (gate check)
 
@@ -416,12 +396,11 @@ Adversarial review of all 6 Step 5 docs using an external LLM. Each doc gets its
 
 Validates Step 5 doc structural integrity, content health, cross-doc consistency, authority flow, boundary compliance, token resolution, and accessibility coherence. Checks that color tokens resolve, no raw hex values leak into downstream docs, interaction actions have feedback coverage, feedback priorities align with audio priorities, and accessibility promises are enforced (no color-only states, no hover-only cues, multi-channel critical events).
 
-> **Art & Audio:** With style docs in place, you can now generate visual and audio assets at any point. See the Quick Reference table for all art and audio skills.
 
 ### 5e — Revise (post-implementation feedback loop)
 
 ```
-/scaffold-revise-style [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword,PLAYTEST:keyword] [--target doc.md]
+/scaffold-revise style [--source PHASE-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword,PLAYTEST:keyword] [--target doc.md]
 ```
 
 Detect Step 5 doc drift from implementation feedback. Reads ADRs, known issues, playtest feedback patterns, design doc changes, system doc changes, Step 3 doc changes, spec/task friction, and code review findings. Classifies each signal as design-led (upstream authority changed), playtest-led (player feedback pattern), or implementation-led (code diverged without approval). Auto-updates safe changes: missing tokens, stale references, new feedback entries (conservative defaults — never auto-adds Critical events), cross-doc alignment. Escalates aesthetic direction changes, interaction model changes, priority hierarchy changes, accessibility changes (always escalates even with ADR), component removals, and token system restructures. Follows Step 5 authority flow: style-guide → color-system → ui-kit; feedback-system → audio-direction. Supports `--target` for single-doc focus and `--signals` for targeted dispatch from revise-foundation.
@@ -435,26 +414,20 @@ Detect Step 5 doc drift from implementation feedback. Reads ADRs, known issues, 
 ### 6a — Create
 
 ```
-/scaffold-bulk-seed-input
+/scaffold-seed input
 ```
 
 Reads the design doc, interaction model, and engine input docs to pre-fill action-map, input-philosophy, keyboard/mouse bindings, gamepad bindings, and UI navigation.
 
-### 6b — Fix (mechanical cleanup)
+### 6b — Review (fix + iterate)
 
 ```
-/scaffold-fix-input [--target doc.md] [--iterate N]
+/scaffold-review input [--target doc.md]
 ```
 
-Mechanical cleanup pass for input docs. Auto-fixes action ID naming conventions, binding collisions, orphan bindings, template text, terminology drift, and cross-doc inconsistencies (action-map ↔ bindings ↔ navigation ↔ interaction-model ↔ design doc). Detects design signals (missing player verbs, namespace confusion, action bloat, philosophy-interaction mismatches, accessibility gaps, button exhaustion) for adversarial review. Supports `--target` for single-doc focus. Context-aware collision detection — namespace-separated and mode-separated overlaps are not flagged.
+Full review pipeline for all 5 input docs. Fix phase: action ID naming, binding collisions, orphan bindings, terminology, cross-doc consistency. Iterate phase: adversarial review covering action traceability, philosophy coherence, binding fitness, navigation completeness, cross-doc consistency, interaction readiness. Supports `--target` for single-doc focus. A passing iterate review sets the document's status to `Approved`.
 
-### 6c — Iterate (adversarial review)
-
-```
-/scaffold-iterate-input [--target doc.md] [--topics "1,3,6"] [--focus "concern"] [--iterations N]
-```
-
-Adversarial per-topic review via external LLM. Consumes design signals from fix-input. Reviews across 6 topics: action coverage & traceability, philosophy & accessibility coherence, binding fitness & device parity, navigation model completeness, cross-doc consistency, and interaction readiness. Mandatory end-to-end interaction test and device parity test gate further per-doc reviews. A passing review sets the document's status to `Approved`.
+> Run `/scaffold-fix input` or `/scaffold-iterate input` independently when needed.
 
 ### 6d — Validate (structural gate)
 
@@ -467,10 +440,10 @@ Deterministic structural gate: action ID conventions, traceability (Source colum
 ### 6e — Revise (post-implementation feedback loop)
 
 ```
-/scaffold-revise-input [--source P#-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword,STYLE:doc-changed]
+/scaffold-revise input [--source PHASE-###|SLICE-###|foundation-recheck] [--signals ADR-###,KI:keyword,STYLE:doc-changed]
 ```
 
-Called from the outer loop (Step 14) or when `/scaffold-revise-foundation --mode recheck` detects Step 6 drift. Reads ADRs, known issues, spec/task friction, code review findings, interaction model changes, and ui-kit changes. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (stale references, missing actions from upstream, orphan bindings, terminology drift); escalates philosophy violations, navigation model changes, device parity gaps, and accessibility changes. After revise-input runs, re-run the stabilization loop: **revise-input → fix-input (6b) → iterate-input (6c) → validate --scope input (6d)**.
+Called from the outer loop (Step 14) or when `/scaffold-revise foundation --mode recheck` detects Step 6 drift. Reads ADRs, known issues, spec/task friction, code review findings, interaction model changes, and ui-kit changes. Classifies drift as design-led vs implementation-led. Auto-updates safe changes (stale references, missing actions from upstream, orphan bindings, terminology drift); escalates philosophy violations, navigation model changes, device parity gaps, and accessibility changes. After revise-input runs, re-run the stabilization loop: **revise-input → `/scaffold-review input` → validate --scope input (6d)**.
 
 ---
 
@@ -498,12 +471,12 @@ The purpose is not to finalize every low-level implementation detail — it's to
 ### 7a — Revise
 
 ```
-/scaffold-revise-foundation [--mode initial|recheck]
+/scaffold-revise foundation [--mode initial|recheck]
 ```
 
 **Initial mode** (first pass): Verifies Steps 1–6 each completed their Create → Review → Iterate pipeline. Reports readiness per doc layer. No revisions needed — nothing has been implemented yet. Proceeds to 7b.
 
-**Recheck mode** (outer loop, after phase completion): Reads implementation feedback (ADRs, KIs, triage logs, playtest patterns, revision logs, code review findings). Identifies which foundation areas drifted and which Step 1–6 docs need updating. Dispatches revision loops (revise → fix → iterate → validate) to affected docs only. After dispatched revisions complete, proceeds to 7b for foundation validation gate.
+**Recheck mode** (outer loop, after phase completion): Reads implementation feedback (ADRs, KIs, triage logs, playtest patterns, revision logs, code review findings). Identifies which foundation areas drifted and which Step 1–6 docs need updating. Dispatches revision loops (revise → review → validate) to affected docs only. After dispatched revisions complete, proceeds to 7b for foundation validation gate.
 
 ### 7b — Validate (gate)
 
@@ -513,7 +486,7 @@ The purpose is not to finalize every low-level implementation detail — it's to
 
 Deterministic checks: foundation area coverage, area status (Locked/Partial/Deferred), authority-architecture consistency, interface completeness, signal consistency, entity consistency, iterate freshness.
 
-If cross-cutting findings are surfaced, run `/scaffold-fix-cross-cutting` to resolve them interactively.
+If cross-cutting findings are surfaced, run `/scaffold-fix cross-cutting` to resolve them interactively.
 
 **Gate assessment:**
 - **PASS** — all areas are Locked, or Partial with tracked bounded gaps. Safe to proceed into planning.
@@ -523,7 +496,7 @@ If cross-cutting findings are surfaced, run `/scaffold-fix-cross-cutting` to res
 ### 7c — Fix Cross-Cutting Issues
 
 ```
-/scaffold-fix-cross-cutting [--category decision-closure|workflow|staleness] [--id XC-###]
+/scaffold-fix cross-cutting [--category decision-closure|workflow|staleness] [--id XC-###]
 ```
 
 Reads `scaffold/decisions/cross-cutting-findings.md` (populated by `/scaffold-validate --scope all` Section 2l checks) and dispatches resolution actions per finding category:
@@ -547,28 +520,20 @@ The roadmap follows the same stabilization pattern as phases. **Loop 1** runs on
 #### 8a — Create the roadmap
 
 ```
-/scaffold-new-roadmap
+/scaffold-seed roadmap
 ```
 
 Proposes a phase skeleton from design context, maps systems to phases, validates ordering and coverage, then writes `phases/roadmap.md` with 20 sections: vision checkpoint, design pillars, ship definition, capability ladder, phase overview, phase boundaries, system coverage map, phase ordering rationale, and more. Includes demo scenarios, success metrics, and sliceability checks per phase.
 
-#### 8b — Fix mechanical issues
+#### 8b — Review (fix + iterate)
 
 ```
-/scaffold-fix-roadmap
+/scaffold-review roadmap
 ```
 
-Auto-fixes template text, vague phase goals, vision checkpoint drift, stale ADR log entries, terminology drift, and registration mismatches. Surfaces strategic issues (coverage gaps, over-scoping, ordering conflicts) for human decision.
+Full review pipeline. Fix phase: template text, vague goals, vision drift, stale ADR entries, terminology. Iterate phase: adversarial review covering vision coverage, phase sequencing, milestone quality, risk distribution, player experience evolution. Produces a Roadmap Strength Rating (1–5).
 
-#### 8c — Adversarial review
-
-```
-/scaffold-iterate-roadmap
-```
-
-Runs adversarial per-topic review via external LLM across 5 topics (vision coverage & scope alignment, phase sequencing & dependency logic, milestone quality & capability progression, risk distribution & ADR currency, player experience evolution). Produces a Roadmap Strength Rating (1–5).
-
-> `/scaffold-review-roadmap` provides a read-only audit at any time.
+> Run `/scaffold-fix roadmap` or `/scaffold-iterate roadmap` independently when needed.
 
 #### 8d — Validate
 
@@ -585,36 +550,20 @@ The roadmap goes through the same stabilization loop as the initial pass:
 **8e — Revise the roadmap**
 
 ```
-/scaffold-revise-roadmap P#-### (the just-completed phase)
+/scaffold-revise roadmap PHASE-### (the just-completed phase)
 ```
 
-Formalizes the Phase Transition Protocol. Moves the completed phase to Completed Phases with delivery notes, completion date, and implementation friction rating (LOW/MEDIUM/HIGH per rubric). Logs ADR feedback (with dedupe), updates Current Phase to earliest Approved phase (from actual file status), adds Revision History entry, and surfaces roadmap-level observations. Includes Roadmap Confidence signal (Stable/Decreased/Improved). Recommended before `/scaffold-revise-phases` but resilient to either order.
+Formalizes the Phase Transition Protocol. Moves the completed phase to Completed Phases with delivery notes, completion date, and implementation friction rating (LOW/MEDIUM/HIGH per rubric). Logs ADR feedback (with dedupe), updates Current Phase to earliest Approved phase (from actual file status), adds Revision History entry, and surfaces roadmap-level observations. Includes Roadmap Confidence signal (Stable/Decreased/Improved). Recommended before `/scaffold-revise phases` but resilient to either order.
 
-**8f — Fix the revised roadmap**
-
-```
-/scaffold-fix-roadmap
-```
-
-Auto-fixes any mechanical issues introduced by the revision — stale ADR log entries, capability ladder drift, system coverage gaps, vision checkpoint drift.
-
-**8g — Iterate the revised roadmap**
+**8f — Review the revised roadmap**
 
 ```
-/scaffold-iterate-roadmap
+/scaffold-review roadmap
 ```
 
-Adversarial review on the revised roadmap. Particularly important after phases that produced HIGH friction or Decreased confidence — the roadmap structure may need strategic adjustment.
+Full review pipeline on the revised roadmap (fix → iterate → validate). Particularly important after phases that produced HIGH friction or Decreased confidence.
 
-**8h — Validate the revised roadmap**
-
-```
-/scaffold-validate --scope roadmap
-```
-
-Structural integrity check after revision. Ensures all 13 checks pass before proceeding to phase revision.
-
-> **Key principle:** The roadmap is a living document. It's revised after every phase completion — not just once at project start. The full loop (revise → fix → iterate → validate) ensures the roadmap stays structurally sound as it evolves. `revise-roadmap` handles the macro view (roadmap document updates), while `revise-phases` (Step 9f) handles the micro view (remaining phase file adjustments).
+> **Key principle:** The roadmap is a living document. It's revised after every phase completion — not just once at project start. The full loop (revise → review → validate) ensures the roadmap stays structurally sound as it evolves. `revise-roadmap` handles the macro view (roadmap document updates), while `revise-phases` (Step 9f) handles the micro view (remaining phase file adjustments).
 
 ### Step 9 — Define and manage phases
 
@@ -625,28 +574,20 @@ Phases follow the same pipeline pattern as slices. **Loop 1** runs once when the
 #### 9a — Seed phases
 
 ```
-/scaffold-bulk-seed-phases
+/scaffold-seed phases
 ```
 
 Generates phase scope gate stubs from the roadmap, design doc, system designs, and ADR/KI history. Roadmap goals drive phase selection. Uses temporary labels during confirmation; assigns permanent IDs only after the user confirms. Additive-aware — won't re-generate existing phases.
 
-> To create a single phase interactively: `/scaffold-new-phase [phase-name]`
+> To create a single phase interactively: `/scaffold-seed phases --single [phase-name]`
 
-#### 9b — Fix mechanical issues in phases
-
-```
-/scaffold-fix-phase P#-###-P#-###
-```
-
-Auto-fixes mechanical issues (template text, vague criteria, broken system references, terminology drift). Surfaces strategic issues (scope too broad, entry/exit chain breaks, ADR contradictions) for human decision.
-
-#### 9c — Iterate phases
+#### 9b — Review phases
 
 ```
-/scaffold-iterate-phase P#-###-P#-###
+/scaffold-review phase PHASE-###-PHASE-###
 ```
 
-Runs adversarial per-topic review via external LLM across 4 topics (scope quality & milestone clarity, entry/exit chain & sequencing, system coverage & authority, risk awareness & decision currency).
+Full review pipeline. Fix phase: template text, vague criteria, broken references, terminology. Iterate phase: adversarial review covering scope quality, entry/exit chains, system coverage, risk awareness.
 
 #### 9d — Validate
 
@@ -659,7 +600,7 @@ Checks phase structural integrity: index sync, roadmap sync, order integrity, st
 #### 9e — Approve first phase
 
 ```
-/scaffold-approve-phases P#-###
+/scaffold-approve phases PHASE-###
 ```
 
 Lifecycle gate that approves exactly one phase — the next in roadmap order. Enforces 9 preconditions: validation passes, no other active phase, correct roadmap order, all entry criteria satisfied, review freshness, no unresolved iterate escalations, no pending ADRs/KIs, content readiness, and slice seeding readiness. The gate never rewrites content — it only reads and judges. Later phases stay Draft.
@@ -670,39 +611,23 @@ Lifecycle gate that approves exactly one phase — the next in roadmap order. En
 #### 9f — Revise remaining phases
 
 ```
-/scaffold-revise-phases P#-### (the just-completed phase)
+/scaffold-revise phases PHASE-### (the just-completed phase)
 ```
 
 Reads ADRs, known issues, playtest patterns, triage logs, foundation recheck results (advisory), slice review logs, and implementation friction signals from the completed phase. Four-tier classification: safe refinement (direct-apply, no pause), scope widening (confirmation required), milestone weakening (confirmation required), scope invalidation (ADR required). Safe refinements must preserve or strengthen milestone meaning. Direct-apply changes proceed without user pause; only confirmation and ADR items stop for decisions. Volume guardrail: >5 direct-apply changes to a single phase triggers acknowledgement. Approved phases stay Approved — no status regression.
 
-#### 9g — Fix the next phase
+#### 9g — Review the next phase
 
 ```
-/scaffold-fix-phase P#-###
+/scaffold-review phase PHASE-###
 ```
 
-Auto-fixes mechanical issues in the revised phase before adversarial review.
-
-#### 9h — Iterate the next phase
-
-```
-/scaffold-iterate-phase P#-###
-```
-
-Adversarial per-topic review on the revised phase.
-
-#### 9i — Validate
-
-```
-/scaffold-validate --scope phases
-```
-
-Structural integrity check after revision.
+Full review pipeline on the revised phase (fix → iterate → validate).
 
 #### 9j — Approve next phase
 
 ```
-/scaffold-approve-phases P#-###
+/scaffold-approve phases PHASE-###
 ```
 
 Approves the next phase in roadmap order. Repeat Loop 2 (9f–9j) for each remaining phase.
@@ -720,30 +645,20 @@ Slices have two loops depending on where you are in the phase. **Loop 1** runs o
 #### 10a — Seed slices
 
 ```
-/scaffold-bulk-seed-slices
+/scaffold-seed slices
 ```
 
 Generates slice stubs for the phase from phase goals, system designs, and interface contracts. Phase goals drive slice selection. Lifecycle-aware — behaves differently for fresh phases vs phases with existing slices. Filters weak candidates (progress theater, fake verticality, duplicate proof) before presentation. Uses temporary labels during confirmation; assigns permanent IDs only after the user confirms the full candidate set, order, and dependencies. Defines implementation order and `Depends on` declarations — only the first slice will be approved initially.
 
-> To create a single slice interactively: `/scaffold-new-slice [slice-name]`
+> To create a single slice interactively: `/scaffold-seed slices --single [slice-name]`
 
-#### 10b — Fix mechanical issues in the first slice
-
-```
-/scaffold-fix-slice SLICE-###
-```
-
-Reviews the first slice, auto-fixes mechanical issues (template text, vague done criteria, broken references, stale dependencies, terminology drift), and surfaces strategic issues (goal quality, boundary design, proof value) for human decision.
-
-#### 10c — Iterate the first slice
+#### 10b — Review the first slice
 
 ```
-/scaffold-iterate-slice SLICE-###
+/scaffold-review slice SLICE-###
 ```
 
-Runs adversarial per-topic review via external LLM across 5 topics (proof quality, boundary design, integration completeness, demo sufficiency, sequencing & transition). Catches blind spots review-slice misses: whether the slice is buying real certainty, whether boundaries are optimal, whether the demo is convincing proof.
-
-> `/scaffold-iterate` also works on slices (general-purpose monolithic review), but `/scaffold-iterate-slice` provides deeper per-topic analysis — recommended for the slice loop.
+Full review pipeline. Fix phase: template text, vague criteria, broken references, terminology. Iterate phase: adversarial review covering proof quality, boundary design, integration completeness, demo sufficiency, sequencing.
 
 #### 10d — Validate
 
@@ -756,7 +671,7 @@ Checks slice structural integrity: index sync, phase resolution, status-filename
 #### 10e — Approve first slice
 
 ```
-/scaffold-approve-slices SLICE-###
+/scaffold-approve slices SLICE-###
 ```
 
 Lifecycle gate that approves exactly one slice — the first in implementation order. Enforces 8 preconditions: validation passes, no other active slice, correct implementation order, all declared dependencies Complete, review and iterate logs fresh, no pending upstream actions, phase-scope alignment, and no spec pipeline drift. Later slices stay Draft because implementation feedback may change them.
@@ -767,39 +682,25 @@ Lifecycle gate that approves exactly one slice — the first in implementation o
 #### 10f — Revise remaining slices
 
 ```
-/scaffold-revise-slices SLICE-### (the just-completed slice)
+/scaffold-revise slices SLICE-### (the just-completed slice)
 ```
 
 Reads ADRs, known issues, triage decision logs, and from the completed slice's implementation. Proposes scope, goal, dependency, and integration changes to remaining Draft slices. Applies confirmed changes. After edits, reconciles `_index.md` order against the dependency graph — if a split or new dependency creates an impossible implementation sequence, proposes a topological reorder.
 
-#### 10g — Fix the next slice
+#### 10g — Review the next slice
 
 ```
-/scaffold-fix-slice SLICE-###
+/scaffold-review slice SLICE-###
 ```
 
-Auto-fixes mechanical issues in the revised slice before adversarial review.
-
-#### 10h — Iterate the next slice
-
-```
-/scaffold-iterate-slice SLICE-###
-```
-
-Adversarial per-topic review on the revised slice.
-
-#### 10i — Validate
-
-```
-/scaffold-validate --scope slices
-```
+Full review pipeline on the revised slice (fix → iterate → validate).
 
 Structural integrity check after revision — includes dependency resolution, dependency order, single-active-slice, and review freshness.
 
 #### 10j — Approve next slice
 
 ```
-/scaffold-approve-slices SLICE-###
+/scaffold-approve slices SLICE-###
 ```
 
 Approves the next slice in implementation order. Repeat Loop 2 (10f–10j) for each remaining slice in the phase.
@@ -813,35 +714,25 @@ This step uses a multi-pass planning loop to produce behavior-ready specs. The l
 #### 11a — Seed specs
 
 ```
-/scaffold-bulk-seed-specs
+/scaffold-seed specs
 ```
 
 Generates spec stubs for all slices from system designs and state transitions. Each spec describes BEHAVIOR, not implementation — no engine constructs.
 
-> To create a single spec interactively: `/scaffold-new-spec [spec-name]`
+> To create a single spec interactively: `/scaffold-seed specs --single [spec-name]`
 
-#### 11b — Fix mechanical issues
-
-```
-/scaffold-fix-spec SPEC-###-SPEC-###
-```
-
-Reviews all specs, auto-fixes mechanical issues (vague ACs, missing sections, implementation leaks, terminology drift, registration gaps), and surfaces strategic issues for human decision (system scope mismatches, authority violations, state machine conflicts, spec overlaps).
-
-#### 11c — Adversarial review
+#### 11b — Review specs
 
 ```
-/scaffold-iterate-spec SPEC-###-SPEC-###
+/scaffold-review spec SPEC-###-SPEC-###
 ```
 
-Runs adversarial per-topic review via external LLM across 6 topics (behavioral correctness, system & authority alignment, slice coverage, cross-system contracts, acceptance criteria quality, edge cases & known issues). Catches blind spots: determinism gaps, actor ambiguity, trigger/sequence issues, authority violations, missing failure paths, unabsorbed ADRs.
-
-> `/scaffold-iterate` also works on specs (general-purpose monolithic review), but `/scaffold-iterate-spec` provides deeper per-topic analysis with back-and-forth discussion — recommended for the stabilization loop.
+Full review pipeline. Fix phase: vague ACs, missing sections, implementation leaks, terminology, registration. Iterate phase: adversarial review covering behavioral correctness, system alignment, slice coverage, cross-system contracts, AC quality, edge cases.
 
 #### 11d — Triage human-required issues
 
 ```
-/scaffold-triage-specs SLICE-###
+/scaffold-triage specs SLICE-###
 ```
 
 Collects all unresolved human-required issues from fix-spec and iterate runs: coverage gaps, spec overlaps, system scope mismatches, authority violations, state machine conflicts. Presents them as a decision checklist: splits, merges, scope changes, new specs, reassignments, deferrals. Applies the user's decisions.
@@ -872,7 +763,7 @@ Runs spec-pipeline validation to catch synchronization drift before approving: s
 #### 11g — Approve specs
 
 ```
-/scaffold-approve-specs SLICE-###
+/scaffold-approve specs SLICE-###
 ```
 
 Marks all Draft specs as Approved. Renames files (`_draft` → `_approved`), updates `specs/_index.md`, and syncs the slice's Specs table. Blocked/deferred specs stay Draft.
@@ -889,40 +780,32 @@ This step uses a multi-pass planning loop to produce implementation-ready tasks.
 #### 12a — Seed tasks
 
 ```
-/scaffold-bulk-seed-tasks SLICE-###
+/scaffold-seed tasks SLICE-###
 ```
 
 Creates initial task stubs from the slice's specs, engine docs, and architecture context. Tasks describe HOW to implement spec behavior in the target engine.
 
-> To create a single task interactively: `/scaffold-new-task [task-name]`
+**Art/audio asset tasks:** When a spec has Asset Requirements with `Status: Needed`, seeding creates dedicated `art` or `audio` tasks (suffixed `_art` / `_audio`). These tasks list every required asset with file paths, dimensions/duration, and ready-to-use generation prompts built from the style guide and color system (art) or audio direction (audio). The user creates these assets externally and places them at the listed paths. Wiring tasks that connect assets to code depend on the art/audio tasks that produce them.
 
-#### 12b — Fix mechanical issues
+> To create a single task interactively: `/scaffold-seed tasks --single [task-name]`
 
-```
-/scaffold-fix-task TASK-###-TASK-###
-```
-
-Reviews all tasks, auto-fixes mechanical issues (vague objectives, weak verification, missing files, terminology drift, bad step order, missing integration touchpoints), and surfaces strategic issues for human decision.
-
-#### 12c — Adversarial review
+#### 12b — Review tasks
 
 ```
-/scaffold-iterate-task TASK-###-TASK-###
+/scaffold-review task TASK-###-TASK-###
 ```
 
-Runs adversarial per-topic review via external LLM across 5 topics (spec coverage, architecture compliance, integration correctness, step executability, edge cases & safety). Catches blind spots: hidden assumptions, coverage gaps, architecture interpretation issues, dependency problems, overlooked edge cases.
-
-> `/scaffold-iterate` also works for tasks (it delegates to `/scaffold-iterate-task` internally), but calling the task-specific skill directly is clearer.
+Full review pipeline. Fix phase: vague objectives, weak verification, missing files, terminology, step order. Iterate phase: adversarial review covering spec coverage, architecture compliance, integration correctness, step executability, edge cases & safety.
 
 #### 12d — Triage human-required issues
 
 ```
-/scaffold-triage-tasks SLICE-###
+/scaffold-triage tasks SLICE-###
 ```
 
 Collects all unresolved human-required issues from fix-task and iterate runs, plus cross-cutting checks: integration gaps, execution path validation, data ownership violations, state transition coverage, persistence gaps, weak verification, and file overlap conflicts. Presents them as a decision checklist: splits, merges, scope changes, new tasks, spec conflicts, blockers, deferrals, ownership. Applies the user's decisions to task files.
 
-Writes a persistent decision log to `decisions/triage-logs/TRIAGE-SLICE-###.md` with two sections: **Decisions** (task-level changes applied) and **Upstream Actions Required** (non-task doc changes that triage identified but did NOT apply — these must be handled via `/scaffold-update-doc` or ADRs). The triage decision log becomes the authoritative record of planning decisions and upstream changes required before implementation. Both `/scaffold-reorder-tasks` and `/scaffold-approve-tasks` read this log downstream.
+Writes a persistent decision log to `decisions/triage-logs/TRIAGE-SLICE-###.md` with two sections: **Decisions** (task-level changes applied) and **Upstream Actions Required** (non-task doc changes that triage identified but did NOT apply — these must be handled via direct file editing or ADRs). The triage decision log becomes the authoritative record of planning decisions and upstream changes required before implementation. Both `/scaffold-reorder-tasks` and `/scaffold-approve tasks` read this log downstream.
 
 #### 12e — Repeat until stable
 
@@ -960,7 +843,7 @@ Run this only after the task graph has stabilized and validation is clean — re
 #### 12h — Approve tasks
 
 ```
-/scaffold-approve-tasks SLICE-###
+/scaffold-approve tasks SLICE-###
 ```
 
 Marks all Draft tasks as Approved after reorder confirms the task graph is clean. Renames files (`_draft` → `_approved`), updates `tasks/_index.md`, and syncs the slice's Tasks table status column. Blocked/deferred tasks stay Draft.
@@ -977,7 +860,7 @@ This is the final gate before implementation — tasks must have passed through 
 ### Step 13 — Implement tasks
 
 ```
-/scaffold-implement-task TASK-### [--CRI N]
+/scaffold-implement TASK-### [--CRI N]
 ```
 
 Runs the full implementation pipeline for a single task or a range (`TASK-###-TASK-###`):
@@ -985,26 +868,25 @@ Runs the full implementation pipeline for a single task or a range (`TASK-###-TA
 1. **Read** — task, spec, system design, architecture, engine docs, ADRs, existing code
 2. **Plan** — output a brief implementation plan for review
 3. **Implement** — write the code following the task's Steps section
-4. **Add tests** — regression tests via `/scaffold-add-regression-tests`
-5. **Build and test** — verification gate via `/scaffold-build-and-test`
-6. **Code review** — adversarial review via `/scaffold-code-review` (file-scope per changed file, optional system-scope coherence pass). `--CRI N` sets max review iterations (default: 10, stops early when stable).
+4. **Add tests** — regression tests via implement.py test phase
+5. **Build and test** — verification gate via `utils.py build-test`
+6. **Code review** — adversarial review via `iterate.py --reviewer code` (file-scope per changed file, optional system-scope coherence pass). `--CRI N` sets max review iterations (default: 10, stops early when stable).
 7. **Rebuild and retest** — if code review applied changes, re-verify
-8. **Sync docs** — update reference and architecture docs via `/scaffold-sync-reference-docs`
-9. **Complete** — mark task done and ripple upward via `/scaffold-complete`
+8. **Sync docs** — update reference and architecture docs via `utils.py sync-refs`
+9. **Complete** — mark task done and ripple upward via `utils.py complete`
 
 The pipeline stops on failure — build errors, test failures, or unresolvable review issues must be fixed before proceeding. For ranges, later tasks are skipped if an earlier task fails (they may depend on it).
 
-> **ADRs during implementation:** When a conflict or ambiguity arises during implementation, create `decisions/ADR-###.md` using `templates/decision-template.md`. ADRs are permanent records that feed back into upcoming phases, specs, and tasks. This happens naturally during implementation — it's not a separate step.
+> **Art/audio tasks:** When `/scaffold-implement` hits an `art` or `audio` task, it checks if all assets in the Asset Delivery table exist at their listed file paths. If any are missing, it reports which ones and blocks. If all assets are present, it auto-completes the task (with upstream ripple) and unblocks dependent wiring tasks. Create assets externally using the prompts in the Asset Delivery section, place them at the listed paths, then run implement again.
 
-> **Asset review:** If art or audio assets have been generated, run `/scaffold-review-art` and
-> `/scaffold-review-audio` to audit visual consistency, prompt quality, and coverage gaps.
+> **ADRs during implementation:** When a conflict or ambiguity arises during implementation, create `decisions/ADR-###.md` using `templates/decision-template.md`. ADRs are permanent records that feed back into upcoming phases, specs, and tasks. This happens naturally during implementation — it's not a separate step.
 
 ### Step 14 — Repeat (the two-loop cycle)
 
 **Inner loop — within a phase:**
 
 1. Implement tasks (Step 13) until the current slice is complete.
-2. Run `/scaffold-revise-slices` (Step 10f) to update remaining Draft slices from implementation feedback.
+2. Run `/scaffold-revise slices` (Step 10f) to update remaining Draft slices from implementation feedback.
 3. Fix, iterate, validate, and approve the next slice (Steps 10g–10j).
 4. Seed specs and tasks for the newly approved slice (Steps 11–12).
 5. Return to step 1. Repeat for each slice in the phase.
@@ -1013,9 +895,9 @@ The pipeline stops on failure — build errors, test failures, or unresolvable r
 
 After all slices in a phase are complete:
 
-6. **Run the foundation architecture pipeline (Step 7a–7b in recheck mode):** `/scaffold-revise-foundation --mode recheck` detects drift and dispatches doc revisions — including `/scaffold-revise-design` (Step 1 drift), `/scaffold-revise-systems` (Step 2 drift), `/scaffold-revise-references` (Step 3 drift), `/scaffold-revise-engine` (Step 4 drift), `/scaffold-revise-style` (Step 5 drift), and `/scaffold-revise-input` (Step 6 drift). Then `validate --scope foundation` gates, and `fix-cross-cutting` resolves any cross-cutting findings. If revise-design was dispatched, re-run the Step 1 stabilization loop. If revise-engine was dispatched, re-run: fix-engine → iterate-engine → validate --scope engine. If revise-style was dispatched, re-run: fix-style → iterate-style → validate --scope style. If revise-input was dispatched, re-run: fix-input → iterate-input → validate --scope input. If no drift, proceeds directly.
-7. **Revise the roadmap (Steps 8e–8h):** revise-roadmap → fix-roadmap → iterate-roadmap → validate --scope roadmap. Full stabilization loop on the revised roadmap before phase revision, so remaining phases are adjusted against the latest roadmap state rather than a stale macro plan.
-8. **Revise remaining phases:** `/scaffold-revise-phases P#-###` (Step 9f) — reads ADRs, KIs, playtest patterns, triage logs, foundation recheck results, slice review logs, implementation friction signals. Four-tier classification with direct-apply path. Approved phases stay Approved.
+6. **Run the foundation architecture pipeline (Step 7a–7b in recheck mode):** `/scaffold-revise foundation --mode recheck` detects drift and dispatches doc revisions — including `/scaffold-revise design` (Step 1 drift), `/scaffold-revise systems` (Step 2 drift), `/scaffold-revise references` (Step 3 drift), `/scaffold-revise engine` (Step 4 drift), `/scaffold-revise style` (Step 5 drift), and `/scaffold-revise input` (Step 6 drift). Then `validate --scope foundation` gates, and `fix-cross-cutting` resolves any cross-cutting findings. If revise-design was dispatched, re-run the Step 1 stabilization loop. If revise-engine was dispatched, re-run: `/scaffold-review engine` → validate --scope engine. If revise-style was dispatched, re-run: `/scaffold-review style` → validate --scope style. If revise-input was dispatched, re-run: `/scaffold-review input` → validate --scope input. If no drift, proceeds directly.
+7. **Revise the roadmap (Steps 8e–8h):** revise-roadmap → `/scaffold-review roadmap` → validate --scope roadmap. Full stabilization loop on the revised roadmap before phase revision, so remaining phases are adjusted against the latest roadmap state rather than a stale macro plan.
+8. **Revise remaining phases:** `/scaffold-revise phases PHASE-###` (Step 9f) — reads ADRs, KIs, playtest patterns, triage logs, foundation recheck results, slice review logs, implementation friction signals. Four-tier classification with direct-apply path. Approved phases stay Approved.
 9. Fix, iterate, validate, and approve the next phase (Steps 9g–9j).
 10. Seed slices for the newly approved phase (Step 10) and return to the inner loop.
 
@@ -1040,7 +922,7 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 
 | Skill | What | Why | How |
 |-------|------|-----|-----|
-| `bulk-seed-systems` | Propose and create system stubs | Define simulation layer from design intent | Proposes systems by ownership (not verbs). 9 category coverage audit, overlap/gap/invariant checks. Batch confirmation |
+| `seed systems` | Propose and create system stubs | Define simulation layer from design intent | Proposes systems by ownership (not verbs). 9 category coverage audit, overlap/gap/invariant checks. Batch confirmation |
 | `new-system` | Create a single system | Add a system after initial seeding | Overlap/authority/invariant audit for one system. Supports `--split-from` (split context) and `--trigger` (ADR/KI context). Pre-fills from parent or trigger |
 | `fix-systems` | Mechanical cleanup | Normalize before adversarial review | Formatter + linter. Auto-fixes structure/terminology/registration. Detects design signals for iterate-systems. All loops parallel |
 | `iterate-systems` | Adversarial review | Challenge system design quality | 5 topics (ownership, behavior, governance, cross-system, fitness) + System Identity Check + Reviewer Bias Pack. External LLM |
@@ -1051,7 +933,7 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 
 | Skill | What | Why | How |
 |-------|------|-----|-----|
-| `bulk-seed-references` | Create all Step 3 docs (9 docs) | Surface cross-cutting assumptions for Step 7 | 10-phase pipeline: architecture (scene tree, dependencies, tick order, update semantics, identity model, data flow rules, forbidden patterns, code patterns) → authority → interfaces → state transitions → entity components (with identity semantics) → resources → signals (with event taxonomy + Level column) → balance params → enums/statuses → report. Creates from templates if docs don't exist. Flags identity model decisions for Step 7 |
+| `seed references` | Create all Step 3 docs (9 docs) | Surface cross-cutting assumptions for Step 7 | 10-phase pipeline: architecture (scene tree, dependencies, tick order, update semantics, identity model, data flow rules, forbidden patterns, code patterns) → authority → interfaces → state transitions → entity components (with identity semantics) → resources → signals (with event taxonomy + Level column) → balance params → enums/statuses → report. Creates from templates if docs don't exist. Flags identity model decisions for Step 7 |
 | `fix-references` | Mechanical cleanup (Step 3) | Normalize before adversarial review | Per-doc checks (section structure, columns, terminology) + cross-doc consistency (authority↔entities, interfaces↔signals, states↔enums). Supports `--target doc.md` for single-doc focus |
 | `iterate-references` | Adversarial review (Step 3) | Challenge reference doc quality | 6 topics (architecture coherence, ownership model, contract quality, data model fitness, cross-doc consistency, simulation readiness) + Reviewer Bias Pack (8 patterns). Supports `--target` and `--topics` |
 | `revise-references` | Post-implementation drift | Keep reference docs matching accepted reality | Reads ADRs/KIs/system doc changes/spec friction/code review. Classifies design-led vs implementation-led. Auto-updates safe changes, escalates authority/architecture/contract/state changes. Supports `--target` and `--signals` |
@@ -1061,7 +943,7 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 
 | Skill | What | Why | How |
 |-------|------|-----|-----|
-| `bulk-seed-engine` | Create engine docs (15 total) | Lock technical foundations before visual/UX | One-pass seed of 15 docs from templates. Auto-detects engine + implementation stack. Confidence-tiered: Strong/Constrained TODO/Open TODO based on Step 3 maturity. No per-doc confirmation. Create-missing-only by default. |
+| `seed engine` | Create engine docs (15 total) | Lock technical foundations before visual/UX | One-pass seed of 15 docs from templates. Auto-detects engine + implementation stack. Confidence-tiered: Strong/Constrained TODO/Open TODO based on Step 3 maturity. No per-doc confirmation. Create-missing-only by default. |
 | `fix-engine` | Mechanical cleanup (Step 4) | Normalize before adversarial review | Per-doc checks (section structure, terminology, constrained TODO currency) + alignment signals (architecture contradictions, authority assumptions, timing mismatches, layer breaches). Cross-doc consistency pass. Supports `--target` |
 | `iterate-engine` | Adversarial review (Step 4) | Catch Step 3 violations, convention gaps, cross-engine inconsistencies | 6 topics via external LLM. Scope collapse guard, ambiguous upstream handling, review consistency lock, practicality check. Supports `--target` and `--topics` |
 | `validate --scope engine` | Structural gate (Step 4) | Deterministic engine doc validation | 28 checks: index, headers, structure, health, Step 3 alignment, cross-engine consistency, layer boundary, template drift, review freshness. Heuristic checks labeled [ADVISORY] |
@@ -1071,14 +953,14 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 
 | Skill | What | Why | How |
 |-------|------|-----|-----|
-| `bulk-seed-style` | Create style/UX docs (6 total) | Define visual language, interaction, feedback, audio | Seeds 6 docs in order: style-guide → color-system → ui-kit → interaction-model → feedback-system → audio-direction. Auto-writes high-confidence, tags medium in changelog, leaves low as TODO. Design doc and system designs are primary sources; architecture/reference/engine are secondary constraints. Pauses only on ambiguous or high-impact decisions. Reports confidence, assumptions, and cross-doc tensions. |
+| `seed style` | Create style/UX docs (6 total) | Define visual language, interaction, feedback, audio | Seeds 6 docs in order: style-guide → color-system → ui-kit → interaction-model → feedback-system → audio-direction. Auto-writes high-confidence, tags medium in changelog, leaves low as TODO. Design doc and system designs are primary sources; architecture/reference/engine are secondary constraints. Pauses only on ambiguous or high-impact decisions. Reports confidence, assumptions, and cross-doc tensions. |
 | `revise-style` | Post-implementation drift (Step 5) | Keep style docs matching accepted reality | Signal-driven. Reads ADRs/KIs/playtest patterns/design doc changes/system changes/Step 3 changes/code review/task friction. Auto-updates safe changes (tokens, entries, alignment), escalates aesthetic/interaction/accessibility with CRITICAL/HIGH/MEDIUM priority. Playtest patterns rank above individual specs. Follows Step 5 authority flow. Supports `--target` and `--signals` |
 
 ### Step 6 — Input
 
 | Skill | What | Why | How |
 |-------|------|-----|-----|
-| `bulk-seed-input` | Create input docs | Map interaction primitives to hardware | Seeds action-map, bindings, navigation, philosophy from design doc + interaction model + engine input docs |
+| `seed input` | Create input docs | Map interaction primitives to hardware | Seeds action-map, bindings, navigation, philosophy from design doc + interaction model + engine input docs |
 | `fix-input` | Mechanical cleanup | Normalize before adversarial review | Auto-fixes ID conventions, binding collisions, orphan bindings, terminology. Detects missing verbs, namespace confusion, action bloat, philosophy-interaction mismatches. Supports `--target` |
 | `iterate-input` | Adversarial review | Challenge input design quality | 6 topics (action traceability, philosophy coherence, binding fitness, navigation completeness, cross-doc, readiness) + mandatory end-to-end + device parity tests. External LLM. Supports `--target` and `--topics` |
 | `validate --scope input` | Structural gate | Confirm input docs are structurally ready | Action ID conventions, traceability (Source column), binding coverage/collisions, navigation completeness, upstream alignment, philosophy compliance, device parity, review freshness |
@@ -1101,7 +983,7 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 | `fix-roadmap` | Mechanical cleanup | Normalize roadmap structure | Auto-fixes vague goals, vision drift, stale ADR log, terminology |
 | `iterate-roadmap` | Adversarial review | Stress-test the roadmap | 5 topics (vision coverage, sequencing, milestones, risk, player experience). Roadmap Strength Rating |
 | `revise-roadmap` | Post-phase update | Keep roadmap current | Moves phase to Completed, updates Current Phase, logs ADRs, surfaces roadmap-level changes |
-| `bulk-seed-phases` | Create phase stubs | Define scope gates from roadmap | Seeds from roadmap goals + design doc + systems + ADRs |
+| `seed phases` | Create phase stubs | Define scope gates from roadmap | Seeds from roadmap goals + design doc + systems + ADRs |
 | `new-phase` | Create one phase | Individual phase with ADR context | Reads ADRs from prior phases to inform scope |
 | `fix-phase` | Mechanical cleanup | Normalize phases | Auto-fixes template text, vague criteria, broken references |
 | `iterate-phase` | Adversarial review | Stress-test phases | 4 topics (scope, entry/exit, systems, risk). Phase Strength Rating |
@@ -1114,21 +996,21 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 
 | Skill | What | Why | How |
 |-------|------|-----|-----|
-| `bulk-seed-slices` | Create slice stubs | Define vertical proof chunks | Lifecycle-aware seeding from phases + systems + interfaces |
+| `seed slices` | Create slice stubs | Define vertical proof chunks | Lifecycle-aware seeding from phases + systems + interfaces |
 | `new-slice` | Create one slice | Individual vertical slice | End-to-end playable chunk that proves something works |
 | `fix-slice` | Mechanical cleanup | Normalize slices | Auto-fixes template text, vague criteria, broken refs, stale dependencies |
 | `iterate-slice` | Adversarial review | Stress-test slices | 5 topics (proof, boundaries, integration, demo, sequencing) |
 | `approve-slices` | Lifecycle gate | Approve for spec seeding | 8 preconditions: order, dependencies, freshness, single-active |
 | `revise-slices` | Post-implementation update | Adjust remaining slices | Reads ADRs/KIs/triage/friction, reconciles dependency graph |
 | `validate --scope slices` | Slice gate | Slice structural integrity | Index, phase resolution, status, dependencies, single-active, review freshness |
-| `bulk-seed-specs` | Create spec stubs | Define atomic behaviors from slices | Slice-driven. Authority trace, behavior path completeness, ADR/KI impact. Overlap handling |
+| `seed specs` | Create spec stubs | Define atomic behaviors from slices | Slice-driven. Authority trace, behavior path completeness, ADR/KI impact. Overlap handling |
 | `new-spec` | Create one spec | Individual behavior spec | Reads system designs and ADRs for testable behavior |
 | `fix-spec` | Mechanical cleanup | Normalize specs | Auto-fixes vague ACs, missing sections, terminology, system misalignment |
 | `iterate-spec` | Adversarial review | Stress-test specs | 6 topics (behavior, systems, slices, contracts, ACs, edge cases) |
 | `triage-specs` | Human decisions | Resolve spec issues | Walks through merge/split/reassign/defer decisions. Writes decision log |
 | `approve-specs` | Lifecycle gate | Approve for task seeding | Marks Draft specs as Approved after stabilization converges |
 | `validate --scope specs` | Spec gate | Spec structural integrity | Index, slice membership, system resolution, status sync, triage targets |
-| `bulk-seed-tasks` | Create task stubs | Define implementation steps | Seeds from specs + engine/architecture/reference context |
+| `seed tasks` | Create task stubs | Define implementation steps | Seeds from specs + engine/architecture/reference context |
 | `new-task` | Create one task | Individual implementation task | Reads engine docs and ADRs for concrete steps |
 | `fix-task` | Mechanical cleanup | Normalize tasks | Auto-fixes vague objectives, missing files, terminology |
 | `iterate-task` | Adversarial review | Stress-test tasks | 5 topics (spec coverage, architecture, integration, executability, edge cases) |
@@ -1141,7 +1023,7 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 
 | Skill | What | Why | How |
 |-------|------|-----|-----|
-| `implement-task` | Build it | End-to-end task execution | Code → tests → build → code review → doc sync → mark complete |
+| `implement-task` | Build it | End-to-end task execution | Code → tests → build → code review → doc sync → mark complete. Art/audio tasks: checks asset delivery, auto-completes when all files present. |
 | `add-regression-tests` | Test coverage | Ensure implementation correctness | Adds tests to regression harness from implementation files |
 | `build-and-test` | Verification gate | Confirm build + tests pass | Build, lint, regression, GUT suite |
 | `code-review` | Code quality | Adversarial review of code | 7 topics via external LLM. File-scope (pipeline) or system-scope (manual) |
@@ -1159,9 +1041,3 @@ The outer loop is a stability check. Most cycles pass through quickly — it onl
 | `playtest-log` | Capture feedback | Record playtester observations | Detects duplicates, promotes patterns at 3+ reports |
 | `playtest-review` | Analyze feedback | Review playtest patterns | Severity x frequency grid, cross-reference checks, delight inventory |
 
-### Art & Audio Generation
-
-| Skill | What |
-|-------|------|
-| `art-concept`, `art-character`, `art-environment`, `art-icon`, `art-promo`, `art-sprite`, `art-ui-mockup` | Generate visual assets informed by style guide and color system |
-| `audio-music`, `audio-sfx`, `audio-ambience`, `audio-voice` | Generate audio assets informed by style guide and design doc |

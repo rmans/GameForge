@@ -1,6 +1,6 @@
 # Code Reviews — Index
 
-> **Purpose:** Adversarial code review logs from `/scaffold-code-review`. Each review session gets its own file. Reviews cover 7 topics: architecture, code structure, simulation design, performance, project organization, engine correctness, maintainability.
+> **Purpose:** Adversarial code review logs from `iterate.py --reviewer code`. Each review session gets its own file. Reviews cover 7 topics: architecture, code structure, simulation design, performance, project organization, engine correctness, maintainability.
 
 ## Reviews
 

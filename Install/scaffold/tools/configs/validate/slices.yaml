@@ -1,0 +1,47 @@
+# slices.yaml — Validate config for vertical slices
+
+scope: slices
+display_name: "Slices"
+glob_pattern: "slices/SLICE-*-*.md"
+
+activation:
+  required_files:
+    - slices/_index.md
+  skip_message: "No slices index found."
+
+checks:
+  deterministic:
+    - id: slices-index-files
+      description: "Slice files registered in _index.md"
+      detection: index_registration
+      index_file: "slices/_index.md"
+      glob_pattern: "slices/SLICE-*-*.md"
+      id_pattern: "SLICE-\\d+"
+      severity: FAIL
+
+    - id: slices-status-filename-sync
+      description: "Filename suffix matches internal Status"
+      detection: status_filename_sync
+      glob_pattern: "slices/SLICE-*-*.md"
+      severity: FAIL
+
+    - id: slices-structure
+      description: "Required sections present"
+      detection: section_structure
+      glob_pattern: "slices/SLICE-*-*.md"
+      required_sections: [Goal, "Proof Value", "Specs Included", Tasks, "Done Criteria", "Demo Script"]
+      severity: FAIL
+
+    - id: slices-review-freshness
+      description: "Review log post-dates file modification"
+      detection: review_freshness
+      glob_pattern: "slices/SLICE-*-*.md"
+      review_pattern: "ITERATE-slice-*"
+      severity: WARN
+
+    - id: slices-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_field: "Phase"
+      upstream_dir: "phases"

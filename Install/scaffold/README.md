@@ -94,7 +94,7 @@ The design doc is a singleton living document — the highest authority for play
 **Systems** (Step 2) follow the same two-loop pattern:
 
 ```
-Loop 1 (initial):     bulk-seed-systems → fix-systems → iterate-systems → validate --scope systems
+Loop 1 (initial):     seed systems → fix-systems → iterate-systems → validate --scope systems
 Loop 2 (after each):  revise-systems → fix-systems → iterate-systems → validate --scope systems
 ```
 
@@ -103,7 +103,7 @@ System designs define per-system ownership, behavior, and interaction boundaries
 **References + Architecture** (Step 3) follow the same two-loop pattern across all 9 docs:
 
 ```
-Loop 1 (initial):     bulk-seed-references → fix-references → iterate-references → validate --scope refs
+Loop 1 (initial):     seed references → fix-references → iterate-references → validate --scope refs
 Loop 2 (after each):  revise-references → fix-references → iterate-references → validate --scope refs
 ```
 
@@ -166,7 +166,7 @@ Deferred issues with recorded decisions do not block stabilization.
 | 4 | `design/architecture.md`, `design/interfaces.md`, `design/authority.md` | Engineering conventions, contracts, data ownership |
 | 5 | `design/systems/SYS-###`, `design/state-transitions.md` | Per-system behavior, state machines |
 | 6 | `reference/*` | Signals, entities, resources, balance, enums/statuses |
-| 7 | `phases/P#-###` | Scope and milestones |
+| 7 | `phases/PHASE-###` | Scope and milestones |
 | 8 | `specs/SPEC-###` | Atomic testable behaviors |
 | 9 | `engine/*` | Engine constraints |
 | 10 | `tasks/TASK-###` | Implementation steps |
@@ -186,11 +186,11 @@ Deferred issues with recorded decisions do not block stabilization.
 | `tasks/` | Execution | 9 | Implementation tasks tied to specs |
 | `engine/` | Implementation | 10 | Engine-specific constraints: coding, UI, input, scene, performance, simulation runtime, save/load, AI/task execution, data pipeline, localization, post-processing, implementation patterns |
 | `theory/` | Advisory | 11 | Game design principles, UX heuristics, architecture patterns — no authority |
-| `decisions/review/` | Tooling | — | Adversarial review logs from `/scaffold-iterate`, `/scaffold-iterate-roadmap` (ITERATE-roadmap-*), `/scaffold-iterate-phase` (ITERATE-phase-*), `/scaffold-iterate-slice` (ITERATE-slice-*), `/scaffold-iterate-spec`, `/scaffold-iterate-task` |
-| `art/` | Content | — | Generated art assets from art skills |
-| `audio/` | Content | — | Generated audio assets from audio skills |
+| `decisions/review/` | Tooling | — | Adversarial review logs from `/scaffold-iterate`, `/scaffold-iterate roadmap` (ITERATE-roadmap-*), `/scaffold-iterate phase` (ITERATE-phase-*), `/scaffold-iterate slice` (ITERATE-slice-*), `/scaffold-iterate spec`, `/scaffold-iterate task` |
+| `art/` | Content | — | Art assets (concept, character, environment, sprite, icon, UI, promo) |
+| `audio/` | Content | — | Audio assets (music, SFX, ambience, voice) |
 | `templates/` | Meta | — | Templates for all document types and engine docs |
-| `tools/` | Tooling | — | Scripts and utilities (validate-refs.py, doc-review.py, code-review.py) |
+| `tools/` | Tooling | — | Scripts and utilities (validate.py, iterate.py, local-review.py, seed.py, implement.py, revise.py, utils.py, adversarial-review.py, code-review.py) |
 
 ## Decision Layer
 

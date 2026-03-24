@@ -1,0 +1,163 @@
+# adr.yaml — Iterate config for Architecture Decision Records
+# No L3 (no ### subsections). Review is L2 (sections) → L1 (document).
+
+layer: adr
+display_name: "Architecture Decision Record"
+target_pattern: "decisions/architecture-decision-record/ADR-*.md"
+target_type: range
+
+preflight:
+  required_files: []
+  glob_pattern: "decisions/architecture-decision-record/ADR-*.md"
+  critical_sections: [Context, Decision, Consequences]
+  blocked_message: "ADR is too incomplete for review. Fill in Context, Decision, and Consequences first."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## System Domains"]
+      priority: 2
+
+  per_target: []
+  per_section: {}
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
+
+defaults:
+  max_iterations: 5
+  max_exchanges: 3
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# L2 — Section Review (## level)
+# ---------------------------------------------------------------------------
+
+l2_sections:
+
+  "## Context":
+    questions:
+      - "Is the problem clearly stated? Could someone who wasn't there understand why this decision was needed?"
+      - "Does it cite specific documents, sections, or implementation friction — not just vibes?"
+      - "Is the current state described concretely enough to evaluate whether the decision improves it?"
+      - "Is the trigger (Triggered by field) specific and traceable?"
+
+  "## Decision":
+    questions:
+      - "Is the decision concrete enough to act on? Could a developer implement it without guessing?"
+      - "Are the specific changes numbered and explicit — not just a direction?"
+      - "Does it name the systems, fields, patterns, or files affected?"
+
+  "## Updated Documents":
+    questions:
+      - "Is every document that changed (or will change) listed?"
+      - "Are the changes specific — 'added X to Y' not 'updated Z'?"
+      - "If the table is empty, is this a decision with no document impact (unlikely) or a gap?"
+
+  "## Alternatives Considered":
+    questions:
+      - "Were alternatives honestly evaluated, or is this a rubber stamp for a predetermined choice?"
+      - "Does each rejected alternative have a real reason, not a strawman dismissal?"
+      - "Is there an obvious alternative that wasn't considered?"
+
+  "## Consequences":
+    questions:
+      - "Do the subsections together paint an honest picture of impact?"
+      - "Would a developer reading this know what to watch out for?"
+
+  "## Scope & Migration":
+    questions:
+      - "Do scope and migration together define a realistic implementation path?"
+      - "If this is a design-only ADR, are these sections correctly removed?"
+
+# ---------------------------------------------------------------------------
+# L3 — Subsection Review (### level)
+# ---------------------------------------------------------------------------
+
+l3_sections:
+
+  "### Positive":
+    parent: "## Consequences"
+    questions:
+      - "Are positive consequences real improvements, not just 'we decided something'?"
+      - "Are they specific — naming what gets easier or what's now possible?"
+
+  "### Negative":
+    parent: "## Consequences"
+    questions:
+      - "Are negative consequences acknowledged honestly?"
+      - "Are downstream impacts identified — what gets harder, what needs follow-up?"
+      - "Is anything suspiciously missing from the negative list?"
+
+  "### Scope":
+    parent: "## Scope & Migration"
+    questions:
+      - "Is scope concrete — single task, task range, or full slice?"
+      - "Does it reference specific TASK-### or SLICE-### if implementation is needed?"
+
+  "### Migration":
+    parent: "## Scope & Migration"
+    questions:
+      - "If this affects existing code/data, is the migration path described?"
+      - "Is the migration realistic or does it hand-wave complexity?"
+
+  "## Supersedes":
+    questions:
+      - "If this supersedes another ADR, is it clear what changed and why?"
+      - "Is the superseded ADR's status updated to 'Superseded by ADR-###'?"
+
+# ---------------------------------------------------------------------------
+# L1 — Document Review (# level)
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Will this decision actually solve the problem described in Context?"
+  - "Is the decision reversible if it turns out to be wrong? If not, is the risk acknowledged?"
+  - "Are the consequences proportional to the problem — is this over-engineering or under-addressing?"
+  - "Six months from now, will someone reading this understand why this choice was made?"
+  - "Does this ADR contradict any existing accepted ADR? If so, does it supersede it explicitly?"
+
+scope_guard:
+  upward: null
+  downward: null
+  tests: []
+
+adjudication:
+  editable_files_pattern: "decisions/architecture-decision-record/ADR-*.md"
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+  rules:
+    - "ADRs are decision records — edits should improve clarity and completeness, not change the decision itself"
+    - "If the decision itself seems wrong, escalate — don't rewrite the ADR to reverse it"
+    - "Missing alternatives and missing consequences are the highest-value findings"
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-adr-{target}-{date}.md"
+  final_questions:
+    - name: "Decision Soundness"
+      prompt: "Will this decision actually solve the stated problem? Is the reasoning solid?"
+    - name: "Blind Spot"
+      prompt: "What consequence or alternative was missed?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally flawed (problem unclear, decision vague, consequences ignored)"
+      2: "major issues (weak reasoning, missing alternatives, unclear impact)"
+      3: "workable (decision is clear but alternatives or consequences are thin)"
+      4: "solid ADR (clear problem, concrete decision, honest consequences)"
+      5: "strong ADR (thorough context, well-reasoned, alternatives honestly evaluated, consequences complete)"
+
+rules:
+  - "Don't change the decision — improve how it's documented"
+  - "Missing alternatives are a real finding, not nitpicking"
+  - "Missing negative consequences are the most dangerous gap"
+  - "Never blindly accept"
+  - "Resolved issues are locked across iterations by root cause"

@@ -1,0 +1,71 @@
+# refs.yaml — Validate config for Step 3 reference/architecture docs
+
+scope: refs
+display_name: "References & Architecture"
+
+activation:
+  required_files:
+    - design/architecture.md
+  skip_message: "No architecture.md found. Skipping reference validation."
+
+checks:
+  deterministic:
+    - id: refs-architecture-exists
+      description: "architecture.md exists"
+      detection: file_exists
+      target_files: ["design/architecture.md"]
+      severity: FAIL
+
+    - id: refs-authority-exists
+      description: "authority.md exists"
+      detection: file_exists
+      target_files: ["design/authority.md"]
+      severity: WARN
+
+    - id: refs-interfaces-exists
+      description: "interfaces.md exists"
+      detection: file_exists
+      target_files: ["design/interfaces.md"]
+      severity: WARN
+
+    - id: refs-state-transitions-exists
+      description: "state-transitions.md exists"
+      detection: file_exists
+      target_files: ["design/state-transitions.md"]
+      severity: WARN
+
+    - id: refs-entity-components-exists
+      description: "entity-components.md exists"
+      detection: file_exists
+      target_files: ["reference/entity-components.md"]
+      severity: WARN
+
+    - id: refs-signal-registry-exists
+      description: "signal-registry.md exists"
+      detection: file_exists
+      target_files: ["reference/signal-registry.md"]
+      severity: WARN
+
+    - id: refs-balance-params-exists
+      description: "balance-params.md exists"
+      detection: file_exists
+      target_files: ["reference/balance-params.md"]
+      severity: WARN
+
+    - id: refs-resource-definitions-exists
+      description: "resource-definitions.md exists"
+      detection: file_exists
+      target_files: ["reference/resource-definitions.md"]
+      severity: WARN
+
+    - id: refs-enums-exists
+      description: "enums-and-statuses.md exists"
+      detection: file_exists
+      target_files: ["reference/enums-and-statuses.md"]
+      severity: WARN
+
+    - id: refs-glossary-compliance
+      description: "NOT-column terms not used in reference docs"
+      detection: glossary_not_column
+      target_files: ["design/architecture.md", "design/authority.md", "design/interfaces.md", "design/state-transitions.md"]
+      severity: WARN

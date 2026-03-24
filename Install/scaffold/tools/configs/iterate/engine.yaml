@@ -1,0 +1,423 @@
+# engine.yaml — Iterate config for engine convention docs (Step 4/10)
+# Multi-doc layer with per-doc tailored questions.
+# Each engine doc gets its own L2 section questions. L1 is cross-doc consistency.
+
+layer: engine
+display_name: "Engine Conventions"
+target_docs:
+  - simulation-runtime.md
+  - scene-architecture.md
+  - coding-best-practices.md
+  - ui-best-practices.md
+  - input-system.md
+  - ai-task-execution.md
+  - save-load-architecture.md
+  - debugging-and-observability.md
+  - resource-management.md
+  - audio-implementation.md
+  - animation-system.md
+  - networking-architecture.md
+  - modding-architecture.md
+  - testing-strategy.md
+  - performance-budgets.md
+target_type: multi_doc
+
+preflight:
+  required_files:
+    - design/design-doc.md
+  blocked_message: "Design doc required as context for engine review."
+
+context:
+  budget: 35000
+
+  base:
+    - file: design/architecture.md
+      class: constraint
+      sections: ["## Foundation Areas", "## Core API Boundary"]
+      priority: 1
+      condition: exists
+
+  per_target: []
+
+  per_section:
+    "## Conventions":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Coding Conventions"]
+        priority: 2
+        condition: exists
+    "## Scene Tree":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 1
+        condition: exists
+    "## Save Architecture":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Foundation Areas"]
+        priority: 1
+        condition: exists
+    "## Simulation Loop":
+      - file: design/architecture.md
+        class: constraint
+        sections: ["## Tick Order"]
+        priority: 1
+        condition: exists
+    "## Audio Asset Pipeline":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Audio Direction", "### Entity Presentation"]
+        priority: 2
+
+  on_demand:
+    - file: design/authority.md
+      class: constraint
+      sections: ["## Authority Table"]
+      priority: 4
+      condition: exists
+    - file: design/interfaces.md
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 5
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# Per-Doc Review (L2 with per-doc tailored questions)
+# ---------------------------------------------------------------------------
+
+per_doc:
+
+  simulation-runtime.md:
+    l2_sections:
+      "## Fixed-Step vs Variable-Step":
+        questions:
+          - "Is the choice clear and justified for this game type?"
+          - "Does it match architecture.md's tick model?"
+      "## Tick Orchestration Implementation":
+        questions:
+          - "Is tick ordering consistent with architecture.md's Tick Processing Order?"
+          - "Are system dependencies respected in the orchestration?"
+      "## Queued Work Draining":
+        questions:
+          - "Is the drain policy clear — when do queued operations execute?"
+          - "Are ordering guarantees explicit?"
+      "## Immediate vs Deferred Transition Mapping":
+        questions:
+          - "Is it clear which state changes are immediate and which are deferred?"
+          - "Does this match what system designs expect?"
+      "## Pause / Speed / Time-Scaling Behavior":
+        questions:
+          - "Does pause behavior match the design doc's session model?"
+          - "Are edge cases covered (pause mid-tick, speed change during processing)?"
+    l2_doc_question: "Does this doc faithfully implement architecture.md's simulation model without contradictions?"
+
+  scene-architecture.md:
+    l2_sections:
+      "## Scene Tree Philosophy":
+        questions:
+          - "Does the philosophy match architecture.md's scene tree layout?"
+      "## Node Lifecycle and Ownership":
+        questions:
+          - "Are lifecycle rules clear — who creates, owns, and destroys nodes?"
+          - "Are dangling reference risks addressed?"
+      "## Singleton / Autoload Policy":
+        questions:
+          - "Is the policy restrictive enough? Too many autoloads create hidden coupling."
+      "## Forbidden Communication Patterns":
+        questions:
+          - "Are forbidden patterns specific enough to catch violations?"
+          - "Do they match architecture.md's data flow rules?"
+    l2_doc_question: "Does this doc give enough structure for consistent scene organization?"
+
+  coding-best-practices.md:
+    l2_sections:
+      "## C++ vs Scripting Boundary":
+        questions:
+          - "Is the boundary clear — what goes in C++ vs GDScript?"
+          - "Are the decision criteria actionable?"
+      "## Naming Conventions":
+        questions:
+          - "Are conventions specific enough that two developers name things the same way?"
+      "## Signal Usage Policy":
+        questions:
+          - "Does signal policy match architecture.md's signal wiring map?"
+          - "Are naming, typing, and connection location rules clear?"
+      "## Serialization-Safe Coding":
+        questions:
+          - "Are rules sufficient to prevent save/load corruption?"
+      "## Forbidden Patterns":
+        questions:
+          - "Are patterns specific with examples of what to do instead?"
+    l2_doc_question: "Could a new developer follow this doc and write code that matches the existing codebase?"
+
+  ui-best-practices.md:
+    l2_sections:
+      "## UI Ownership and Data Access":
+        questions:
+          - "Is it clear that UI reads system state but never writes it?"
+          - "Does data access follow architecture.md's data flow rules?"
+      "## HUD / Modal / Overlay Distinctions":
+        questions:
+          - "Are the categories clear with no ambiguous cases?"
+      "## Focus and Navigation":
+        questions:
+          - "Does navigation match interaction-model.md and ui-navigation input doc?"
+      "## UI Update Cadence":
+        questions:
+          - "Is update frequency appropriate — not every frame for expensive queries?"
+    l2_doc_question: "Does this doc prevent UI code from violating the design/engine boundary?"
+
+  input-system.md:
+    l2_sections:
+      "## Input Layering Model":
+        questions:
+          - "Are input layers clear — game, UI, debug, system?"
+          - "Is layer priority unambiguous?"
+      "## Intent Conversion":
+        questions:
+          - "Is the path from raw input to simulation intent clear?"
+          - "Does it match the action map from input docs?"
+      "## Remapping Policy":
+        questions:
+          - "Is remapping scoped correctly — what can be rebound, what can't?"
+      "## Pause-State Behavior":
+        questions:
+          - "Does pause input handling match simulation-runtime.md's pause model?"
+    l2_doc_question: "Does this doc connect input docs (WHAT the player does) to engine implementation (HOW it's processed)?"
+
+  ai-task-execution.md:
+    l2_sections:
+      "## Task Reservation Lifecycle":
+        questions:
+          - "Does the reservation model handle the colony sim reality of constant interruption?"
+          - "Are all states clear (unclaimed, reserved, in-progress, interrupted, complete)?"
+      "## Claim / Lock Ownership Implementation":
+        questions:
+          - "Is single-writer enforced at the task level?"
+          - "What happens when two actors try to claim the same task?"
+      "## Interruption and Retry Semantics":
+        questions:
+          - "Are interruption scenarios comprehensive (target destroyed, actor dies, higher-priority task)?"
+          - "Is retry logic explicit — when does a task retry vs fail?"
+      "## Recovery When Targets Disappear":
+        questions:
+          - "Is stale target handling explicit — what happens to an in-flight task when its target is destroyed?"
+      "## Multi-Phase Task Structure":
+        questions:
+          - "Are multi-phase tasks (move → reserve → act → complete) modeled correctly?"
+    l2_doc_question: "Does this doc handle the interruption-heavy reality of colony sim task execution?"
+
+  save-load-architecture.md:
+    l2_sections:
+      "## Serialization Boundaries":
+        questions:
+          - "Is it clear what gets saved and what is reconstructed?"
+      "## Entity Restoration Order":
+        questions:
+          - "Does restoration order respect system dependencies?"
+          - "Are circular restoration dependencies addressed?"
+      "## Handle Rebind / Reference Repair":
+        questions:
+          - "Are all reference types covered (entity handles, system refs, resource refs)?"
+      "## Restoring In-Flight Tasks / Reservations / Queued Intents":
+        questions:
+          - "Are in-flight operations handled — what happens to a half-complete task on load?"
+      "## Versioning and Migration":
+        questions:
+          - "Is the migration path clear for save format changes?"
+    l2_doc_question: "Can the game be saved and loaded without losing or corrupting simulation state?"
+
+  debugging-and-observability.md:
+    l2_sections:
+      "## Debug Overlays":
+        questions:
+          - "Are overlays useful for the systems this game has?"
+      "## Simulation Inspection Tools":
+        questions:
+          - "Can you inspect live simulation state at runtime?"
+      "## Event Tracing":
+        questions:
+          - "Can you trace cause chains through the simulation?"
+      "## Logging Categories":
+        questions:
+          - "Are categories aligned with system names?"
+          - "Is log verbosity configurable?"
+      "## Diagnostics System":
+        questions:
+          - "Does the diagnostics system catch invariant violations at runtime?"
+    l2_doc_question: "Can a developer diagnose simulation problems without guessing?"
+
+  performance-budgets.md:
+    l2_sections:
+      "## Global Frame Budget":
+        questions:
+          - "Is the frame budget realistic for the target platforms?"
+      "## Per-System / Per-Category Guidance":
+        questions:
+          - "Are per-system budgets aligned with the systems this game has?"
+      "## Budget Breach Response":
+        questions:
+          - "Is the escalation path clear when budgets are exceeded?"
+      "## C++ Escalation Criteria":
+        questions:
+          - "Are the criteria for moving logic to C++ specific and measurable?"
+      "## Test Scenarios and Benchmark Cases":
+        questions:
+          - "Are benchmark scenarios realistic — do they match late-game complexity?"
+    l2_doc_question: "Are performance targets realistic and actionable for this game's simulation complexity?"
+
+  build-test-template.md:
+    l2_sections:
+      "## Test Layers":
+        questions:
+          - "Do test layers match the task template's 6 regression test layers?"
+      "## Simulation Correctness Tests":
+        questions:
+          - "Are simulation tests testing behavior, not implementation?"
+      "## CI / Automation":
+        questions:
+          - "Is the CI pipeline defined clearly enough to set up?"
+      "## Headless Simulation Testing":
+        questions:
+          - "Can simulation tests run without rendering?"
+    l2_doc_question: "Does this doc define a testing strategy that catches real bugs in a colony sim?"
+
+  implementation-patterns-template.md:
+    l2_sections:
+      "## Pattern Library Conventions":
+        questions:
+          - "Are conventions for adding new patterns clear?"
+      "## Patterns":
+        questions:
+          - "Does each pattern have Problem, When to Use, When Not to Use, Structure, Example, and Anti-Pattern?"
+          - "Are patterns derived from architecture.md decisions?"
+    l2_doc_question: "Are patterns concrete enough that developers apply them consistently?"
+
+  localization-template.md:
+    l2_sections:
+      "## Translation Key Naming Rules":
+        questions:
+          - "Are naming rules specific enough for consistency (DOMAIN_CONTEXT_ITEM)?"
+      "## tr() Usage Rules":
+        questions:
+          - "Is it clear what must use tr() and what's exempt?"
+      "## Fallback Behavior":
+        questions:
+          - "What happens when a key is missing? Is it graceful?"
+      "## UI Truncation and Expansion Expectations":
+        questions:
+          - "Are text expansion rules realistic for translated strings?"
+    l2_doc_question: "Can a developer localize UI text correctly without reading the full doc?"
+
+  post-processing-template.md:
+    l2_sections:
+      "## Scope vs Style / Art Docs":
+        questions:
+          - "Is the boundary between post-processing (engine) and visual style (design) clear?"
+      "## Readability Safeguards":
+        questions:
+          - "Do safeguards protect gameplay readability from visual effects?"
+      "## UI Overlay Interaction Rules":
+        questions:
+          - "Are post-processing effects correctly excluded from UI overlays?"
+    l2_doc_question: "Does this doc prevent visual effects from hurting gameplay readability?"
+
+  asset-import-pipeline-template.md:
+    l2_sections:
+      "## Import Presets":
+        questions:
+          - "Are presets defined for all asset types the game uses?"
+      "## Texture & Spritesheet Pipeline":
+        questions:
+          - "Is the pipeline specific enough for the game's art style?"
+      "## Audio Asset Pipeline":
+        questions:
+          - "Does the audio pipeline match audio-direction.md's format conventions?"
+      "## Runtime vs Authored Asset Boundary":
+        questions:
+          - "Is it clear which assets are authored and which are generated at runtime?"
+    l2_doc_question: "Can an artist add assets to the project without reading engine code?"
+
+  data-content-pipeline-template.md:
+    l2_sections:
+      "## Content Data vs Runtime State Boundary":
+        questions:
+          - "Is it clear what's authored data vs runtime state?"
+      "## Content ID to Runtime Entity Mapping":
+        questions:
+          - "Does ID mapping match architecture.md's entity identity conventions?"
+      "## Validation of Authored Content":
+        questions:
+          - "Is validation automatic — does bad data get caught before runtime?"
+      "## Hot-Reload Policy":
+        questions:
+          - "Is hot-reload scope clear — what can be reloaded, what requires restart?"
+    l2_doc_question: "Does this doc prevent data definition errors from reaching the simulation?"
+
+# ---------------------------------------------------------------------------
+# L1 — Cross-Engine-Doc Consistency Review
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Do simulation-runtime and scene-architecture agree on how systems are structured and updated?"
+  - "Does coding-best-practices' signal policy match architecture.md's signal wiring map?"
+  - "Does ai-task-execution's interruption model match simulation-runtime's tick model?"
+  - "Does save-load-architecture's restoration order match the boot order in scene-architecture?"
+  - "Do performance-budgets' per-system allocations account for ai-task-execution's complexity?"
+  - "Does input-system's intent conversion match coding-best-practices' allowed patterns?"
+  - "Is terminology consistent across all engine docs?"
+  - "What convention gap is most likely to cause inconsistent implementation?"
+
+scope_guard:
+  upward: "architecture.md — architectural decisions; design docs — game design"
+  downward: null
+  tests:
+    - name: upward_leakage
+      question: "Does this change modify architectural decisions that belong in architecture.md, or game design that belongs in design docs?"
+      guidance: "Engine docs implement architecture.md decisions for a specific domain."
+    - name: design_content
+      question: "Does this doc contain game design content (what the game is, how it feels, player behavior)?"
+      guidance: "Engine docs are strictly HOW, never WHAT."
+
+adjudication:
+  editable_files_pattern: "engine/*.md"
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-engine-{target}-{date}.md"
+  final_questions:
+    - name: "Most Dangerous Convention Gap"
+      prompt: "The missing convention most likely to cause inconsistent implementation."
+    - name: "Weakest Doc"
+      prompt: "Which engine doc needs the most work?"
+    - name: "Cross-Doc Conflicts"
+      prompt: "Any conflicts between engine docs."
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (contradicts architecture, contains design content)"
+      2: "major issues (significant gaps or authority violations)"
+      3: "workable but soft (some gaps, minor inconsistencies)"
+      4: "solid engine doc (good coverage, consistent, minor soft spots)"
+      5: "strong engine doc (complete, consistent, developer-ready)"
+
+rules:
+  - "Project documents and authority order win"
+  - "Engine docs describe HOW, never WHAT"
+  - "Only edit engine docs"
+  - "Never blindly accept"
+  - "Pushback is expected and healthy"
+  - "Resolved issues are locked across iterations by root cause"
+  - "Architecture.md decisions are not negotiable in engine docs — file an ADR to change them"

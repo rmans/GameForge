@@ -5,41 +5,52 @@
 ## Connection to the Main Pipeline
 
 ```
-Main Pipeline                          Audio Pipeline
-─────────────                          ──────────────
+Design Pipeline                        Audio Pipeline
+───────────────                        ──────────────
+Design doc ──→ Entity Presentation ──→ What entities sound like (high-level)
+                      │
+              Audio Direction ──→ Sound philosophy, categories, hierarchy
+                      │
+System designs ──→ Asset Needs ──→ Per-system audio requirements
+                      │
 Specs approved ──→ Asset Requirements ──→ Scan existing assets
                    (what's needed)        ├── Reusable? → mark Ready
                                           └── Needed? → enter Audio Pipeline
                                                 │
-                                                ├── Reference & Design
-                                                ├── Production (discipline-specific)
-                                                ├── Technical Prep
-                                                ├── Import & Validate In-Game
-                                                ├── Iterate
-                                                ├── Accept → mark Ready in spec
-                                                └── Register → update index
-                                                │
-Tasks seeded ←── Asset paths from spec ──────────┘
-Tasks implement ── wire Ready assets
+Task seeding ──→ TASK-###_audio created           │
+                 (file paths + prompts)           │
+                      │                           │
+                      ├── Reference & Design      │
+                      ├── Production (discipline) │
+                      ├── Technical Prep          │
+                      ├── Import & Validate       │
+                      ├── Iterate                 │
+                      ├── Place at listed paths ──┘
+                      └── /scaffold-implement auto-completes task
+                           └── wiring tasks unblock
 ```
 
-**Audio does not block spec approval.** Specs can be approved with Needed assets. Audio blocks **task completion**, not spec completion.
+**Audio does not block spec approval.** Specs can be approved with Needed assets. Audio blocks **task implementation** — `/scaffold-implement` checks if assets exist at the file paths listed in the audio task's Asset Delivery table. Missing assets block; all present auto-completes the task.
 
-## Asset Types and Skills
+## Asset Types
 
-| Type | Skill | Output Directory | Discipline |
-|------|-------|-----------------|------------|
-| Sound effects | `/scaffold-audio-sfx` | `assets/entities/[entity]/` or `assets/ui/` | Sound design |
-| Music | `/scaffold-audio-music` | `assets/music/` | Composition & production |
-| Ambience | `/scaffold-audio-ambience` | `assets/environment/[location]/` | Environmental sound design |
-| Voice | `/scaffold-audio-voice` | `assets/entities/[entity]/` | Voice production |
+| Type | Output Directory | Discipline |
+|------|-----------------|------------|
+| Sound effects | `assets/entities/[entity]/` or `assets/ui/` | Sound design |
+| Music | `assets/music/` | Composition & production |
+| Ambience | `assets/environment/[location]/` | Environmental sound design |
+| Voice | `assets/entities/[entity]/` | Voice production |
 
 ---
 
 ## Phase 1 — Identify Requirements
 
-**When:** After specs are approved (or during spec creation).
-**Source:** The spec's `## Asset Requirements` table.
+**When:** Audio identification happens at three levels, progressively more specific:
+1. **Design doc** (`### Entity Presentation`) — high-level sound identity per content category
+2. **System designs** (`### Asset Needs`) — per-system audio requirements tied to actions/states
+3. **Specs** (`### Asset Requirements`) — per-behavior asset list with Status: Needed/Ready
+
+**Source for production:** The audio task's `## Asset Delivery` table (auto-generated during task seeding from spec Asset Requirements). Each row has file path, duration, and a generation prompt.
 
 Before marking anything as Needed:
 1. **Scan existing audio** — glob `assets/` subdirectories for sounds that match.
@@ -51,13 +62,15 @@ Before marking anything as Needed:
 
 **Before producing any audio**, establish the sonic direction:
 
-1. **Read design context:**
+1. **Read the audio task** — the Asset Delivery table has generation prompts pre-built from audio direction context. Use these as starting points.
+
+2. **Read design context** (if the prompts need refinement):
    - `design/audio-direction.md` — audio philosophy, sound categories, restraint principles, feedback hierarchy
    - `design/feedback-system.md` — event-response coordination, priority level, cross-modal timing
    - `design/style-guide.md` — visual tone (translate to audio: gritty → raw, polished → clean, organic → natural)
-   - `design/design-doc.md` — world setting, mood, genre
+   - `design/design-doc.md` — Entity Presentation sound identity, world setting, mood, genre
 
-2. **Find reference sounds** — existing games, sound libraries, recordings that capture the target character.
+3. **Find reference sounds** — existing games, sound libraries, recordings that capture the target character.
 
 3. **Define the sound's role:**
    - What feedback priority is this? (Critical alert vs ambient detail)
@@ -119,7 +132,7 @@ This phase varies by discipline. Follow the pipeline for the asset type you're c
 |------|------|---------|
 | **1. Script** | Write the lines from the game's tone | Dialogue, barks (short contextual exclamations), narration, announcements. Match the design-doc's tone and the audio-direction's voice guidance. Keep barks under 3 seconds. Ensure lines work out of context (the player may hear them in any order). |
 | **2. Casting** | Choose the voice | AI voice (OpenAI TTS, ElevenLabs) or human voice actor. For AI: select a voice that matches the character's personality. For human: provide character description, reference lines, and emotional range. |
-| **3. Recording / generation** | Capture the performance | For AI: generate via `/scaffold-audio-voice` or the tool's API. For human: record in a quiet space, consistent microphone distance, consistent energy level. Multiple takes per line. |
+| **3. Recording / generation** | Capture the performance | For AI: generate via TTS API (OpenAI, ElevenLabs). For human: record in a quiet space, consistent microphone distance, consistent energy level. Multiple takes per line. |
 | **4. Editing** | Clean up, trim, normalize timing | Remove breaths (or reduce them — total removal sounds unnatural). Trim silence from start and end. Ensure consistent pacing across all lines for the same character. |
 | **5. Processing** | EQ for character, compression, effects | EQ to match the character's vocal quality (warm, thin, nasal, deep). Compress to control dynamics — game dialogue needs consistent loudness. Apply context effects: radio filter for comms, reverb for large spaces, distortion for corruption/damage. |
 | **6. Integration prep** | Naming, metadata, subtitle sync | File naming convention matching the script structure (e.g., `colonist_bark_hungry_01.mp3`). Timing metadata for subtitle display. Language tags if localizing. |

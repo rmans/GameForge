@@ -1,0 +1,11 @@
+layer: input
+display_name: "Input System"
+editable_files: [inputs/action-map.md, inputs/input-philosophy.md, inputs/default-bindings-kbm.md, inputs/default-bindings-gamepad.md, inputs/ui-navigation.md]
+preflight:
+  required_files: [inputs/action-map.md]
+  blocked_message: "No input docs to revise."
+feedback_sources:
+  - type: adr
+    glob: "decisions/architecture-decision-record/ADR-*_accepted*.md"
+safe_patterns: ["Stale reference", "Missing action from upstream", "Orphan binding", "Terminology drift"]
+escalation_patterns: ["Philosophy violation", "Navigation model change", "Device parity gap", "Accessibility change"]

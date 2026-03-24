@@ -1,0 +1,75 @@
+# cross-cutting.yaml — Fix config for cross-document integrity findings
+
+layer: cross-cutting
+display_name: "Cross-Cutting Findings"
+target: decisions/cross-cutting-findings.md
+target_type: fixed
+
+preflight:
+  required_files:
+    - decisions/cross-cutting-findings.md
+  blocked_message: "No cross-cutting findings file. Run `/scaffold-validate --scope all` first."
+
+context:
+  budget: 25000
+
+  base:
+    - file: decisions/cross-cutting-findings.md
+      class: canonical
+      priority: 1
+    - file: decisions/known-issues.md
+      class: evidence
+      priority: 3
+    - file: decisions/design-debt.md
+      class: evidence
+      priority: 3
+
+  on_demand:
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files:
+  - decisions/cross-cutting-findings.md
+
+defaults:
+  max_iterations: 5
+
+mechanical_checks:
+
+  finding_status:
+    - id: stale_open_finding
+      description: "Finding is Open but referenced doc has been fixed"
+      detection: finding_resolution_check
+      auto_fix: true
+      fix_action: "Update finding status to Resolved with fix reference"
+
+    - id: duplicate_finding
+      description: "Same finding logged twice"
+      detection: duplicate_check
+      auto_fix: true
+      fix_action: "Merge duplicate entries"
+
+judgment_checks:
+
+  per_category:
+    - id: decision_closure
+      description: "Unresolved TODO/TBD in Approved/Complete doc"
+      question: "Should this TODO be resolved, deferred with tracking reference, or is it intentionally open?"
+
+    - id: workflow_integrity
+      description: "Pipeline prerequisite missing (e.g., iterate not run before approve)"
+      question: "Should the missing pipeline step be run, or should status be reverted?"
+
+    - id: upstream_staleness
+      description: "Downstream doc may be stale relative to upstream change"
+      question: "Is the downstream doc still valid after the upstream change, or does it need updating?"
+
+report:
+  log_name_pattern: "FIX-cross-cutting-{date}.md"
+
+rules:
+  - "Only edit cross-cutting-findings.md status fields"
+  - "Actual doc fixes are dispatched to layer-specific fix skills"
+  - "Decision closure issues may require ADR or KI filing"
+  - "Staleness issues may require revise skill dispatch"

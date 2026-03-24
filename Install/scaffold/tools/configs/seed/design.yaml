@@ -1,0 +1,90 @@
+# design.yaml — Seed config for the design document (Step 1)
+# Unlike other layers, design has no upstream docs to read.
+# Instead it interviews the user and scans the project.
+
+layer: design
+display_name: "Design Document"
+template: "scaffold/templates/design-doc-template.md"
+target: design/design-doc.md
+target_type: fixed
+
+preflight:
+  required_files: []
+  blocked_message: "Cannot proceed."
+  check_existing: true
+  existing_message: "Design doc already exists. Use `/scaffold-review design` to review it, or delete it to start fresh."
+
+# No upstream docs — design is Step 1
+upstream_sources: []
+
+# Project context gathered from file system scan + user interview
+project_context:
+  scan:
+    - engine
+    - languages
+    - test_frameworks
+    - lint_tools
+    - ci
+    - build_system
+    - directories
+    - dependencies
+  interview_sections:
+    - group: "Identity"
+      subsections: ["Core Fantasy", "Design Invariants", "Elevator Pitch", "Core Pillars", "Core Design Tension", "Unique Selling Points"]
+      questions:
+        - "What is the one-sentence fantasy this game delivers?"
+        - "What must NEVER be violated in this game? (Design Invariants)"
+        - "What are the 3-5 pillars everything else serves?"
+        - "What is the core tension the player navigates?"
+    - group: "Shape"
+      subsections: ["Core Loop", "Secondary Loops", "Session Shape", "Progression Arc", "Player Goals", "Decision Types", "Decision Density"]
+      questions:
+        - "What does the player do moment-to-moment? (Core Loop)"
+        - "What wraps around the core loop? (Secondary Loops)"
+        - "How long is a session and what's its arc?"
+        - "How does the player progress over time?"
+    - group: "Control"
+      subsections: ["Player Control Model", "Control Philosophy", "Player Verbs", "Player Mental Model", "Feedback Loops"]
+      questions:
+        - "How does the player interact — direct control, indirect, hybrid?"
+        - "What are the player's verbs (concrete actions)?"
+    - group: "World"
+      subsections: ["Place & Time", "Tone", "Narrative Wrapper", "Factions / Forces"]
+      questions:
+        - "Where and when is the game set?"
+        - "What's the tone — grim, whimsical, clinical, warm?"
+    - group: "Presentation"
+      subsections: ["Camera", "Aesthetic Pillars", "Audio Direction", "Player Information Model"]
+      questions:
+        - "What's the camera perspective?"
+        - "What does the game look like (art style)?"
+        - "How much information does the player see?"
+    - group: "Content"
+      subsections: ["Content Structure", "Content Categories", "Procedural vs Authored", "Replayability Model"]
+      questions:
+        - "What content does the game have?"
+        - "What's procedural vs hand-authored?"
+    - group: "System Domains"
+      subsections: ["Major System Domains", "Major Mechanics", "System Interaction Philosophy", "Simulation Depth Target"]
+      questions:
+        - "What are the major system domains?"
+        - "How deep is the simulation?"
+    - group: "Philosophy"
+      subsections: ["Failure Philosophy", "Risk / Reward Philosophy", "Simulation Transparency Policy", "Information Clarity Principle", "Decision Anchors", "Design Pressure Tests", "Design Gravity", "Design Boundaries", "Learning Curve Strategy"]
+      questions:
+        - "What happens when the player fails?"
+        - "How transparent is the simulation?"
+        - "What is the game NOT?"
+    - group: "Scope"
+      subsections: ["Scope Reality Check", "Target Platforms", "Accessibility Goals", "Performance Targets", "Technical Stack"]
+      questions:
+        - "What's realistically achievable?"
+        - "What platforms?"
+        - "What engine and tech stack?"
+
+dependency_checks: []
+
+coverage_rules:
+  - "Every section group has at least partial content"
+  - "Technical Stack reflects actual project state"
+  - "Governance mechanisms (Invariants, Anchors, Pressure Tests) are populated"

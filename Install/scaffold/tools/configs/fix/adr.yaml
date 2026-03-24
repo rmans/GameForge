@@ -1,0 +1,79 @@
+# adr.yaml — Fix config for Architecture Decision Records
+
+layer: adr
+display_name: "Architecture Decision Record"
+target_pattern: "decisions/architecture-decision-record/ADR-*.md"
+target_type: range
+template: "scaffold/templates/decision-template.md"
+
+preflight:
+  required_files: []
+  glob_pattern: "decisions/architecture-decision-record/ADR-*.md"
+  blocked_message: "No ADR files found."
+
+context:
+  budget: 15000
+
+  base:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  on_demand:
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files_pattern: "decisions/architecture-decision-record/ADR-*.md"
+
+defaults:
+  max_iterations: 3
+
+mechanical_checks:
+  completeness:
+    - id: missing_sections
+      description: "Section required by template is absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section heading with template comment"
+
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      patterns: ["<!-- TODO:", "*TODO:"]
+      auto_fix: true
+      fix_action: "Remove template text"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+  cross_reference:
+    - id: stale_adr_reference
+      description: "References superseded ADR without noting supersession"
+      detection: adr_status_check
+      auto_fix: true
+      fix_action: "Update reference"
+
+judgment_checks:
+  quality:
+    - id: empty_alternatives
+      description: "Alternatives Considered section is empty or has only one option"
+      section: "## Alternatives Considered"
+      question: "Were alternatives honestly evaluated, or is this a rubber stamp?"
+
+    - id: missing_negative_consequences
+      description: "Consequences section has no negative entries"
+      section: "### Negative"
+      question: "Are negative consequences acknowledged? Every decision has costs."
+
+report:
+  log_name_pattern: "FIX-adr-{target}-{date}.md"
+
+rules:
+  - "Don't change the decision — improve how it's documented"
+  - "Missing alternatives and missing consequences are high-value fixes"

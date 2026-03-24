@@ -1,0 +1,32 @@
+# roadmap.yaml — Validate config for roadmap
+
+scope: roadmap
+display_name: "Roadmap"
+
+activation:
+  required_files:
+    - phases/roadmap.md
+  skip_message: "No roadmap found."
+
+checks:
+  deterministic:
+    - id: roadmap-exists
+      description: "Roadmap file exists"
+      detection: file_exists
+      target_files: ["phases/roadmap.md"]
+      severity: FAIL
+
+    - id: roadmap-section-health
+      description: "Weighted section health score"
+      detection: section_health
+      target_files: ["phases/roadmap.md"]
+      fail_threshold: 0.5
+      warn_threshold: 0.75
+      severity: WARN
+
+    - id: roadmap-review-freshness
+      description: "Review log post-dates file modification"
+      detection: review_freshness
+      target_files: ["phases/roadmap.md"]
+      review_pattern: "ITERATE-roadmap-*"
+      severity: WARN

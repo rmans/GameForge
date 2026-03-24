@@ -43,7 +43,7 @@
 | Entity | Format | Example |
 |--------|--------|---------|
 | System | SYS-### | SYS-001 |
-| Phase | P#-### | P1-001 |
+| Phase | PHASE-### | P1-001 |
 | Spec | SPEC-### | SPEC-001 |
 | Task | TASK-### | TASK-001 |
 | ADR | ADR-### | ADR-001 |

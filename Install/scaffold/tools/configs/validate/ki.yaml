@@ -1,0 +1,26 @@
+# ki.yaml — Validate config for Known Issues
+
+scope: ki
+display_name: "Known Issues"
+glob_pattern: "decisions/known-issues/KI-*.md"
+
+activation:
+  required_files: []
+  skip_message: "No KI files found."
+
+checks:
+  deterministic:
+    - id: ki-structure
+      description: "Required sections present"
+      detection: section_structure
+      glob_pattern: "decisions/known-issues/KI-*.md"
+      required_sections: [Description, "Affected Documents", "Fix Options"]
+      severity: FAIL
+
+    - id: ki-section-health
+      description: "Weighted section health"
+      detection: section_health
+      glob_pattern: "decisions/known-issues/KI-*.md"
+      fail_threshold: 0.3
+      warn_threshold: 0.5
+      severity: WARN

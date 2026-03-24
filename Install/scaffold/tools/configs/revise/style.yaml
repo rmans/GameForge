@@ -1,0 +1,16 @@
+layer: style
+display_name: "Style & UX"
+editable_files: [design/style-guide.md, design/color-system.md, design/ui-kit.md, design/interaction-model.md, design/feedback-system.md, design/audio-direction.md]
+preflight:
+  required_files: [design/style-guide.md]
+  blocked_message: "No style docs to revise."
+feedback_sources:
+  - type: adr
+    glob: "decisions/architecture-decision-record/ADR-*_accepted*.md"
+  - type: playtest
+    glob: "decisions/playtest-feedback/PF-*.md"
+    filter: "Status: Pattern"
+  - type: code_review
+    glob: "decisions/code-review/CR-*.md"
+safe_patterns: ["Missing token", "Stale reference", "New feedback entry"]
+escalation_patterns: ["Aesthetic direction change", "Interaction model change", "Priority hierarchy change", "Accessibility change"]

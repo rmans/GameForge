@@ -1,0 +1,162 @@
+# spec.yaml — Fix config for behavior specs
+
+layer: spec
+display_name: "Behavior Spec"
+target_pattern: "specs/SPEC-*.md"
+target_type: range
+template: "scaffold/templates/spec-template.md"
+
+preflight:
+  required_files: []
+  glob_pattern: "specs/SPEC-*-*.md"
+  blocked_message: "No spec files found."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  per_target:
+    - type: parent_system
+      sections: ["### Purpose", "### Player Actions", "### Owned State"]
+      priority: 1
+      class: upstream
+    - type: parent_slice
+      sections: ["### Goal", "### Done Criteria"]
+      priority: 2
+      class: upstream
+
+  on_demand:
+    - file: design/authority.md
+      class: constraint
+      sections: ["## Authority Table"]
+      priority: 3
+      condition: exists
+    - file: design/state-transitions.md
+      class: constraint
+      priority: 3
+      condition: exists
+    - file: design/interfaces.md
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files_pattern: "specs/SPEC-*.md"
+
+defaults:
+  max_iterations: 10
+
+mechanical_checks:
+
+  completeness:
+    - id: missing_sections
+      description: "Section required by template is absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section heading with template comment"
+
+    - id: missing_secondary_systems
+      description: "Missing Secondary Systems header field"
+      detection: header_field_check
+      field: "Secondary Systems"
+      auto_fix: true
+      fix_action: "Add > **Secondary Systems:** —"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+    - id: registration_gap
+      description: "Spec missing from _index.md or slice table"
+      detection: index_check
+      auto_fix: true
+      fix_action: "Add to index"
+
+  implementation_language:
+    - id: implementation_leaks
+      description: "Engine constructs in behavioral spec"
+      detection: implementation_patterns
+      patterns: ["emit_signal", "connect\\(", "func\\s+", "class\\s+", "\\$\\w+", "res://"]
+      auto_fix: true
+      fix_action: "Replace with behavior language"
+
+  structural_quality:
+    - id: vague_preconditions
+      description: "Preconditions too vague to verify"
+      detection: vague_content
+      section: "### Preconditions"
+      auto_fix: true
+      condition: "Tightenable from spec context"
+      fix_action: "Tighten to verifiable conditions"
+
+    - id: vague_outcomes
+      description: "Observable/Failure Outcome too vague"
+      detection: vague_content
+      section: "### Observable Outcome"
+      auto_fix: true
+      condition: "Concrete result derivable from behavior steps"
+      fix_action: "Tighten to concrete results"
+
+    - id: empty_out_of_scope
+      description: "Out of Scope section empty"
+      detection: empty_section
+      section: "### Out of Scope"
+      auto_fix: true
+      fix_action: "Add explicit exclusions derived from spec boundaries"
+
+  asset_requirements:
+    - id: empty_asset_requirements
+      description: "Asset Requirements section is still template comment or empty"
+      detection: template_comment_check
+      section: "### Asset Requirements"
+      auto_fix: true
+      fix_action: "Fill table or write 'No art or audio assets required for this behavior.'"
+
+  adr:
+    - id: missing_adr_reflection
+      description: "Accepted ADR affecting this spec not reflected"
+      detection: adr_impact_check
+      auto_fix: true
+      fix_action: "Add edge case or AC noting ADR impact"
+
+judgment_checks:
+
+  alignment:
+    - id: system_scope_mismatch
+      description: "Spec describes behavior outside its system's scope"
+      question: "Does this spec's behavior belong to the referenced system, or has it drifted?"
+
+    - id: authority_violation
+      description: "Spec implies cross-system data writes not in authority.md"
+      question: "Does this spec assume writing to data owned by another system?"
+
+    - id: state_machine_conflict
+      description: "Spec's transitions don't match state-transitions.md"
+      question: "Do the state changes in this spec match the state machine definitions?"
+
+    - id: spec_overlap
+      description: "Two specs define the same behavior"
+      question: "Does this spec duplicate behavior defined in another spec?"
+
+    - id: contradictory_acs
+      description: "Acceptance criteria within spec conflict"
+      question: "Do any ACs contradict each other?"
+
+report:
+  log_name_pattern: "FIX-spec-{target}-{date}.md"
+
+rules:
+  - "Only edit the spec file"
+  - "Specs describe BEHAVIOR, not IMPLEMENTATION"
+  - "Never add new behavior — only clarify existing"
+  - "Authority violations are always flagged, never auto-fixed"

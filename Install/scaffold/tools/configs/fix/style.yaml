@@ -1,0 +1,150 @@
+# style.yaml — Fix config for Step 5 visual/UX docs
+
+layer: style
+display_name: "Style & UX"
+target_docs:
+  - style-guide.md
+  - color-system.md
+  - ui-kit.md
+  - interaction-model.md
+  - feedback-system.md
+  - audio-direction.md
+target_type: multi_doc
+
+preflight:
+  required_files:
+    - design/design-doc.md
+  blocked_message: "Design doc required as context."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Philosophy"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  per_target:
+    - type: style_peers
+      priority: 3
+      class: adjacent
+      condition: exists
+
+  on_demand:
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files:
+  - design/style-guide.md
+  - design/color-system.md
+  - design/ui-kit.md
+  - design/interaction-model.md
+  - design/feedback-system.md
+  - design/audio-direction.md
+
+defaults:
+  max_iterations: 10
+
+mechanical_checks:
+
+  per_doc_common:
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      auto_fix: true
+      fix_action: "Remove template text"
+
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+    - id: missing_sections
+      description: "Template section absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section stub"
+
+  color_system:
+    - id: hex_validation
+      description: "Invalid hex color value"
+      detection: pattern_match
+      pattern: "#[0-9a-fA-F]+"
+      auto_fix: true
+      fix_action: "Normalize to #RRGGBB"
+
+    - id: duplicate_tokens
+      description: "Duplicate color token names"
+      detection: duplicate_check
+      auto_fix: true
+      fix_action: "Merge duplicates"
+
+    - id: raw_hex_usage
+      description: "Raw hex value used instead of token reference"
+      detection: pattern_match
+      auto_fix: true
+      fix_action: "Replace with token reference"
+
+  ui_kit:
+    - id: missing_component_states
+      description: "Component state table incomplete"
+      detection: table_columns
+      required_columns: [State, "Visual Treatment", "Color Token"]
+      auto_fix: true
+      fix_action: "Add missing columns"
+
+    - id: scope_guard
+      description: "Screen maps, scene hierarchies, or HUD layouts in ui-kit"
+      detection: implementation_patterns
+      patterns: ["scene tree", "node hierarchy", "screen flow", "modal graph"]
+      auto_fix: false
+      signal: scope_creep
+
+  feedback_system:
+    - id: event_response_columns
+      description: "Event-Response table missing columns"
+      detection: table_columns
+      required_columns: [Event, Visual, Audio, UI, Timing, Priority]
+      auto_fix: true
+      fix_action: "Add missing columns"
+
+judgment_checks:
+
+  cross_doc:
+    - id: tone_register_gap
+      description: "Style guide tone registers don't cover game's emotional range"
+      section: "### Tone Registers"
+      question: "Do tone registers cover normal, alert, crisis, and calm states?"
+
+    - id: entity_coverage_gap
+      description: "Entity types from entity-components without visual descriptions"
+      question: "Are all gameplay entity types covered in the style guide?"
+
+    - id: priority_ambiguity
+      description: "Feedback and audio priority hierarchies conflict"
+      question: "Do feedback-system and audio-direction agree on priority ordering?"
+
+signals:
+
+  integration:
+    - id: tone_mismatch
+      description: "Audio tone doesn't match visual tone registers"
+    - id: token_flow_broken
+      description: "Color tokens don't flow correctly from color-system → ui-kit → feedback"
+    - id: boundary_violation
+      description: "Doc defines content belonging to another doc's layer"
+
+report:
+  log_name_pattern: "FIX-style-{target}-{date}.md"
+
+rules:
+  - "Only edit style docs listed in editable_files"
+  - "Token additions are safe — token removals affect all docs"
+  - "Priority hierarchy changes must be consistent across feedback + audio"

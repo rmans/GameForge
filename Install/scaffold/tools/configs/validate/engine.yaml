@@ -1,0 +1,79 @@
+# engine.yaml — Validate config for engine convention docs
+
+scope: engine
+display_name: "Engine Conventions"
+glob_pattern: "engine/*.md"
+
+activation:
+  required_files:
+    - engine/_index.md
+  skip_message: "No engine index found. Skipping engine validation."
+
+checks:
+  deterministic:
+    - id: engine-index-files
+      description: "Engine doc files registered in _index.md"
+      detection: index_registration
+      index_file: "engine/_index.md"
+      glob_pattern: "engine/*.md"
+      severity: FAIL
+
+    - id: engine-common-sections
+      description: "Purpose, Project Overrides, Rules sections present"
+      detection: section_structure
+      glob_pattern: "engine/*.md"
+      required_sections: [Purpose, "Project Overrides", Rules]
+      severity: FAIL
+
+    - id: engine-section-health
+      description: "Weighted section health score"
+      detection: section_health
+      glob_pattern: "engine/*.md"
+      fail_threshold: 0.4
+      warn_threshold: 0.65
+      severity: WARN
+
+    - id: engine-seeded-markers
+      description: "Remaining SEEDED markers"
+      detection: pattern_present
+      glob_pattern: "engine/*.md"
+      pattern: "<!-- SEEDED"
+      severity: WARN
+
+    - id: engine-todo-count
+      description: "Remaining TODO markers"
+      detection: pattern_present
+      glob_pattern: "engine/*.md"
+      pattern: "\\*TODO:"
+      severity: WARN
+
+    - id: engine-no-system-design-sections
+      description: "No system design sections in engine docs"
+      detection: pattern_absent
+      glob_pattern: "engine/*.md"
+      pattern: "^#+\\s+(Simulation Responsibility|Player Intent|Design Constraints|Owned State|Non-Responsibilities)"
+      severity: FAIL
+
+    - id: engine-review-freshness
+      description: "Review log post-dates file modification"
+      detection: review_freshness
+      glob_pattern: "engine/*.md"
+      review_pattern: "ITERATE-engine-*"
+      severity: WARN
+
+    - id: engine-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_docs:
+        - "design/architecture.md"
+
+  heuristic:
+    - id: engine-no-design-content
+      description: "No design-layer content in engine docs"
+      detection: pattern_absent
+      glob_pattern: "engine/*.md"
+      pattern: "the player can|when the player|the system decides|this system is responsible for"
+      severity: WARN
+      label: "[ADVISORY]"
+      confidence: Low

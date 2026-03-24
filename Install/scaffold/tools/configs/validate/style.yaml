@@ -1,0 +1,56 @@
+# style.yaml — Validate config for Step 5 visual/UX docs
+
+scope: style
+display_name: "Style & UX"
+
+activation:
+  required_files:
+    - design/style-guide.md
+    - design/color-system.md
+    - design/ui-kit.md
+  skip_message: "Need at least 3 Step 5 docs for cross-doc validation."
+
+checks:
+  deterministic:
+    - id: style-section-health
+      description: "Weighted section health score per doc"
+      detection: section_health
+      target_files: ["design/style-guide.md", "design/color-system.md", "design/ui-kit.md", "design/interaction-model.md", "design/feedback-system.md", "design/audio-direction.md"]
+      fail_threshold: 0.4
+      warn_threshold: 0.65
+      severity: WARN
+
+    - id: color-hex-valid
+      description: "All hex color values well-formed"
+      detection: pattern_absent
+      target_files: ["design/color-system.md"]
+      pattern: "#[0-9a-fA-F]{1,2}[^0-9a-fA-F]|#[0-9a-fA-F]{3}[^0-9a-fA-F]|#[0-9a-fA-F]{5}[^0-9a-fA-F]|#[0-9a-fA-F]{7}[^0-9a-fA-F]"
+      severity: WARN
+
+    - id: color-no-duplicate-tokens
+      description: "No duplicate color token names"
+      detection: pattern_absent
+      target_files: ["design/color-system.md"]
+      pattern: "duplicate"
+      severity: WARN
+
+    - id: ui-kit-scope-guard
+      description: "No screen maps, scene hierarchies, or modal graphs in ui-kit"
+      detection: pattern_absent
+      target_files: ["design/ui-kit.md"]
+      pattern: "screen map|scene hierarchy|modal graph|screen flow"
+      severity: FAIL
+
+    - id: style-review-freshness
+      description: "Review log post-dates file modification"
+      detection: review_freshness
+      target_files: ["design/style-guide.md", "design/color-system.md", "design/ui-kit.md", "design/interaction-model.md", "design/feedback-system.md", "design/audio-direction.md"]
+      review_pattern: "ITERATE-style-*"
+      severity: WARN
+
+    - id: style-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_docs:
+        - "design/design-doc.md"

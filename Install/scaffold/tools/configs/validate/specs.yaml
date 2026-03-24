@@ -1,0 +1,47 @@
+# specs.yaml — Validate config for behavior specs
+
+scope: specs
+display_name: "Specs"
+glob_pattern: "specs/SPEC-*-*.md"
+
+activation:
+  required_files:
+    - specs/_index.md
+  skip_message: "No specs index found."
+
+checks:
+  deterministic:
+    - id: specs-index-files
+      description: "Spec files registered in _index.md"
+      detection: index_registration
+      index_file: "specs/_index.md"
+      glob_pattern: "specs/SPEC-*-*.md"
+      id_pattern: "SPEC-\\d+"
+      severity: FAIL
+
+    - id: specs-status-filename-sync
+      description: "Filename suffix matches internal Status"
+      detection: status_filename_sync
+      glob_pattern: "specs/SPEC-*-*.md"
+      severity: FAIL
+
+    - id: specs-structure
+      description: "Required sections present"
+      detection: section_structure
+      glob_pattern: "specs/SPEC-*-*.md"
+      required_sections: [Summary, Trigger, "Observable Outcome", "Failure Outcome", "Acceptance Criteria"]
+      severity: FAIL
+
+    - id: specs-review-freshness
+      description: "Review log post-dates file modification"
+      detection: review_freshness
+      glob_pattern: "specs/SPEC-*-*.md"
+      review_pattern: "REVIEW-spec-*"
+      severity: WARN
+
+    - id: specs-upstream-freshness
+      description: "Spec was last updated after its parent system was modified"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_field: "System"
+      upstream_dir: "design/systems"

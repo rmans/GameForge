@@ -1,0 +1,69 @@
+# design.yaml — Validate config for design-doc.md
+
+scope: design
+display_name: "Design Document"
+
+activation:
+  required_files:
+    - design/design-doc.md
+  skip_message: "No design doc found."
+
+checks:
+  deterministic:
+    - id: design-exists
+      description: "Design doc exists"
+      detection: file_exists
+      target_files: ["design/design-doc.md"]
+      severity: FAIL
+
+    - id: design-structure
+      description: "Required sections present"
+      detection: section_structure
+      target_files: ["design/design-doc.md"]
+      required_sections: [Identity, Shape, Control, World, Presentation, Content, "System Domains", Philosophy, Scope, "System Design Index"]
+      severity: FAIL
+
+    - id: design-section-health
+      description: "Weighted section health score"
+      detection: section_health
+      target_files: ["design/design-doc.md"]
+      fail_threshold: 0.5
+      warn_threshold: 0.75
+      severity: WARN
+
+    - id: design-governance-invariants
+      description: "Design Invariants section has content"
+      detection: pattern_present
+      target_files: ["design/design-doc.md"]
+      pattern: "###\\s+Design Invariants"
+      severity: WARN
+
+    - id: design-governance-anchors
+      description: "Decision Anchors section has content"
+      detection: pattern_present
+      target_files: ["design/design-doc.md"]
+      pattern: "###\\s+Decision Anchors"
+      severity: WARN
+
+    - id: design-system-index-sync
+      description: "System Design Index matches systems/_index.md"
+      detection: index_registration
+      index_file: "design/design-doc.md"
+      glob_pattern: "design/systems/SYS-*-*.md"
+      id_pattern: "SYS-\\d+"
+      severity: FAIL
+
+    - id: design-review-freshness
+      description: "Review log post-dates file modification"
+      detection: review_freshness
+      target_files: ["design/design-doc.md"]
+      review_pattern: "ITERATE-design-*"
+      severity: WARN
+
+  heuristic:
+    - id: design-glossary-compliance
+      description: "NOT-column terms not used"
+      detection: glossary_not_column
+      target_files: ["design/design-doc.md"]
+      severity: WARN
+      label: "[ADVISORY]"

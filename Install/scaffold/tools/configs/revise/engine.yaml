@@ -1,0 +1,13 @@
+layer: engine
+display_name: "Engine Conventions"
+editable_files_pattern: "engine/*.md"
+preflight:
+  required_files: [engine/_index.md]
+  blocked_message: "No engine docs to revise."
+feedback_sources:
+  - type: adr
+    glob: "decisions/architecture-decision-record/ADR-*_accepted*.md"
+  - type: code_review
+    glob: "decisions/code-review/CR-*.md"
+safe_patterns: ["Stale upstream reference", "Step 3 alignment", "Constrained TODO resolution", "New implementation pattern"]
+escalation_patterns: ["Convention change", "Performance budget revision", "Architecture implementation change"]

@@ -1,0 +1,182 @@
+# engine.yaml — Fix config for engine convention docs
+
+layer: engine
+display_name: "Engine Conventions"
+target_docs:
+  - simulation-runtime.md
+  - scene-architecture.md
+  - coding-best-practices.md
+  - ui-best-practices.md
+  - input-system.md
+  - ai-task-execution.md
+  - save-load-architecture.md
+  - debugging-and-observability.md
+  - resource-management.md
+  - audio-implementation.md
+  - animation-system.md
+  - networking-architecture.md
+  - modding-architecture.md
+  - testing-strategy.md
+  - performance-budgets.md
+target_type: multi_doc
+
+preflight:
+  required_files:
+    - design/design-doc.md
+    - design/architecture.md
+  blocked_message: "Design doc and architecture.md required as context."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/architecture.md
+      class: canonical
+      sections: ["## Foundation Areas", "## Core API Boundary", "## Data Flow"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity"]
+      priority: 3
+
+  on_demand:
+    - file: design/authority.md
+      class: constraint
+      sections: ["## Authority Table"]
+      priority: 4
+      condition: exists
+    - file: design/interfaces.md
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files_pattern: "engine/*.md"
+
+defaults:
+  max_iterations: 10
+
+mechanical_checks:
+
+  metadata:
+    - id: required_fields
+      description: "Missing required header fields (Layer, Authority, Status)"
+      detection: header_field_check
+      auto_fix: true
+      fix_action: "Add missing header fields"
+
+    - id: status_valid
+      description: "Status field not a valid value"
+      detection: enum_check
+      valid_values: [Draft, Review, Approved, Complete, Deprecated]
+      auto_fix: false
+      user_action: "Fix status value"
+
+  sections:
+    - id: missing_sections
+      description: "Template section absent (Purpose, Project Overrides, Rules)"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section heading"
+
+    - id: stale_seeded_markers
+      description: "SEEDED marker with authored content"
+      detection: marker_with_content
+      auto_fix: true
+      fix_action: "Remove SEEDED marker"
+
+    - id: stale_constrained_todo
+      description: "Constrained TODO references resolved decision"
+      detection: constrained_todo_check
+      auto_fix: true
+      fix_action: "Remove constraint marker or convert to plain TODO"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+    - id: index_registration
+      description: "Engine doc missing from scaffold/engine/_index.md"
+      detection: index_check
+      auto_fix: true
+      fix_action: "Add to index"
+
+    - id: stale_index_rows
+      description: "Index row references non-existent doc"
+      detection: index_check
+      auto_fix: true
+      fix_action: "Remove stale row"
+
+  upstream_drift:
+    - id: stale_upstream_names
+      description: "Section names, terms, or signal names don't match upstream"
+      detection: upstream_name_check
+      auto_fix: true
+      fix_action: "Update to current upstream names"
+
+    - id: adr_reversed_convention
+      description: "Convention contradicts accepted ADR"
+      detection: adr_impact_check
+      auto_fix: true
+      fix_action: "Update convention to match ADR"
+
+  cross_reference:
+    - id: internal_reference_drift
+      description: "Cross-engine-doc reference is broken"
+      detection: cross_doc_link_check
+      auto_fix: true
+      fix_action: "Update cross-reference"
+
+judgment_checks:
+
+  layer_purity:
+    - id: design_content
+      description: "Engine doc contains game design content (WHAT not HOW)"
+      question: "Does this doc prescribe game behavior instead of implementation patterns?"
+
+    - id: authority_override
+      description: "Engine doc overrides architectural decision from architecture.md"
+      question: "Does this convention contradict architecture.md?"
+
+signals:
+
+  alignment:
+    - id: tick_model_contradiction
+      description: "Tick model doesn't match architecture.md"
+      severity: HIGH
+    - id: data_flow_violation
+      description: "Convention violates data flow rules"
+      severity: HIGH
+    - id: ownership_assumption
+      description: "Engine doc assumes data ownership"
+      severity: HIGH
+    - id: layer_breach
+      description: "Engine doc contains design-layer content"
+      severity: HIGH
+    - id: boot_order_mismatch
+      description: "Boot order inconsistent with scene architecture"
+      severity: MEDIUM
+    - id: convention_conflict
+      description: "Two engine docs disagree on a convention"
+      severity: MEDIUM
+    - id: maturity_imbalance
+      description: "Engine docs at very different completion levels"
+      severity: LOW
+
+report:
+  log_name_pattern: "FIX-engine-{target}-{date}.md"
+
+rules:
+  - "Only edit engine docs"
+  - "Engine docs describe HOW, never WHAT"
+  - "architecture.md decisions are not negotiable — file an ADR to change them"
+  - "Design content in engine docs is always flagged"

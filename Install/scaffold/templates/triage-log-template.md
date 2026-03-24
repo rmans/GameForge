@@ -42,4 +42,4 @@
 
 | # | Item | Deferred To | Reason |
 |---|------|------------|--------|
-| 1 | <!-- description --> | <!-- SLICE-### / P#-### / "future" --> | <!-- why not now --> |
+| 1 | <!-- description --> | <!-- SLICE-### / PHASE-### / "future" --> | <!-- why not now --> |

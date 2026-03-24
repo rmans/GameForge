@@ -1,0 +1,33 @@
+# adr.yaml — Validate config for ADRs
+
+scope: adr
+display_name: "Architecture Decision Records"
+glob_pattern: "decisions/architecture-decision-record/ADR-*.md"
+
+activation:
+  required_files: []
+  skip_message: "No ADR files found."
+
+checks:
+  deterministic:
+    - id: adr-structure
+      description: "Required sections present"
+      detection: section_structure
+      glob_pattern: "decisions/architecture-decision-record/ADR-*.md"
+      required_sections: [Context, Decision, "Updated Documents", "Alternatives Considered", Consequences]
+      severity: FAIL
+
+    - id: adr-section-health
+      description: "Weighted section health"
+      detection: section_health
+      glob_pattern: "decisions/architecture-decision-record/ADR-*.md"
+      fail_threshold: 0.4
+      warn_threshold: 0.65
+      severity: WARN
+
+    - id: adr-review-freshness
+      description: "Review log post-dates file modification"
+      detection: review_freshness
+      glob_pattern: "decisions/architecture-decision-record/ADR-*.md"
+      review_pattern: "ITERATE-adr-*"
+      severity: WARN

@@ -1,0 +1,13 @@
+layer: slices
+display_name: "Slices"
+editable_files_pattern: "slices/SLICE-*-*.md"
+preflight:
+  required_files: [slices/_index.md]
+  blocked_message: "No slices to revise."
+feedback_sources:
+  - type: adr
+    glob: "decisions/architecture-decision-record/ADR-*_accepted*.md"
+  - type: triage
+    glob: "decisions/triage-log/TRIAGE-*.md"
+safe_patterns: ["Scope refinement", "Dependency update", "Stale reference"]
+escalation_patterns: ["Goal change", "Proof value change", "Dependency invalidation"]

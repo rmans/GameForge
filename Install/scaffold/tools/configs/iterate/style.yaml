@@ -1,0 +1,449 @@
+# style.yaml — Iterate config for Step 5 visual/UX docs
+# Multi-doc layer with per-doc tailored L3/L2 questions.
+# Each of the 6 docs has its own section-level review. L1 is cross-doc integration.
+
+layer: style
+display_name: "Style & UX"
+target_docs:
+  - style-guide.md
+  - color-system.md
+  - ui-kit.md
+  - interaction-model.md
+  - feedback-system.md
+  - audio-direction.md
+target_type: multi_doc
+
+preflight:
+  required_files:
+    - design/design-doc.md
+  blocked_message: "Design doc required as context for style review."
+
+context:
+  budget: 30000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Presentation", "## Identity"]
+      priority: 1
+
+  per_target: []
+
+  per_section:
+    "### Aesthetic Pillars":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Aesthetic Pillars", "### Tone"]
+        priority: 1
+    "### Tone Registers":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Tone", "### Core Fantasy"]
+        priority: 1
+    "### Entity Visual Hierarchy":
+      - file: design/design-doc.md
+        class: canonical
+        sections: ["### Entity Presentation", "### Content Categories"]
+        priority: 1
+    "### Base Palette":
+      - file: design/style-guide.md
+        class: upstream
+        sections: ["## Art Direction", "## Visual Tone"]
+        priority: 2
+        condition: exists
+    "### Signal Palette":
+      - file: design/state-transitions.md
+        class: constraint
+        priority: 3
+        condition: exists
+    "## Component Definitions":
+      - file: design/style-guide.md
+        class: upstream
+        sections: ["## Art Direction"]
+        priority: 2
+        condition: exists
+      - file: design/color-system.md
+        class: upstream
+        sections: ["## Palette", "## Color Tokens"]
+        priority: 2
+        condition: exists
+    "## Interaction Patterns":
+      - file: design/interaction-model.md
+        class: adjacent
+        priority: 2
+        condition: exists
+    "## Event-Response Table":
+      - file: design/interaction-model.md
+        class: adjacent
+        priority: 2
+        condition: exists
+      - file: design/audio-direction.md
+        class: adjacent
+        sections: ["## Sound Categories", "## Feedback Hierarchy"]
+        priority: 2
+        condition: exists
+    "## Audio Philosophy":
+      - file: design/feedback-system.md
+        class: adjacent
+        sections: ["## Priority & Stacking"]
+        priority: 2
+        condition: exists
+
+  on_demand:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 4
+
+defaults:
+  max_iterations: 10
+  max_exchanges: 5
+  sleep_between_topics: 10
+
+# ---------------------------------------------------------------------------
+# Per-Doc Review (L3 subsections + L2 sections)
+# ---------------------------------------------------------------------------
+
+per_doc:
+
+  style-guide.md:
+    l3_sections:
+      "### Aesthetic Pillars":
+        parent: "## Art Direction"
+        questions:
+          - "Do pillars serve the design doc's vision and tone?"
+          - "Are they specific enough to guide art production?"
+      "### Reference Points":
+        parent: "## Art Direction"
+        questions:
+          - "Are references concrete (specific games, films, art) not vague ('retro style')?"
+      "### Tone Registers":
+        parent: "## Visual Tone"
+        questions:
+          - "Do registers cover the game's full emotional range (normal, alert, crisis, calm)?"
+      "### Entity Visual Hierarchy":
+        parent: "## Character & Entity Style"
+        questions:
+          - "Can the player distinguish entity types at a glance?"
+          - "Is hierarchy consistent with the design doc's information model?"
+      "### Motion Principles":
+        parent: "## Animation Style"
+        questions:
+          - "Do motion principles match the game's tone and pacing?"
+      "### Icon Design Rules":
+        parent: "## Iconography Style"
+        questions:
+          - "Would two artists produce consistent icons from these rules?"
+    l2_sections:
+      "## Art Direction":
+        questions:
+          - "Do aesthetic pillars and references reinforce the same visual identity?"
+      "## Visual Tone":
+        questions:
+          - "Are tone registers consistent with the design doc's Tone section?"
+      "## Character & Entity Style":
+        questions:
+          - "Is the visual hierarchy clear enough for gameplay readability?"
+      "## Environment Style":
+        questions:
+          - "Do terrain and structure styles support gameplay — can the player read the environment?"
+      "## Animation Style":
+        questions:
+          - "Do feedback animations match the feedback system's timing requirements?"
+    l2_doc_question: "Does this style guide form a coherent visual identity that serves the Core Fantasy?"
+
+  color-system.md:
+    l3_sections:
+      "### Base Palette":
+        parent: "## Palette"
+        questions:
+          - "Is the base palette distinct enough to avoid confusion?"
+          - "Does it match the style guide's tone?"
+      "### Signal Palette":
+        parent: "## Palette"
+        questions:
+          - "Do signal colors have unambiguous meaning (danger, success, warning, info)?"
+          - "Are they distinguishable from base palette colors?"
+      "### Identity Palette":
+        parent: "## Palette"
+        questions:
+          - "Are identity colors for factions/entities distinct and memorable?"
+      "### State Tokens":
+        parent: "## Color Tokens"
+        questions:
+          - "Does each state token have a consistent meaning across all contexts?"
+          - "Are all game states from system designs represented?"
+      "### UI Tokens":
+        parent: "## Color Tokens"
+        questions:
+          - "Do UI tokens cover all component states (normal, hover, active, disabled, error)?"
+    l2_sections:
+      "## Palette":
+        questions:
+          - "Do the three palettes (base, signal, identity) work together without clashing?"
+      "## Color Tokens":
+        questions:
+          - "Are tokens sufficient for all UI and game state representation?"
+      "## Accessibility":
+        questions:
+          - "Do color combinations meet WCAG contrast requirements?"
+          - "Is the system usable for colorblind players (deuteranopia, protanopia, tritanopia)?"
+      "## UI vs World Colors":
+        questions:
+          - "Is the boundary clear — can the player distinguish UI from world at all times?"
+    l2_doc_question: "Does color carry stable meaning without breaking accessibility?"
+
+  ui-kit.md:
+    l3_sections:
+      "### Panels":
+        parent: "## Component Definitions"
+        questions:
+          - "Are panel types sufficient for all information display needs?"
+      "### Buttons":
+        parent: "## Component Definitions"
+        questions:
+          - "Are button states (normal, hover, pressed, disabled) fully defined?"
+          - "Do button styles distinguish primary, secondary, and destructive actions?"
+      "### Tooltips":
+        parent: "## Component Definitions"
+        questions:
+          - "Is tooltip content defined — what information appears and when?"
+      "### Alerts & Notifications":
+        parent: "## Component Definitions"
+        questions:
+          - "Do alert types match the feedback system's priority hierarchy?"
+      "### Spacing":
+        parent: "## Layout Rules"
+        questions:
+          - "Are spacing values concrete (pixels/units) not vague ('adequate spacing')?"
+    l2_sections:
+      "## Component Definitions":
+        questions:
+          - "Are all UI needs covered by the component set?"
+          - "Are interactive components' behaviors fully defined?"
+      "## Layout Rules":
+        questions:
+          - "Are spacing and safe zones concrete enough to implement consistently?"
+      "## Component States":
+        questions:
+          - "Are all states covered — normal, hover, active, disabled, error, loading?"
+      "## Animation & Transitions":
+        questions:
+          - "Do transitions match the style guide's motion principles?"
+      "## Sound Feedback":
+        questions:
+          - "Does UI sound feedback match audio-direction.md's UI Sounds category?"
+    l2_doc_question: "Are the UI building blocks sufficient and properly bounded for this game?"
+
+  interaction-model.md:
+    l3_sections:
+      "### Selectable Entities":
+        parent: "## Selection Model"
+        questions:
+          - "Are all selectable entity types listed?"
+          - "Does selection match the design doc's Player Control Model?"
+      "### Direct Commands":
+        parent: "## Command Model"
+        questions:
+          - "Are direct commands consistent with the design doc's Control Philosophy?"
+      "### Command Cancellation":
+        parent: "## Command Model"
+        questions:
+          - "Can the player cancel any action? Are cancellation rules clear?"
+      "### Drag-to-Place":
+        parent: "## Drag Behaviors"
+        questions:
+          - "Does placement interaction match system designs' Player Actions?"
+      "### Cancel Action":
+        parent: "## Interaction Patterns"
+        questions:
+          - "Is cancel always available? Is the cancel pattern consistent across all contexts?"
+    l2_sections:
+      "## Selection Model":
+        questions:
+          - "Is the selection model consistent with the design doc's Player Control Model?"
+      "## Command Model":
+        questions:
+          - "Do commands match Player Verbs from the design doc?"
+          - "Is queuing/priority clear?"
+      "## Drag Behaviors":
+        questions:
+          - "Are drag behaviors distinct — can the player tell which drag mode they're in?"
+      "## Interaction Patterns":
+        questions:
+          - "Are patterns consistent — does the same input always do the same thing in the same context?"
+      "## Modal vs Non-Modal Interaction":
+        questions:
+          - "Is it clear when the player is in a modal state and how to exit?"
+      "## Camera Interaction":
+        questions:
+          - "Does camera control match the design doc's Camera section?"
+    l2_doc_question: "Can the player act clearly and consistently without memorizing a manual?"
+
+  feedback-system.md:
+    l3_sections:
+      "### Action Confirmation":
+        parent: "## Feedback Types"
+        questions:
+          - "Does every player action have a confirmation feedback defined?"
+      "### Action Failure":
+        parent: "## Feedback Types"
+        questions:
+          - "Does failure feedback tell the player WHY, not just THAT?"
+      "### Critical Alert":
+        parent: "## Feedback Types"
+        questions:
+          - "Are critical alerts clearly distinguished from warnings?"
+          - "Can they interrupt other feedback?"
+      "### Priority Hierarchy":
+        parent: "## Priority & Stacking"
+        questions:
+          - "Is the hierarchy unambiguous — what wins when two events fire simultaneously?"
+      "### Coordination Rules":
+        parent: "## Cross-Modal Coordination"
+        questions:
+          - "Do visual, audio, and haptic channels reinforce each other, not contradict?"
+    l2_sections:
+      "## Feedback Types":
+        questions:
+          - "Are all 7 feedback types (confirmation, failure, state change, warning, critical, selection, sustained) defined with clear boundaries?"
+      "## Timing Rules":
+        questions:
+          - "Are instant vs delayed rules consistent with the game's pacing?"
+      "## Priority & Stacking":
+        questions:
+          - "Does the priority hierarchy match audio-direction.md's feedback hierarchy?"
+      "## Cross-Modal Coordination":
+        questions:
+          - "Is the redundancy principle applied — critical info on multiple channels?"
+      "## Event-Response Table":
+        questions:
+          - "Is the table complete — are there game events with no defined response?"
+          - "Does every response reference the correct feedback type, channel, and priority?"
+    l2_doc_question: "Does the game answer every action and event correctly, with consistent priority?"
+
+  audio-direction.md:
+    l3_sections:
+      "### Core Audio Identity":
+        parent: "## Audio Philosophy"
+        questions:
+          - "Does the audio identity match the style guide's tone?"
+      "### Audio as Information":
+        parent: "## Audio Philosophy"
+        questions:
+          - "Does audio carry gameplay information, not just atmosphere?"
+      "### Restraint Principle":
+        parent: "## Audio Philosophy"
+        questions:
+          - "Is restraint specific — what doesn't play is as important as what does?"
+      "### UI Sounds":
+        parent: "## Sound Categories"
+        questions:
+          - "Do UI sounds match ui-kit.md's Sound Feedback section?"
+      "### Alert Sounds":
+        parent: "## Sound Categories"
+        questions:
+          - "Do alert sounds match feedback-system.md's Critical Alert and Warning types?"
+      "### When Music Plays":
+        parent: "## Music Direction"
+        questions:
+          - "Are music triggers tied to game states, not arbitrary?"
+      "### Priority Ordering":
+        parent: "## Feedback Hierarchy"
+        questions:
+          - "Does audio priority match feedback-system.md's priority hierarchy?"
+      "### Visual Alternatives":
+        parent: "## Accessibility"
+        questions:
+          - "Does every critical audio cue have a visual alternative?"
+    l2_sections:
+      "## Audio Philosophy":
+        questions:
+          - "Does the philosophy match the style guide's tone and the design doc's Core Fantasy?"
+      "## Sound Categories":
+        questions:
+          - "Are all game sound needs covered — UI, feedback, alerts, ambient, system events, music?"
+      "## Music Direction":
+        questions:
+          - "Does music pacing match the design doc's Session Shape?"
+      "## Silence & Space":
+        questions:
+          - "Is silence used intentionally — quiet moments as design, not gaps?"
+      "## Feedback Hierarchy":
+        questions:
+          - "Does audio hierarchy match the feedback system's hierarchy exactly?"
+      "## Accessibility":
+        questions:
+          - "Are visual alternatives, subtitles, and volume controls complete?"
+    l2_doc_question: "Does sound reinforce tone and carry information without overwhelming or contradicting visuals?"
+
+per_doc_failure_probe:
+  questions:
+    - "What breaks if this doc is wrong?"
+    - "What will developers guess here — and guess differently?"
+    - "Where will two developers diverge?"
+    - "What is most likely to drift over time?"
+
+# ---------------------------------------------------------------------------
+# L1 — Cross-Doc Integration Review
+# ---------------------------------------------------------------------------
+
+l1_questions:
+  - "Do color tokens flow correctly from color-system → ui-kit → feedback-system?"
+  - "Does every interaction in interaction-model have corresponding feedback in feedback-system?"
+  - "Does audio-direction's priority hierarchy match feedback-system's priority hierarchy?"
+  - "Does audio-direction's UI Sounds category match ui-kit's Sound Feedback section?"
+  - "Do all docs respect the style guide as the governing visual identity?"
+  - "Does the interaction model's Camera section match the design doc's Camera section in Presentation?"
+  - "Where would two developers interpret these docs differently and build inconsistent UI?"
+  - "Do these six docs work as one usable system, or are there seams where they disagree?"
+
+scope_guard:
+  upward: "design doc — game design decisions"
+  downward: "engine docs, implementation patterns"
+  tests:
+    - name: upward_leakage
+      question: "Does this change modify game design decisions (vision, mechanics, systems)?"
+      guidance: "Style docs define how the game looks and feels, not what it is."
+    - name: downward_leakage
+      question: "Does this change introduce engine-specific implementation patterns?"
+      guidance: "Style docs define visual/UX intent, not how to implement it."
+
+adjudication:
+  editable_files:
+    - design/style-guide.md
+    - design/color-system.md
+    - design/ui-kit.md
+    - design/interaction-model.md
+    - design/feedback-system.md
+    - design/audio-direction.md
+  outcomes: [accept, reject, escalate, ambiguous_intent]
+
+review_lock:
+  track_by: root_cause
+
+report:
+  log_name_pattern: "ITERATE-style-{target}-{date}.md"
+  final_questions:
+    - name: "Dangerous Integration Gaps"
+      prompt: "The most dangerous gaps between the six docs."
+    - name: "Developer Divergence Points"
+      prompt: "Where will developers diverge because the docs are ambiguous?"
+    - name: "Cross-Doc Seam Failures"
+      prompt: "Where do the docs fail to work as one system?"
+  rating:
+    scale: 5
+    descriptions:
+      1: "fundamentally broken (docs contradict, no visual coherence)"
+      2: "major issues (significant gaps or contradictions between docs)"
+      3: "workable but soft (some gaps, minor inconsistencies)"
+      4: "solid style system (coherent, well-integrated, minor soft spots)"
+      5: "strong style system (fully integrated, consistent, developer-ready)"
+
+rules:
+  - "Project documents and authority order win"
+  - "Only edit style docs listed in editable_files"
+  - "Never blindly accept"
+  - "Pushback is expected and healthy"
+  - "Resolved issues are locked across iterations by root cause"
+  - "Cross-doc integration (L1) is highest value — prioritize it"

@@ -5,7 +5,7 @@
 > **Severity:** High | Medium | Low
 > **System/Spec:** <!-- SYS-### or SPEC-### most related to this observation -->
 > **Session:** <!-- PT-YYYY-MM-DD — which playtest session -->
-> **Phase:** <!-- P#-### — which phase was active -->
+> **Phase:** <!-- PHASE-### — which phase was active -->
 > **Frequency:** <!-- N/M — how many testers out of how many total. Update on repeat observations. -->
 > **Created:** YYYY-MM-DD
 > **Last Updated:** YYYY-MM-DD

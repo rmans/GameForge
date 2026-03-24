@@ -47,7 +47,7 @@ from datetime import datetime
 def load_config(profile=None):
     """Load review_config.json, optionally merging a named profile.
 
-    Uses the same config file as doc-review.py — both reviewers share
+    Uses the same config file as adversarial-review.py — both reviewers share
     provider settings, temperature, and token limits. Profiles (e.g.,
     "code_review") override provider/model settings from the top level.
     """

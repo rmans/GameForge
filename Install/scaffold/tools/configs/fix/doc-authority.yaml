@@ -1,0 +1,63 @@
+# doc-authority.yaml — Fix config for doc-authority.md
+
+layer: doc-authority
+display_name: "Document Authority"
+target: scaffold/doc-authority.md
+target_type: fixed
+
+preflight:
+  required_files:
+    - scaffold/doc-authority.md
+  blocked_message: "No doc-authority.md found."
+
+context:
+  budget: 15000
+
+  base:
+    - file: scaffold/doc-authority.md
+      class: canonical
+      priority: 1
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## System Domains"]
+      priority: 2
+
+editable_files:
+  - scaffold/doc-authority.md
+
+defaults:
+  max_iterations: 3
+
+mechanical_checks:
+  completeness:
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      patterns: ["<!-- TODO:", "*TODO:"]
+      auto_fix: true
+      fix_action: "Remove template text"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+judgment_checks:
+  quality:
+    - id: missing_doc_type
+      description: "A document type exists in the scaffold but has no rank"
+      question: "Are there document types in the scaffold without a rank or unranked designation?"
+
+    - id: conflict_resolution_gap
+      description: "Conflict resolution rules don't cover a common scenario"
+      section: "## Conflict Resolution"
+      question: "Could a developer resolve a document conflict using only this section?"
+
+report:
+  log_name_pattern: "FIX-doc-authority-{date}.md"
+
+rules:
+  - "Rank changes affect the entire pipeline — always escalate"
+  - "Conflict resolution changes should be escalated"

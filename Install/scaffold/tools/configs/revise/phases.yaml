@@ -1,0 +1,16 @@
+layer: phases
+display_name: "Phases"
+editable_files_pattern: "phases/PHASE-*-*.md"
+preflight:
+  required_files: [phases/_index.md]
+  blocked_message: "No phases to revise."
+feedback_sources:
+  - type: adr
+    glob: "decisions/architecture-decision-record/ADR-*_accepted*.md"
+  - type: triage
+    glob: "decisions/triage-log/TRIAGE-*.md"
+  - type: playtest
+    glob: "decisions/playtest-feedback/PF-*.md"
+    filter: "Status: Pattern"
+safe_patterns: ["Safe refinement", "Stale reference"]
+escalation_patterns: ["Scope widening", "Milestone weakening", "Scope invalidation"]

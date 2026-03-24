@@ -1,0 +1,26 @@
+# playtest-session.yaml — Validate config for playtest sessions
+
+scope: playtest-session
+display_name: "Playtest Sessions"
+glob_pattern: "decisions/playtest-feedback/PT-*.md"
+
+activation:
+  required_files: []
+  skip_message: "No PT files found."
+
+checks:
+  deterministic:
+    - id: pt-structure
+      description: "Required sections present"
+      detection: section_structure
+      glob_pattern: "decisions/playtest-feedback/PT-*.md"
+      required_sections: [Observations, Summary, "Feedback Entries Created"]
+      severity: FAIL
+
+    - id: pt-section-health
+      description: "Weighted section health"
+      detection: section_health
+      glob_pattern: "decisions/playtest-feedback/PT-*.md"
+      fail_threshold: 0.3
+      warn_threshold: 0.5
+      severity: WARN

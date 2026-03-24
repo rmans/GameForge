@@ -1,0 +1,42 @@
+# slices.yaml — Seed config for vertical slices
+
+layer: slices
+display_name: "Vertical Slices"
+template: "scaffold/templates/slice-template.md"
+index_file: "slices/_index.md"
+id_pattern: "SLICE-###"
+id_prefix: "SLICE"
+output_pattern: "slices/SLICE-*-*.md"
+
+preflight:
+  required_files:
+    - phases/_index.md
+    - design/systems/_index.md
+  blocked_message: "Phases and system designs must exist before seeding slices."
+
+upstream_sources:
+  - type: phase
+    glob: "phases/PHASE-*_approved*.md"
+    extract: "Phase goals and scope drive slice selection"
+    extract_sections:
+      - "### Objective"
+      - "### Slice Strategy"
+      - "### Exit Criteria"
+  - type: system
+    glob: "design/systems/SYS-*-*.md"
+    extract: "System interactions define integration points"
+    extract_sections:
+      - "### Purpose"
+      - "### Player Actions"
+      - "### Owned State"
+  - type: interfaces
+    glob: "design/interfaces.md"
+    extract: "Interface contracts define what slices must exercise"
+
+dependency_checks: []
+
+coverage_rules:
+  - "Every phase In Scope item maps to at least one slice"
+  - "Every slice exercises at least one cross-system integration point"
+  - "No two slices prove the same thing"
+  - "High-risk integrations appear in earlier slices"

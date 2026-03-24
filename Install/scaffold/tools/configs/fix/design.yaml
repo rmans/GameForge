@@ -1,0 +1,166 @@
+# design.yaml — Fix config for design-doc.md
+
+layer: design
+display_name: "Design Document"
+target: design/design-doc.md
+target_type: fixed
+template: null  # design doc uses init-design structure, not a single template
+
+preflight:
+  required_files:
+    - design/design-doc.md
+    - design/glossary.md
+  blocked_message: "No design doc found. Run `/scaffold-init-design` first."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Philosophy", "## Scope", "### Design Invariants", "### Decision Anchors", "### Design Pressure Tests"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+    - file: design/systems/_index.md
+      class: adjacent
+      priority: 3
+
+  on_demand:
+    - file: decisions/known-issues.md
+      class: evidence
+      priority: 4
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files:
+  - design/design-doc.md
+
+defaults:
+  max_iterations: 10
+
+mechanical_checks:
+
+  completeness:
+    - id: missing_sections
+      description: "Required section from init-design structure is absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add empty stub with section heading"
+
+    - id: template_text
+      description: "TODO or template placeholder still present"
+      detection: pattern_match
+      patterns: ["<!-- TODO:", "*TODO:"]
+      auto_fix: true
+      fix_action: "Replace with content derived from existing sections or authoritative docs"
+
+    - id: provisional_markers
+      description: "PROVISIONAL markers on sections with substantive content"
+      detection: marker_with_content
+      pattern: "<!-- PROVISIONAL"
+      min_content_length: 50
+      auto_fix: true
+      fix_action: "Remove PROVISIONAL marker"
+
+  governance_format:
+    - id: incomplete_invariant
+      description: "Invariant has Rule but missing Reason or Implication"
+      detection: governance_field_check
+      section: "### Design Invariants"
+      required_fields: ["Invariant:", "Rule:", "Reason:", "Implication:"]
+      auto_fix: true
+      condition: "Derivable unambiguously from rule text"
+      fix_action: "Add missing fields derived from context"
+
+    - id: incomplete_pressure_test
+      description: "Pressure Test missing Scenario, Expectation, or Failure Signal"
+      detection: governance_field_check
+      section: "### Design Pressure Tests"
+      required_fields: ["Pressure Test:", "Scenario:", "Expectation:", "Failure Signal:"]
+      auto_fix: true
+      condition: "Derivable unambiguously from test name"
+      fix_action: "Add missing fields derived from test name"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used as authoritative terminology"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+  cross_reference:
+    - id: system_index_mismatch
+      description: "System Design Index doesn't match systems/_index.md"
+      detection: index_sync
+      auto_fix: true
+      fix_action: "Sync index to match systems/_index.md"
+
+    - id: stale_adr_reference
+      description: "References deprecated or superseded ADR"
+      detection: adr_status_check
+      auto_fix: true
+      fix_action: "Update reference to current ADR status"
+
+judgment_checks:
+
+  governance:
+    - id: contradictory_sections
+      description: "Two sections describe mutually exclusive mechanics"
+      question: "Do any two sections contradict each other? If yes, which interpretation should the design commit to?"
+
+    - id: vague_invariant
+      description: "Invariant rule too broad to be testable"
+      section: "### Design Invariants"
+      question: "Is this invariant testable with a binary yes/no, or is it too vague?"
+
+    - id: anchor_conflict
+      description: "Two Decision Anchors contradict in a realistic scenario"
+      section: "### Decision Anchors"
+      question: "Do any two anchors contradict when applied to the same decision?"
+
+    - id: pressure_test_failure
+      description: "Current feature would fail a defined Pressure Test"
+      section: "### Design Pressure Tests"
+      question: "Would any current system or feature fail this pressure test?"
+
+  layer_violations:
+    - id: layer_violation
+      description: "Design doc contains system-layer truth"
+      question: "Does the design doc contain ownership tables, signal registries, interface contracts, or data schemas that belong in later-step docs?"
+
+  scope:
+    - id: scope_creep
+      description: "Design doc describes features beyond roadmap scope"
+      section: "## Scope"
+      question: "Does the design doc promise features not covered by any roadmap phase?"
+
+    - id: philosophy_drift
+      description: "Philosophy section wording no longer matches project direction"
+      section: "## Philosophy"
+      question: "Does the Philosophy section still match how the project is actually evolving?"
+
+signals:
+
+  downstream_drift:
+    - id: invariant_violation
+      description: "Downstream doc implies mechanic breaking a Design Invariant"
+      detection: "Compare system/spec/slice behavior against invariants"
+
+    - id: unescalated_mechanic
+      description: "Downstream doc introduces player-facing mechanic not in design doc"
+      detection: "Check for new mechanics in systems/specs not traceable to design doc"
+
+report:
+  log_name_pattern: "FIX-design-{date}.md"
+
+rules:
+  - "Only edit the design doc"
+  - "Never change what the game is — only fix how clearly the doc expresses it"
+  - "Derive fixes from context, never invent"
+  - "Governance format fixes must preserve meaning exactly"
+  - "Design intent is sacred"
+  - "Layer violations are always human-required"

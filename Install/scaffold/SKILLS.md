@@ -1,6 +1,6 @@
 # Skills Reference
 
-> Man-page reference for all 77 scaffold slash commands. Each entry shows synopsis, description, arguments, examples, and related skills.
+> Man-page reference for all 10 scaffold slash commands. Each entry shows synopsis, description, arguments, examples, and related skills.
 >
 > **When to use each skill** — see [WORKFLOW.md](WORKFLOW.md) for the step-by-step pipeline order.
 
@@ -10,101 +10,24 @@
 
 | Skill | Arguments | What it does |
 |-------|-----------|-------------|
-| **Init** | | |
-| `/scaffold-init-design` | `[--mode seed\|fill-gaps\|reconcile\|refresh]` | Initialize or update design document |
-| **Create** | | |
-| `/scaffold-new-roadmap` | — | Create the project roadmap |
-| `/scaffold-new-phase` | `[phase-name]` | Create a phase scope gate with auto P#-### ID |
-| `/scaffold-new-slice` | `[slice-name]` | Create a vertical slice with auto SLICE-### ID |
-| `/scaffold-new-system` | `[system-name] [--split-from SYS-###] [--trigger ADR-###\|KI:keyword]` | Create a single system design with overlap/authority audit |
-| `/scaffold-new-spec` | `[spec-name]` | Create a behavior spec with auto SPEC-### ID |
-| `/scaffold-new-task` | `[task-name]` | Create an implementation task with auto TASK-### ID |
-| **Bulk Seed** | | |
-| `/scaffold-bulk-seed-style` | — | Seed all 6 Step 5 visual/UX docs from upstream context |
-| `/scaffold-bulk-seed-systems` | — | Seed glossary + system stubs from design doc |
-| `/scaffold-bulk-seed-references` | — | Seed all 9 reference/architecture docs from systems |
-| `/scaffold-bulk-seed-engine` | `[--engine godot4\|unity\|unreal5\|other]` | Select engine, then seed all engine docs |
-| `/scaffold-bulk-seed-input` | — | Seed all 5 input docs from design doc |
-| `/scaffold-bulk-seed-phases` | — | Seed phase stubs from roadmap |
-| `/scaffold-bulk-seed-slices` | — | Seed slice stubs from phases + systems + interfaces |
-| `/scaffold-bulk-seed-specs` | — | Seed spec stubs from slices + systems + states |
-| `/scaffold-bulk-seed-tasks` | — | Seed task stubs from specs + engine docs + signals |
+| **Seed** | | |
+| `/scaffold-seed` | `<layer> [--target scope] [--single "name"]` | Dependency-aware document generation for any layer (design, systems, references, engine, style, input, phases, slices, specs, tasks, roadmap). Bulk or single doc creation. Orchestrated by seed.py. |
 | **Fix** | | |
-| `/scaffold-fix-design` | `[--iterate N]` | Mechanical cleanup for design doc |
-| `/scaffold-fix-style` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for all 6 Step 5 visual/UX docs |
-| `/scaffold-iterate-style` | `[--target doc.md] [--topics "1,4,7"] [--focus "..."]` | Adversarial per-doc review of Step 5 visual/UX docs (7 topics) |
-| `/scaffold-fix-systems` | `[--target SYS-###] [--iterate N]` | Mechanical cleanup for system designs |
-| `/scaffold-fix-references` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for Step 3 reference/architecture docs |
-| `/scaffold-fix-engine` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for engine docs |
-| `/scaffold-fix-roadmap` | `[--iterate N]` | Mechanical cleanup for roadmap |
-| `/scaffold-fix-phase` | `[--target P#-###] [--iterate N]` | Mechanical cleanup for phase docs |
-| `/scaffold-fix-slice` | `[--target SLICE-###] [--iterate N]` | Mechanical cleanup for slice docs |
-| `/scaffold-fix-spec` | `[--target SPEC-###] [--iterate N]` | Mechanical cleanup for spec docs |
-| `/scaffold-fix-task` | `[--target TASK-###] [--iterate N]` | Mechanical cleanup for task docs |
-| `/scaffold-fix-input` | `[--target doc.md] [--iterate N]` | Mechanical cleanup for Step 6 input docs |
-| `/scaffold-fix-cross-cutting` | — | Resolve cross-document integrity findings |
+| `/scaffold-fix` | `<layer> [target] [--sections "..."] [--iterations N]` | Mechanical cleanup for any layer (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine, cross-cutting). Orchestrated by local-review.py with per-layer YAML configs. |
 | **Iterate** | | |
-| `/scaffold-iterate-design` | `[--topic N] [--iterations N]` | Adversarial per-topic design doc review (5 structural + 1 design stress test) |
-| `/scaffold-iterate-systems` | `[SYS-### or SYS-###-SYS-###]` | Adversarial per-topic system design review |
-| `/scaffold-iterate-references` | `[--target doc.md] [--topic N]` | Adversarial per-topic Step 3 docs review |
-| `/scaffold-iterate-engine` | `[--target doc.md] [--topic N]` | Adversarial per-topic engine doc review |
-| `/scaffold-iterate-roadmap` | `[--topic N]` | Adversarial per-topic roadmap review |
-| `/scaffold-iterate-phase` | `[P#-###] [--topic N]` | Adversarial per-topic phase review |
-| `/scaffold-iterate-slice` | `[SLICE-###] [--topic N]` | Adversarial per-topic slice review |
-| `/scaffold-iterate-spec` | `[SPEC-### or range] [--topic N]` | Adversarial per-topic spec review |
-| `/scaffold-iterate-input` | `[--target doc.md] [--topics "1,3,6"] [--focus "..."]` | Adversarial per-topic input doc review (6 topics) |
-| `/scaffold-iterate-task` | `[TASK-### or range] [--topic N]` | Adversarial per-topic task review |
+| `/scaffold-iterate` | `<layer> [target] [--topics "1,3"] [--focus "..."] [--iterations N]` | Adversarial per-topic review for any layer (design, systems, spec, task, slice, phase, roadmap, references, style, input, engine). Orchestrated by iterate.py with per-layer YAML configs. |
 | **Revise** | | |
-| `/scaffold-revise-design` | `[--source P#-###\|SLICE-###\|foundation-recheck]` | Detect design drift from implementation feedback |
-| `/scaffold-revise-systems` | `[--source SLICE-###]` | Detect system design drift from implementation feedback |
-| `/scaffold-revise-references` | `[--source SLICE-###]` | Detect Step 3 doc drift from implementation feedback |
-| `/scaffold-revise-engine` | `[--source SLICE-###]` | Detect engine doc drift from implementation feedback |
-| `/scaffold-revise-style` | `[--source SLICE-###]` | Detect Step 5 visual/UX doc drift from implementation feedback |
-| `/scaffold-revise-input` | `[--source SLICE-###] [--target doc.md]` | Detect Step 6 input doc drift from implementation feedback |
-| `/scaffold-revise-foundation` | `[--mode initial\|recheck]` | Verify foundation stability, dispatch revision loops |
-| `/scaffold-revise-roadmap` | — | Update roadmap after phase completion |
-| `/scaffold-revise-phases` | `[--source P#-###]` | Update remaining phases from implementation feedback |
-| `/scaffold-revise-slices` | `[--source SLICE-###]` | Update remaining slices from implementation feedback |
-| **Approve** | | |
-| `/scaffold-approve-phases` | — | Lifecycle gate: approve Draft phases for slice seeding |
-| `/scaffold-approve-slices` | — | Lifecycle gate: approve Draft slices for spec seeding |
-| `/scaffold-approve-specs` | — | Lifecycle gate: approve Draft specs in a slice |
-| `/scaffold-approve-tasks` | — | Lifecycle gate: approve Draft tasks in a slice |
+| `/scaffold-revise` | `<layer> [--source PHASE-###\|SLICE-###] [--signals ADR-###,KI:keyword]` | Detect drift and revise any layer from implementation feedback. Classifies signals, auto-applies safe changes, escalates dangerous changes, dispatches restabilization. Orchestrated by revise.py with per-layer YAML configs. |
 | **Triage** | | |
-| `/scaffold-triage-specs` | `[SLICE-###]` | Resolve spec-level issues from iterate-spec |
-| `/scaffold-triage-tasks` | `[SLICE-###]` | Resolve task-level issues from iterate-task |
-| `/scaffold-reorder-tasks` | `[SLICE-###]` | Reorder tasks by dependency and implementation sequence |
+| `/scaffold-triage` | `<layer> <SLICE-###>` | Resolve human-required issues from review passes. Decision checklists for splits, merges, reassignments. |
 | **Implement** | | |
-| `/scaffold-implement-task` | `[TASK-### or range]` | Implement task(s) end-to-end: code, tests, review, sync |
-| `/scaffold-build-and-test` | `[--files file...] [--skip-unit] [--skip-lint]` | Pure verification gate: build, lint, tests |
-| `/scaffold-code-review` | `[file or system scope]` | Adversarial code review via external LLM (7 topics) |
-| `/scaffold-add-regression-tests` | `[TASK-###]` | Add regression tests using 6-layer model |
-| **Complete** | | |
-| `/scaffold-complete` | `[document-path\|ID]` | Mark a planning doc as Complete; ripples up through parents |
-| **Edit** | | |
-| `/scaffold-update-doc` | `[doc-name\|path]` | Add, remove, or modify entries in any scaffold doc |
-| `/scaffold-sync-glossary` | `[--scope all\|design\|systems\|references\|style\|input] [--dry-run]` | Scan docs for glossary-worthy terms with worthiness gate and ambiguity detection |
-| `/scaffold-sync-reference-docs` | — | Sync reference docs after upstream changes |
+| `/scaffold-implement` | `<TASK-###> [--max-retries N] [--cri N]` | Implement task end-to-end: plan, code (one step at a time, including tests), build, review, sync, complete. All mechanical ops in Python (utils.py). Code review via iterate.py --reviewer code. |
 | **Validate** | | |
 | `/scaffold-validate` | `[--scope refs\|design\|systems\|foundation\|roadmap\|phases\|slices\|specs\|tasks\|engine\|style\|input\|all]` | Normalize markdown formatting, then run cross-reference validation across scaffold docs |
 | **Decisions** | | |
 | `/scaffold-file-decision` | `--type adr\|ki\|dd "title"` | File an ADR, Known Issue, or Design Debt entry with cross-references |
 | **Playtest** | | |
-| `/scaffold-playtest-log` | `[session-type]` | Log playtester observations into the feedback tracker |
-| `/scaffold-playtest-review` | — | Analyze playtest feedback patterns with priority grid |
-| **Art** | | |
-| `/scaffold-art-concept` | `[prompt or document-path]` | Generate concept art using DALL-E |
-| `/scaffold-art-ui-mockup` | `[prompt or document-path]` | Generate UI mockup art using DALL-E |
-| `/scaffold-art-character` | `[prompt or document-path]` | Generate character art using DALL-E |
-| `/scaffold-art-environment` | `[prompt or document-path]` | Generate environment art using DALL-E |
-| `/scaffold-art-sprite` | `[prompt or document-path]` | Generate sprite art using DALL-E |
-| `/scaffold-art-icon` | `[prompt or document-path]` | Generate icon art using DALL-E |
-| `/scaffold-art-promo` | `[prompt or document-path]` | Generate promotional art using DALL-E |
-| **Audio** | | |
-| `/scaffold-audio-music` | `[prompt or document-path]` | Generate music tracks using ElevenLabs |
-| `/scaffold-audio-sfx` | `[prompt or document-path]` | Generate sound effects using ElevenLabs |
-| `/scaffold-audio-ambience` | `[prompt or document-path]` | Generate ambient audio loops using ElevenLabs |
-| `/scaffold-audio-voice` | `[prompt or document-path]` | Generate voice audio using OpenAI TTS |
+| `/scaffold-playtest` | `<log\|review> [session-date]` | Log playtest sessions and review feedback patterns |
 
 ---
 
@@ -113,13 +36,13 @@
 Skills for initializing individual documents from templates. All create skills ask one section at a time, write answers immediately, and set Status to Draft.
 
 
-### /scaffold-new-roadmap
+### /scaffold-seed roadmap
 
 Create the project roadmap.
 
 **Synopsis**
 
-    /scaffold-new-roadmap
+    /scaffold-seed roadmap
 
 **Description**
 
@@ -127,25 +50,25 @@ Creates the project roadmap by copying Core Fantasy from the design doc as the V
 
 **Examples**
 
-    /scaffold-new-roadmap
+    /scaffold-seed roadmap
 
 **See Also**
 
-`/scaffold-new-phase`
+`/scaffold-seed phases --single`
 
 ---
 
-### /scaffold-new-phase
+### /scaffold-seed phases --single
 
 Create a phase scope gate with automatic ID assignment.
 
 **Synopsis**
 
-    /scaffold-new-phase [phase-name]
+    /scaffold-seed phases --single [phase-name]
 
 **Description**
 
-Creates a phase scope gate at `phases/P#-###-<name>.md` with automatic sequential ID assignment. Reads the roadmap, design doc, all systems, and all ADRs for impact analysis before defining the phase. Walks through Goal, Entry Criteria (with specific IDs), In Scope, Out of Scope, Deliverables, Exit Criteria, and Dependencies. Registers in `phases/_index.md`.
+Creates a phase scope gate at `phases/PHASE-###-<name>.md` with automatic sequential ID assignment. Reads the roadmap, design doc, all systems, and all ADRs for impact analysis before defining the phase. Walks through Goal, Entry Criteria (with specific IDs), In Scope, Out of Scope, Deliverables, Exit Criteria, and Dependencies. Registers in `phases/_index.md`.
 
 **Arguments**
 
@@ -155,23 +78,23 @@ Creates a phase scope gate at `phases/P#-###-<name>.md` with automatic sequentia
 
 **Examples**
 
-    /scaffold-new-phase foundation
-    /scaffold-new-phase content-pipeline
-    /scaffold-new-phase
+    /scaffold-seed phases --single foundation
+    /scaffold-seed phases --single content-pipeline
+    /scaffold-seed phases --single
 
 **See Also**
 
-`/scaffold-new-slice`
+`/scaffold-seed slices --single`
 
 ---
 
-### /scaffold-new-slice
+### /scaffold-seed slices --single
 
 Create a vertical slice with automatic ID assignment.
 
 **Synopsis**
 
-    /scaffold-new-slice [slice-name]
+    /scaffold-seed slices --single [slice-name]
 
 **Description**
 
@@ -185,23 +108,23 @@ Creates a vertical slice at `slices/SLICE-###-<name>.md` with automatic sequenti
 
 **Examples**
 
-    /scaffold-new-slice core-combat-loop
-    /scaffold-new-slice inventory-ui
-    /scaffold-new-slice
+    /scaffold-seed slices --single core-combat-loop
+    /scaffold-seed slices --single inventory-ui
+    /scaffold-seed slices --single
 
 **See Also**
 
-`/scaffold-bulk-seed-slices`, `/scaffold-new-spec`
+`/scaffold-seed slices`, `/scaffold-seed specs --single`
 
 ---
 
-### /scaffold-new-system
+### /scaffold-seed systems --single
 
 Create a single system design document with automatic ID assignment.
 
 **Synopsis**
 
-    /scaffold-new-system [system-name] [--split-from SYS-###] [--trigger ADR-###|KI:keyword]
+    /scaffold-seed systems --single [system-name] [--split-from SYS-###] [--trigger ADR-###|KI:keyword]
 
 **Description**
 
@@ -217,24 +140,24 @@ Creates a single system design at `design/systems/SYS-###-<name>_draft.md` with 
 
 **Examples**
 
-    /scaffold-new-system mood-resolution
-    /scaffold-new-system task-scheduling --split-from SYS-005
-    /scaffold-new-system zone-management --trigger ADR-018
-    /scaffold-new-system
+    /scaffold-seed systems --single mood-resolution
+    /scaffold-seed systems --single task-scheduling --split-from SYS-005
+    /scaffold-seed systems --single zone-management --trigger ADR-018
+    /scaffold-seed systems --single
 
 **See Also**
 
-`/scaffold-bulk-seed-systems`, `/scaffold-fix-systems`, `/scaffold-iterate-systems`
+`/scaffold-seed systems`, `/scaffold-fix systems`, `/scaffold-iterate systems`
 
 ---
 
-### /scaffold-new-spec
+### /scaffold-seed specs --single
 
 Create a behavior spec with automatic ID assignment.
 
 **Synopsis**
 
-    /scaffold-new-spec [spec-name]
+    /scaffold-seed specs --single [spec-name]
 
 **Description**
 
@@ -248,23 +171,23 @@ Creates a behavior spec at `specs/SPEC-###-<name>.md` with automatic sequential 
 
 **Examples**
 
-    /scaffold-new-spec player-attack
-    /scaffold-new-spec item-pickup
-    /scaffold-new-spec
+    /scaffold-seed specs --single player-attack
+    /scaffold-seed specs --single item-pickup
+    /scaffold-seed specs --single
 
 **See Also**
 
-`/scaffold-bulk-seed-specs`, `/scaffold-new-task`
+`/scaffold-seed specs`, `/scaffold-seed tasks --single`
 
 ---
 
-### /scaffold-new-task
+### /scaffold-seed tasks --single
 
 Create an implementation task with automatic ID assignment.
 
 **Synopsis**
 
-    /scaffold-new-task [task-name]
+    /scaffold-seed tasks --single [task-name]
 
 **Description**
 
@@ -278,13 +201,13 @@ Creates an implementation task at `tasks/TASK-###-<name>.md` with automatic sequ
 
 **Examples**
 
-    /scaffold-new-task implement-attack-resolution
-    /scaffold-new-task wire-inventory-ui
-    /scaffold-new-task
+    /scaffold-seed tasks --single implement-attack-resolution
+    /scaffold-seed tasks --single wire-inventory-ui
+    /scaffold-seed tasks --single
 
 **See Also**
 
-`/scaffold-bulk-seed-tasks`, `/scaffold-complete`
+`/scaffold-seed tasks`, `utils.py complete`
 
 ---
 
@@ -294,13 +217,13 @@ Skills for bulk-populating multiple documents from source documents. All bulk se
 
 ---
 
-### /scaffold-bulk-seed-style
+### /scaffold-seed style
 
 Seed all 6 Step 5 visual/UX docs from upstream context.
 
 **Synopsis**
 
-    /scaffold-bulk-seed-style
+    /scaffold-seed style
 
 **Description**
 
@@ -308,17 +231,17 @@ Reads the design doc, system designs, and supporting docs to seed `style-guide.m
 
 **Examples**
 
-    /scaffold-bulk-seed-style
+    /scaffold-seed style
 
 ---
 
-### /scaffold-fix-style
+### /scaffold-fix style
 
 Mechanical cleanup for all 6 Step 5 visual/UX docs.
 
 **Synopsis**
 
-    /scaffold-fix-style [--target doc.md] [--iterate N]
+    /scaffold-fix style [--target doc.md] [--iterate N]
 
 **Description**
 
@@ -333,23 +256,23 @@ Formatter and linter for Step 5 docs: style-guide, color-system, ui-kit, interac
 
 **Examples**
 
-    /scaffold-fix-style
-    /scaffold-fix-style --target ui-kit.md
-    /scaffold-fix-style --target feedback-system.md --iterate 5
+    /scaffold-fix style
+    /scaffold-fix style --target ui-kit.md
+    /scaffold-fix style --target feedback-system.md --iterate 5
 
 **See Also**
 
-`/scaffold-bulk-seed-style`, `/scaffold-iterate-style`
+`/scaffold-seed style`, `/scaffold-iterate style`
 
 ---
 
-### /scaffold-iterate-style
+### /scaffold-iterate style
 
 Adversarial per-topic review of all 6 Step 5 visual/UX docs.
 
 **Synopsis**
 
-    /scaffold-iterate-style [--target doc.md] [--topics "1,2,5"] [--focus "concern"] [--iterations N]
+    /scaffold-iterate style [--target doc.md] [--topics "1,2,5"] [--focus "concern"] [--iterations N]
 
 **Description**
 
@@ -367,24 +290,24 @@ Each of the 6 Step 5 docs gets its own specialized review lens targeting its uni
 
 **Examples**
 
-    /scaffold-iterate-style
-    /scaffold-iterate-style --target feedback-system.md
-    /scaffold-iterate-style --topics "5,7" --focus "priority hierarchy"
-    /scaffold-iterate-style --signals "tone mismatch, component gap"
+    /scaffold-iterate style
+    /scaffold-iterate style --target feedback-system.md
+    /scaffold-iterate style --topics "5,7" --focus "priority hierarchy"
+    /scaffold-iterate style --signals "tone mismatch, component gap"
 
 **See Also**
 
-`/scaffold-fix-style`, `/scaffold-bulk-seed-style`
+`/scaffold-fix style`, `/scaffold-seed style`
 
 ---
 
-### /scaffold-bulk-seed-systems
+### /scaffold-seed systems
 
 Seed glossary and system stubs from the design doc.
 
 **Synopsis**
 
-    /scaffold-bulk-seed-systems
+    /scaffold-seed systems
 
 **Description**
 
@@ -392,21 +315,21 @@ Reads the completed design doc and bulk-seeds the glossary and system design stu
 
 **Examples**
 
-    /scaffold-bulk-seed-systems
+    /scaffold-seed systems
 
 **See Also**
 
-`/scaffold-fix-systems`, `/scaffold-iterate-systems`
+`/scaffold-fix systems`, `/scaffold-iterate systems`
 
 ---
 
-### /scaffold-bulk-seed-references
+### /scaffold-seed references
 
 Seed all 7 reference docs from system designs.
 
 **Synopsis**
 
-    /scaffold-bulk-seed-references
+    /scaffold-seed references
 
 **Description**
 
@@ -414,21 +337,21 @@ Reads all completed system designs and bulk-populates 7 companion docs in order:
 
 **Examples**
 
-    /scaffold-bulk-seed-references
+    /scaffold-seed references
 
 **See Also**
 
-`/scaffold-fix-references`, `/scaffold-iterate-references`
+`/scaffold-fix references`, `/scaffold-iterate references`
 
 ---
 
-### /scaffold-bulk-seed-engine
+### /scaffold-seed engine
 
 Select engine, then seed all 5 engine docs.
 
 **Synopsis**
 
-    /scaffold-bulk-seed-engine
+    /scaffold-seed engine
 
 **Description**
 
@@ -436,21 +359,21 @@ Asks which engine the project uses (Godot 4, Unity, Unreal 5, or custom), then c
 
 **Examples**
 
-    /scaffold-bulk-seed-engine
+    /scaffold-seed engine
 
 **See Also**
 
-`/scaffold-fix-engine`, `/scaffold-iterate-engine`
+`/scaffold-fix engine`, `/scaffold-iterate engine`
 
 ---
 
-### /scaffold-bulk-seed-input
+### /scaffold-seed input
 
 Seed all 5 input docs from the design doc.
 
 **Synopsis**
 
-    /scaffold-bulk-seed-input
+    /scaffold-seed input
 
 **Description**
 
@@ -458,21 +381,21 @@ Reads the completed design doc and bulk-seeds all 5 input documents in 5 sequent
 
 **Examples**
 
-    /scaffold-bulk-seed-input
+    /scaffold-seed input
 
 **See Also**
 
-`/scaffold-fix-style`, `/scaffold-bulk-seed-input`
+`/scaffold-fix style`, `/scaffold-seed input`
 
 ---
 
-### /scaffold-bulk-seed-slices
+### /scaffold-seed slices
 
 Seed slice stubs from phases, systems, and interfaces.
 
 **Synopsis**
 
-    /scaffold-bulk-seed-slices
+    /scaffold-seed slices
 
 **Description**
 
@@ -480,21 +403,21 @@ Reads all phases, system designs, and interface contracts to bulk-create vertica
 
 **Examples**
 
-    /scaffold-bulk-seed-slices
+    /scaffold-seed slices
 
 **See Also**
 
-`/scaffold-new-slice`
+`/scaffold-seed slices --single`
 
 ---
 
-### /scaffold-bulk-seed-specs
+### /scaffold-seed specs
 
 Seed spec stubs from slices, systems, and state transitions.
 
 **Synopsis**
 
-    /scaffold-bulk-seed-specs
+    /scaffold-seed specs
 
 **Description**
 
@@ -502,21 +425,21 @@ Reads all slices, system designs, and state transitions to bulk-create behavior 
 
 **Examples**
 
-    /scaffold-bulk-seed-specs
+    /scaffold-seed specs
 
 **See Also**
 
-`/scaffold-new-spec`
+`/scaffold-seed specs --single`
 
 ---
 
-### /scaffold-bulk-seed-tasks
+### /scaffold-seed tasks
 
 Seed task stubs from specs, engine docs, and signal registry.
 
 **Synopsis**
 
-    /scaffold-bulk-seed-tasks
+    /scaffold-seed tasks
 
 **Description**
 
@@ -524,11 +447,11 @@ Reads all specs, engine docs, and signal registry to bulk-create implementation 
 
 **Examples**
 
-    /scaffold-bulk-seed-tasks
+    /scaffold-seed tasks
 
 **See Also**
 
-`/scaffold-new-task`
+`/scaffold-seed tasks --single`
 
 
 ## Complete
@@ -543,7 +466,7 @@ Mark a planning doc as Complete; ripple status upward through parents.
 
 **Synopsis**
 
-    /scaffold-complete [document-path|ID]
+    utils.py complete [document-path|ID]
 
 **Description**
 
@@ -559,14 +482,14 @@ For tasks: direct Complete (leaf nodes, no children check). For specs, slices, a
 
 **Examples**
 
-    /scaffold-complete TASK-001
-    /scaffold-complete SPEC-003
-    /scaffold-complete phases/P1-001-foundation.md
+    utils.py complete TASK-001
+    utils.py complete SPEC-003
+    utils.py complete phases/P1-001-foundation.md
     /scaffold-complete
 
 **See Also**
 
-`/scaffold-iterate-task`, `/scaffold-complete`
+`/scaffold-iterate task`, `utils.py complete`
 
 ---
 
@@ -582,7 +505,7 @@ Add, remove, or modify entries in any scaffold document.
 
 **Synopsis**
 
-    /scaffold-update-doc [doc-name|path]
+    direct file editing [doc-name|path]
 
 **Description**
 
@@ -598,9 +521,9 @@ Updates cross-references automatically: glossary term renames propagate, system 
 
 **Examples**
 
-    /scaffold-update-doc glossary
-    /scaffold-update-doc SYS-001
-    /scaffold-update-doc reference/signal-registry.md
+    direct file editing glossary
+    direct file editing SYS-001
+    direct file editing reference/signal-registry.md
     /scaffold-update-doc
 
 ---
@@ -611,7 +534,7 @@ Scan scaffold docs for domain terms missing from the glossary.
 
 **Synopsis**
 
-    /scaffold-sync-glossary [--scope all|design|systems|references|style|input] [--dry-run]
+    utils.py sync-glossary [--scope all|design|systems|references|style|input] [--dry-run]
 
 **Description**
 
@@ -627,13 +550,13 @@ Scans scaffold docs for domain terms that should be in the glossary but aren't. 
 **Examples**
 
     /scaffold-sync-glossary
-    /scaffold-sync-glossary --scope references
-    /scaffold-sync-glossary --scope style,input
-    /scaffold-sync-glossary --dry-run
+    utils.py sync-glossary --scope references
+    utils.py sync-glossary --scope style,input
+    utils.py sync-glossary --dry-run
 
 **See Also**
 
-`/scaffold-bulk-seed-systems` (initial glossary seeding), `/scaffold-validate` (glossary coverage check), `/scaffold-update-doc glossary` (manual edits)
+`/scaffold-seed systems` (initial glossary seeding), `/scaffold-validate` (glossary coverage check), `direct file editing glossary` (manual edits)
 
 ---
 
@@ -653,7 +576,7 @@ Run cross-reference validation across all scaffold documents.
 
 **Description**
 
-Runs `validate-refs.py` to check referential integrity across all scaffold documents. Reports broken references, missing registrations, glossary NOT-column violations, and orphaned entries. Checks: system IDs registered in `systems/_index.md`, authority ↔ entity ownership, signal emitters/consumers, interface sources/targets, state machine authorities, glossary NOT-column usage, bidirectional system registration (index ↔ design doc), spec ↔ slice coverage, and task ↔ spec links.
+Runs `validate.py` with per-scope YAML configs to check structural integrity and referential integrity across all scaffold documents. Normalizes markdown formatting, then runs deterministic checks: broken references, missing registrations, glossary NOT-column violations, orphaned entries, section structure, content health, cross-doc consistency, and more. Supports scoped validation (`--scope refs|design|systems|foundation|roadmap|phases|slices|specs|tasks|engine|style|input|all`).
 
 Presents results as a summary table with PASS/FAIL per check and lists each failing issue with file, line, and message. Suggests specific fixes for each issue. Read-only — does not modify any files.
 
@@ -663,23 +586,23 @@ Presents results as a summary table with PASS/FAIL per check and lists each fail
 
 **See Also**
 
-`/scaffold-update-doc`
+direct file editing
 
 ---
 
 ## Playtest
 
-Skills for capturing and analyzing playtester feedback. Observations are logged with `/scaffold-playtest-log` and analyzed with `/scaffold-playtest-review`.
+Skills for capturing and analyzing playtester feedback. Observations are logged with `/scaffold-playtest log` and analyzed with `/scaffold-playtest review`.
 
 ---
 
-### /scaffold-playtest-log
+### /scaffold-playtest log
 
 Log playtester observations into the feedback tracker.
 
 **Synopsis**
 
-    /scaffold-playtest-log [session-type]
+    /scaffold-playtest log [session-type]
 
 **Description**
 
@@ -693,23 +616,23 @@ Captures playtester observations into `decisions/playtest-feedback.md`. Creates 
 
 **Examples**
 
-    /scaffold-playtest-log in-person
-    /scaffold-playtest-log remote
-    /scaffold-playtest-log
+    /scaffold-playtest log in-person
+    /scaffold-playtest log remote
+    /scaffold-playtest log
 
 **See Also**
 
-`/scaffold-playtest-review`, `/scaffold-update-doc`
+`/scaffold-playtest review`, direct file editing
 
 ---
 
-### /scaffold-playtest-review
+### /scaffold-playtest review
 
 Analyze playtest feedback patterns with severity x frequency grid.
 
 **Synopsis**
 
-    /scaffold-playtest-review
+    /scaffold-playtest review
 
 **Description**
 
@@ -717,351 +640,10 @@ Read-only analysis of `decisions/playtest-feedback.md`. Groups feedback by syste
 
 **Examples**
 
-    /scaffold-playtest-review
+    /scaffold-playtest review
 
 **See Also**
 
-`/scaffold-playtest-log`, `/scaffold-new-phase`
+`/scaffold-playtest log`, `/scaffold-seed phases --single`
 
----
-
-## Art
-
-Skills for generating visual assets informed by the project's style guide and color system.
-
----
-
-### /scaffold-art-concept
-
-Generate concept art using DALL-E, informed by the project's style guide and color system.
-
-**Synopsis**
-
-    /scaffold-art-concept [prompt or document-path]
-
-**Description**
-
-Generates concept art using DALL-E, grounded in the project's visual identity. Reads `design/style-guide.md` and `design/color-system.md` to build a style context, then combines it with the user's prompt or a document's visual elements. Supports two modes: freeform (text prompt) and document-driven (reads a scaffold doc and extracts visual elements). Shows the composed prompt for user confirmation before calling the API. Saves images to `art/concept-art/` with kebab-case timestamped filenames and updates the art index.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text prompt, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-art-concept a misty pixel-art village at dawn
-    /scaffold-art-concept scaffold/design/systems/SYS-001-combat.md
-    /scaffold-art-concept
-
-**See Also**
-
-`/scaffold-art-ui-mockup`, `/scaffold-art-character`, `/scaffold-art-environment`, `/scaffold-art-sprite`, `/scaffold-art-icon`, `/scaffold-art-promo`
-
----
-
-### /scaffold-art-ui-mockup
-
-Generate UI mockup art using DALL-E, informed by the project's UI kit, style guide, and color system.
-
-**Synopsis**
-
-    /scaffold-art-ui-mockup [prompt or document-path]
-
-**Description**
-
-Generates UI mockup art using DALL-E, grounded in the project's visual identity. Reads `design/ui-kit.md`, `design/style-guide.md`, and `design/color-system.md` to build a style context focused on screen composition, HUD layout, menu flows, and readability. Supports freeform (text prompt) and document-driven (reads a scaffold doc and extracts UI elements) modes. Shows the composed prompt for user confirmation before calling the API. Saves images to `art/ui-mockups/` with kebab-case timestamped filenames. Default size: 1792x1024.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text prompt, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-art-ui-mockup main HUD with health bar, minimap, and hotbar
-    /scaffold-art-ui-mockup scaffold/design/ui-kit.md
-    /scaffold-art-ui-mockup
-
-**See Also**
-
-`/scaffold-art-concept`, `/scaffold-art-icon`
-
----
-
-### /scaffold-art-character
-
-Generate character art using DALL-E, informed by the project's style guide and color system.
-
-**Synopsis**
-
-    /scaffold-art-character [prompt or document-path]
-
-**Description**
-
-Generates character art using DALL-E, grounded in the project's visual identity. Reads `design/style-guide.md` and `design/color-system.md` to build a style context, plus checks the design doc for character descriptions. Focuses on silhouette readability, proportions, color identity, expression, and costume design. Supports freeform (text prompt) and document-driven (reads a scaffold doc and extracts character descriptions) modes. Shows the composed prompt for user confirmation before calling the API. Saves images to `art/character-art/` with kebab-case timestamped filenames. Default size: 1024x1024.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text prompt, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-art-character a rogue archer with dark cloak and glowing arrows
-    /scaffold-art-character scaffold/design/design-doc.md
-    /scaffold-art-character
-
-**See Also**
-
-`/scaffold-art-concept`, `/scaffold-art-sprite`
-
----
-
-### /scaffold-art-environment
-
-Generate environment art using DALL-E, informed by the project's style guide and color system.
-
-**Synopsis**
-
-    /scaffold-art-environment [prompt or document-path]
-
-**Description**
-
-Generates environment art using DALL-E, grounded in the project's visual identity. Reads `design/style-guide.md` and `design/color-system.md` to build a style context, plus checks the design doc for world/setting descriptions. Focuses on depth, atmosphere, lighting, scale, and walkable vs decorative space. Supports freeform (text prompt) and document-driven (reads a scaffold doc and extracts environment descriptions) modes. Shows the composed prompt for user confirmation before calling the API. Saves images to `art/environment-art/` with kebab-case timestamped filenames. Default size: 1792x1024.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text prompt, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-art-environment a misty forest clearing with ancient ruins
-    /scaffold-art-environment scaffold/design/systems/SYS-003-exploration.md
-    /scaffold-art-environment
-
-**See Also**
-
-`/scaffold-art-concept`, `/scaffold-art-promo`
-
----
-
-### /scaffold-art-sprite
-
-Generate sprite art using DALL-E, informed by the project's style guide and color system.
-
-**Synopsis**
-
-    /scaffold-art-sprite [prompt or document-path]
-
-**Description**
-
-Generates sprite art using DALL-E, grounded in the project's visual identity. Reads `design/style-guide.md` and `design/color-system.md` to build a style context focused on pixel art style, limited palette, clean edges, and small-size readability. Supports freeform (text prompt) and document-driven (reads a scaffold doc and extracts sprite subjects) modes. Shows the composed prompt for user confirmation before calling the API. Saves images to `art/sprite-art/` with kebab-case timestamped filenames. Default size: 1024x1024.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text prompt, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-art-sprite warrior idle animation frame, 16-color palette
-    /scaffold-art-sprite scaffold/design/systems/SYS-001-combat.md
-    /scaffold-art-sprite
-
-**See Also**
-
-`/scaffold-art-concept`, `/scaffold-art-character`
-
----
-
-### /scaffold-art-icon
-
-Generate icon art using DALL-E, informed by the project's UI kit, color system, and style guide.
-
-**Synopsis**
-
-    /scaffold-art-icon [prompt or document-path]
-
-**Description**
-
-Generates icon art using DALL-E, grounded in the project's visual identity. Reads `design/ui-kit.md`, `design/color-system.md`, and `design/style-guide.md` to build a style context focused on square format, simple silhouette, high contrast, and icon-size readability. Supports freeform (text prompt) and document-driven (reads a scaffold doc and extracts icon subjects) modes. Shows the composed prompt for user confirmation before calling the API. Saves images to `art/icon-art/` with kebab-case timestamped filenames. Default size: 1024x1024.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text prompt, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-art-icon health potion icon, red liquid in glass vial
-    /scaffold-art-icon scaffold/reference/entity-components.md
-    /scaffold-art-icon
-
-**See Also**
-
-`/scaffold-art-ui-mockup`, `/scaffold-art-concept`
-
----
-
-### /scaffold-art-promo
-
-Generate promotional art using DALL-E, informed by the project's style guide and color system.
-
-**Synopsis**
-
-    /scaffold-art-promo [prompt or document-path]
-
-**Description**
-
-Generates promotional art using DALL-E, grounded in the project's visual identity. Reads `design/style-guide.md` and `design/color-system.md` to build a style context, plus checks the design doc for identity and vision. Focuses on dramatic composition, marketing appeal, text-safe space for title/logo overlay, and landscape orientation. Supports freeform (text prompt) and document-driven (reads a scaffold doc and extracts visual themes) modes. Shows the composed prompt for user confirmation before calling the API. Saves images to `art/promo-art/` with kebab-case timestamped filenames. Default size: 1792x1024.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text prompt, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-art-promo epic hero banner with dark forest background, text-safe left third
-    /scaffold-art-promo scaffold/design/design-doc.md
-    /scaffold-art-promo
-
-**See Also**
-
-`/scaffold-art-concept`, `/scaffold-art-environment`
-
----
-
-## Audio
-
-Skills for generating audio assets informed by the project's style guide, color system, and design doc.
-
----
-
-### /scaffold-audio-music
-
-Generate music tracks using ElevenLabs, informed by the project's style guide and design doc mood/tone.
-
-**Synopsis**
-
-    /scaffold-audio-music [prompt or document-path]
-
-**Description**
-
-Generates music tracks using ElevenLabs, grounded in the project's tonal identity. Reads `design/style-guide.md` and `design/design-doc.md` to build a musical direction (genre, tempo, mood, instrumentation). Supports two modes: freeform (text prompt) and document-driven (reads a scaffold doc and extracts musical elements). Shows the composed prompt for user confirmation before calling the API. Saves audio to `audio/music/` with kebab-case timestamped filenames. Output format: `.mp3`.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text prompt, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-audio-music upbeat chiptune battle theme, loopable, 120 BPM
-    /scaffold-audio-music scaffold/design/design-doc.md
-    /scaffold-audio-music
-
-**See Also**
-
-`/scaffold-audio-sfx`, `/scaffold-audio-ambience`, `/scaffold-audio-voice`
-
----
-
-### /scaffold-audio-sfx
-
-Generate sound effects using ElevenLabs, informed by the project's style guide and design doc game feel.
-
-**Synopsis**
-
-    /scaffold-audio-sfx [prompt or document-path]
-
-**Description**
-
-Generates sound effects using ElevenLabs, grounded in the project's tonal identity. Reads `design/style-guide.md` and `design/design-doc.md` to build a sound design direction (intensity, style, audio character). Focuses on clarity, impact, timing, and game-appropriate intensity. Supports freeform (text prompt) and document-driven (reads a scaffold doc and extracts sound-worthy events) modes. Shows the composed prompt for user confirmation before calling the API. Saves audio to `audio/sfx/` with kebab-case timestamped filenames. Output format: `.mp3`.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text prompt, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-audio-sfx sword slash impact, metallic ring, medium weight
-    /scaffold-audio-sfx scaffold/design/systems/SYS-001-combat.md
-    /scaffold-audio-sfx
-
-**See Also**
-
-`/scaffold-audio-music`, `/scaffold-audio-ambience`, `/scaffold-audio-voice`
-
----
-
-### /scaffold-audio-ambience
-
-Generate ambient audio loops using ElevenLabs, informed by the project's style guide, color system mood, and design doc world/setting.
-
-**Synopsis**
-
-    /scaffold-audio-ambience [prompt or document-path]
-
-**Description**
-
-Generates ambient audio loops using ElevenLabs, grounded in the project's world and atmosphere. Reads `design/style-guide.md`, `design/color-system.md`, and `design/design-doc.md` to build an atmospheric direction (environment type, mood, depth, spatial character). Uses the `sfx` subcommand with `--loop` for seamless looping. Focuses on atmosphere, depth, layering, and loop seamlessness. Supports freeform (text prompt) and document-driven (reads a scaffold doc and extracts environment descriptions) modes. Shows the composed prompt for user confirmation before calling the API. Saves audio to `audio/ambience/` with kebab-case timestamped filenames. Output format: `.mp3`.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text prompt, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-audio-ambience misty forest clearing with distant birdsong and gentle wind
-    /scaffold-audio-ambience scaffold/design/systems/SYS-003-exploration.md
-    /scaffold-audio-ambience
-
-**See Also**
-
-`/scaffold-audio-music`, `/scaffold-audio-sfx`, `/scaffold-audio-voice`
-
----
-
-### /scaffold-audio-voice
-
-Generate voice audio using OpenAI TTS, informed by the project's style guide and design doc characters/narrative.
-
-**Synopsis**
-
-    /scaffold-audio-voice [prompt or document-path]
-
-**Description**
-
-Generates voice audio using OpenAI TTS, grounded in the project's narrative identity. Reads `design/style-guide.md` and `design/design-doc.md` to build a voice direction (vocal register, energy, pacing, emotional range). Supports selecting from OpenAI TTS voices (alloy, echo, fable, onyx, nova, shimmer) based on character personality. Supports freeform (text to speak) and document-driven (reads a scaffold doc and extracts dialogue/narration) modes. Shows the text and voice parameters for user confirmation before calling the API. Saves audio to `audio/voice/` with kebab-case timestamped filenames. Output format: `.mp3`.
-
-**Arguments**
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `prompt or document-path` | No | Freeform text to speak, or a path to a scaffold doc for document-driven mode. If omitted, asks interactively. |
-
-**Examples**
-
-    /scaffold-audio-voice "The ancient forest holds secrets older than memory."
-    /scaffold-audio-voice scaffold/design/design-doc.md
-    /scaffold-audio-voice
-
-**See Also**
-
-`/scaffold-audio-music`, `/scaffold-audio-sfx`, `/scaffold-audio-ambience`
 

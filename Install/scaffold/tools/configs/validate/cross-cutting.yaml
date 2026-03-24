@@ -1,0 +1,33 @@
+# cross-cutting.yaml — Validate config for cross-cutting integrity
+# Only runs on --scope all
+
+scope: cross-cutting
+display_name: "Cross-Cutting Integrity"
+
+activation:
+  required_files:
+    - design/design-doc.md
+  skip_message: "Design doc required for cross-cutting checks."
+
+checks:
+  deterministic:
+    - id: decision-closure-tasks
+      description: "Approved tasks have no unresolved TODOs"
+      detection: pattern_absent
+      glob_pattern: "tasks/TASK-*_approved*.md"
+      pattern: "\\*TODO:|<!-- TODO"
+      severity: FAIL
+
+    - id: decision-closure-specs
+      description: "Approved specs have no unresolved TODOs"
+      detection: pattern_absent
+      glob_pattern: "specs/SPEC-*_approved*.md"
+      pattern: "\\*TODO:|<!-- TODO"
+      severity: FAIL
+
+    - id: decision-closure-slices
+      description: "Approved slices have no unresolved TODOs"
+      detection: pattern_absent
+      glob_pattern: "slices/SLICE-*_approved*.md"
+      pattern: "\\*TODO:|<!-- TODO"
+      severity: FAIL

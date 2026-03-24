@@ -1,0 +1,44 @@
+# input.yaml — Seed config for Step 6 input docs
+
+layer: input
+display_name: "Input System"
+template: null
+index_file: null
+output_files:
+  - inputs/action-map.md
+  - inputs/input-philosophy.md
+  - inputs/default-bindings-kbm.md
+  - inputs/default-bindings-gamepad.md
+  - inputs/ui-navigation.md
+
+preflight:
+  required_files:
+    - design/design-doc.md
+    - design/interaction-model.md
+  blocked_message: "Design doc and interaction model must exist before seeding input docs."
+
+upstream_sources:
+  - type: design
+    glob: "design/design-doc.md"
+    extract: "Player Verbs and Control Model drive action map"
+    extract_sections:
+      - "## Control"
+      - "## Identity"
+  - type: interaction_model
+    glob: "design/interaction-model.md"
+    extract: "Interaction patterns drive bindings and navigation"
+    extract_sections:
+      - "## Selection Model"
+      - "## Command Model"
+      - "## Interaction Patterns"
+  - type: ui_kit
+    glob: "design/ui-kit.md"
+    extract: "UI components drive navigation requirements"
+
+dependency_checks: []
+
+coverage_rules:
+  - "Every Player Verb has an action in the action map"
+  - "Every action has bindings in both KBM and gamepad docs"
+  - "Every interactive UI component is navigable"
+  - "Input philosophy matches Control Model"

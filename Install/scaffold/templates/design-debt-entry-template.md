@@ -29,9 +29,17 @@
 
 <!-- Concrete plan to fix it. Not "someday" — name a trigger, phase, slice, or condition. -->
 
-- **When:** <!-- P#-### phase, SLICE-### scope, specific trigger condition -->
-- **How:** <!-- What the fix looks like — new task, refactor, ADR, system redesign -->
-- **Effort:** <!-- Rough scope: single task, task range, full slice -->
+### When
+
+<!-- PHASE-### phase, SLICE-### scope, specific trigger condition. Must be concrete — "someday" is not a trigger. -->
+
+### How
+
+<!-- What the fix looks like — new task, refactor, ADR, system redesign. -->
+
+### Effort
+
+<!-- Rough scope: single task, task range, full slice. -->
 
 ## Payoff
 

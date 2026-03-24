@@ -1,0 +1,18 @@
+layer: foundation
+display_name: "Foundation Architecture"
+editable_files: []
+preflight:
+  required_files: [design/architecture.md]
+  blocked_message: "No foundation docs."
+feedback_sources:
+  - type: adr
+    glob: "decisions/architecture-decision-record/ADR-*_accepted*.md"
+  - type: triage
+    glob: "decisions/triage-log/TRIAGE-*.md"
+  - type: code_review
+    glob: "decisions/code-review/CR-*.md"
+  - type: revision_log
+    glob: "decisions/revision-log/REVISION-*.md"
+dispatch_order: [design, systems, references, engine, style, input]
+safe_patterns: []
+escalation_patterns: ["Foundation area drift", "Cross-layer contradiction"]

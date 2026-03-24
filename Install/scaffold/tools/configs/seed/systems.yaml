@@ -1,0 +1,32 @@
+# systems.yaml — Seed config for system designs
+
+layer: systems
+display_name: "System Designs"
+template: "scaffold/templates/system-template.md"
+index_file: "design/systems/_index.md"
+id_pattern: "SYS-###"
+id_prefix: "SYS"
+output_pattern: "design/systems/SYS-*-*.md"
+
+preflight:
+  required_files:
+    - design/design-doc.md
+  blocked_message: "Design doc must exist before seeding systems."
+
+upstream_sources:
+  - type: design
+    glob: "design/design-doc.md"
+    extract: "System Domains, Major Mechanics, Core Loop, and Simulation Depth Target drive system identification"
+    extract_sections:
+      - "## Identity"
+      - "## Control"
+      - "## System Domains"
+      - "## Content"
+
+dependency_checks: []
+
+coverage_rules:
+  - "Every Major System Domain has at least one system"
+  - "Every Major Mechanic has an owning system"
+  - "No two systems have overlapping Simulation Responsibility"
+  - "Core Loop steps are covered by the system set"

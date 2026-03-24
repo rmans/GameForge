@@ -1,0 +1,170 @@
+# slice.yaml — Fix config for vertical slices
+
+layer: slice
+display_name: "Vertical Slice"
+target_pattern: "slices/SLICE-*.md"
+target_type: range
+template: "scaffold/templates/slice-template.md"
+
+preflight:
+  required_files: []
+  glob_pattern: "slices/SLICE-*-*.md"
+  blocked_message: "No slice files found."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  per_target:
+    - type: parent_phase
+      sections: ["### Goal", "### Exit Criteria", "### Slice Strategy"]
+      priority: 1
+      class: upstream
+    - type: system_designs
+      sections: ["### Purpose", "### Owned State"]
+      priority: 3
+      class: adjacent
+    - type: earlier_slices
+      sections: ["### Goal", "### Done Criteria"]
+      priority: 3
+      class: adjacent
+
+  on_demand:
+    - file: design/interfaces.md
+      class: constraint
+      priority: 4
+      condition: exists
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files_pattern: "slices/SLICE-*.md"
+
+defaults:
+  max_iterations: 10
+
+mechanical_checks:
+
+  completeness:
+    - id: missing_sections
+      description: "Section required by template is absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section heading with template comment"
+
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      patterns: ["<!-- TODO:", "*TODO:"]
+      auto_fix: true
+      fix_action: "Replace with goal-derived content"
+
+    - id: missing_depends_on
+      description: "Depends on header field missing"
+      detection: header_field_check
+      field: "Depends on"
+      auto_fix: true
+      fix_action: "Add > **Depends on:** —"
+
+    - id: empty_starting_conditions
+      description: "Starting Conditions section empty"
+      detection: empty_section
+      section: "### Starting Conditions"
+      auto_fix: true
+      fix_action: "Populate from Goal/Assumptions/Preconditions"
+
+    - id: empty_proof_value
+      description: "Proof Value section empty"
+      detection: empty_section
+      section: "### Proof Value"
+      auto_fix: true
+      fix_action: "Derive from Goal and Integration Points"
+
+    - id: empty_failure_modes
+      description: "Failure Modes section empty"
+      detection: empty_section
+      section: "### Failure Modes This Slice Should Catch"
+      auto_fix: true
+      fix_action: "Derive from Integration Points and Done Criteria"
+
+    - id: empty_visible_proof
+      description: "Visible Proof section empty"
+      detection: empty_section
+      section: "### Visible Proof"
+      auto_fix: true
+      fix_action: "Derive from Done Criteria and Demo Script"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+    - id: stale_dependency
+      description: "Dependency references renamed slice (unambiguous)"
+      detection: stale_reference
+      auto_fix: true
+      condition: "Unambiguous rename"
+      fix_action: "Update reference"
+
+    - id: missing_adr_reflection
+      description: "ADR affecting this slice not reflected"
+      detection: adr_impact_check
+      auto_fix: true
+      fix_action: "Add to Notes"
+
+  structural_quality:
+    - id: vague_done_criteria
+      description: "Done Criteria not falsifiable"
+      detection: vague_content
+      section: "### Done Criteria"
+      auto_fix: true
+      condition: "Goal/Integration Points make outcome explicit"
+      fix_action: "Tighten to falsifiable condition"
+
+    - id: status_filename_mismatch
+      description: "Status field doesn't match filename suffix"
+      detection: status_vs_filename
+      auto_fix: true
+      fix_action: "Update internal Status to match filename"
+
+judgment_checks:
+
+  design:
+    - id: horizontal_goal
+      description: "Goal describes a horizontal layer, not a vertical slice"
+      question: "Does this goal describe an end-to-end experience, or just a horizontal system layer?"
+
+    - id: goal_not_visible
+      description: "Goal is not player-visible"
+      question: "Can someone observe this goal being met without reading code?"
+
+    - id: proof_value_unclear
+      description: "Proof value doesn't reduce real uncertainty"
+      question: "What specific uncertainty does this slice reduce? Is it worth proving?"
+
+    - id: demo_doesnt_prove
+      description: "Demo script doesn't demonstrate the goal"
+      question: "Would running this demo actually prove what the goal claims?"
+
+    - id: phase_scope_drift
+      description: "Slice scope exceeds parent phase"
+      question: "Does this slice include work that belongs in a different phase?"
+
+    - id: spec_task_gap
+      description: "Specs/tasks don't cover the proof goal"
+      question: "Are there gaps in spec or task coverage that would leave the proof incomplete?"
+
+report:
+  log_name_pattern: "FIX-slice-{target}-{date}.md"
+
+rules:
+  - "Only edit the slice file"
+  - "Slices define what to prove, not how behavior works"
+  - "Never fabricate proof value — if unclear, flag it"

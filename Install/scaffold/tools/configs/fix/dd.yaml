@@ -1,0 +1,72 @@
+# dd.yaml — Fix config for Design Debt entries
+
+layer: dd
+display_name: "Design Debt"
+target_pattern: "decisions/design-debt/DD-*.md"
+target_type: range
+template: "scaffold/templates/design-debt-entry-template.md"
+
+preflight:
+  required_files: []
+  glob_pattern: "decisions/design-debt/DD-*.md"
+  blocked_message: "No DD files found."
+
+context:
+  budget: 15000
+
+  base:
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  on_demand:
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files_pattern: "decisions/design-debt/DD-*.md"
+
+defaults:
+  max_iterations: 3
+
+mechanical_checks:
+  completeness:
+    - id: missing_sections
+      description: "Section required by template is absent"
+      detection: template_diff
+      auto_fix: true
+      fix_action: "Add section heading with template comment"
+
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      patterns: ["<!-- TODO:", "*TODO:"]
+      auto_fix: true
+      fix_action: "Remove template text"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+judgment_checks:
+  quality:
+    - id: vague_payoff_trigger
+      description: "Payoff Plan When section says 'someday' or is vague"
+      section: "### When"
+      question: "'Someday' is not a trigger. Is the When concrete — a phase, slice, or condition?"
+
+    - id: stale_trigger
+      description: "Payoff trigger may have already passed"
+      section: "### When"
+      question: "Has the trigger condition already been met? Should this debt be escalated?"
+
+report:
+  log_name_pattern: "FIX-dd-{target}-{date}.md"
+
+rules:
+  - "Don't pay off the debt — improve how it's documented"
+  - "'Someday' triggers must be flagged"

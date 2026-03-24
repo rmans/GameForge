@@ -1,0 +1,77 @@
+# systems.yaml — Validate config for system design docs
+
+scope: systems
+display_name: "System Designs"
+glob_pattern: "design/systems/SYS-*-*.md"
+
+activation:
+  required_files:
+    - design/systems/_index.md
+  skip_message: "No systems index found. Skipping system validation."
+
+checks:
+  deterministic:
+    - id: systems-index-files
+      description: "System files registered in _index.md"
+      detection: index_registration
+      index_file: "design/systems/_index.md"
+      glob_pattern: "design/systems/SYS-*-*.md"
+      id_pattern: "SYS-\\d+"
+      severity: FAIL
+
+    - id: systems-design-doc-sync
+      description: "Systems in _index.md match design-doc.md System Design Index"
+      detection: index_registration
+      index_file: "design/design-doc.md"
+      glob_pattern: "design/systems/SYS-*-*.md"
+      id_pattern: "SYS-\\d+"
+      severity: FAIL
+
+    - id: systems-status-filename-sync
+      description: "Filename suffix matches internal Status field"
+      detection: status_filename_sync
+      glob_pattern: "design/systems/SYS-*-*.md"
+      severity: FAIL
+
+    - id: systems-structure
+      description: "Required sections present"
+      detection: section_structure
+      glob_pattern: "design/systems/SYS-*-*.md"
+      required_sections: [Purpose, "Simulation Responsibility", "Player Intent", "Design Constraints", "Non-Responsibilities", "Visibility to Player", "Player Actions", "System Resolution", "Feel & Feedback", "Owned State", "State Lifecycle", "Failure / Friction States", "Upstream Dependencies", "Downstream Consequences", "Edge Cases & Ambiguity Killers", "Open Questions", "Observability & Debug Surface", "Performance Characteristics"]
+      severity: FAIL
+
+    - id: systems-section-health
+      description: "Weighted section health score"
+      detection: section_health
+      glob_pattern: "design/systems/SYS-*-*.md"
+      fail_threshold: 0.5
+      warn_threshold: 0.7
+      severity: WARN
+
+    - id: systems-seeded-markers
+      description: "Remaining SEEDED markers"
+      detection: pattern_present
+      glob_pattern: "design/systems/SYS-*-*.md"
+      pattern: "<!-- SEEDED"
+      severity: WARN
+
+    - id: systems-review-freshness
+      description: "Review logs post-date file modification"
+      detection: review_freshness
+      glob_pattern: "design/systems/SYS-*-*.md"
+      severity: WARN
+
+    - id: systems-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_docs:
+        - "design/design-doc.md"
+
+  heuristic:
+    - id: systems-glossary-compliance
+      description: "NOT-column terms not used as authoritative terminology"
+      detection: glossary_not_column
+      glob_pattern: "design/systems/SYS-*-*.md"
+      severity: WARN
+      label: "[ADVISORY]"

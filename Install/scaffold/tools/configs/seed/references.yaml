@@ -1,0 +1,49 @@
+# references.yaml — Seed config for reference/architecture docs
+
+layer: references
+display_name: "References & Architecture"
+template: null
+index_file: null
+output_files:
+  - design/architecture.md
+  - design/authority.md
+  - design/interfaces.md
+  - design/state-transitions.md
+  - reference/entity-components.md
+  - reference/resource-definitions.md
+  - reference/signal-registry.md
+  - reference/balance-params.md
+  - reference/enums-and-statuses.md
+
+preflight:
+  required_files:
+    - design/systems/_index.md
+    - design/design-doc.md
+  blocked_message: "Design doc and system designs must exist before seeding references."
+
+upstream_sources:
+  - type: system
+    glob: "design/systems/SYS-*-*.md"
+    extract: "Systems provide owned state, dependencies, state lifecycle, player actions"
+    extract_sections:
+      - "### Purpose"
+      - "### Player Actions"
+      - "### Owned State"
+      - "### State Lifecycle"
+      - "### Asset Needs"
+  - type: design
+    glob: "design/design-doc.md"
+    extract: "Design doc provides governance constraints"
+    extract_sections:
+      - "## Identity"
+      - "## Control"
+      - "## System Domains"
+
+dependency_checks: []
+
+coverage_rules:
+  - "Every system Owned State entry appears in authority.md"
+  - "Every system dependency has an interface contract"
+  - "Every system State Lifecycle has a state machine in state-transitions.md"
+  - "Every system with signals has entries in signal-registry.md"
+  - "Every entity from Owned State has an entity-components entry"

@@ -1,0 +1,49 @@
+# specs.yaml — Seed config for behavior specs
+
+layer: specs
+display_name: "Behavior Specs"
+template: "scaffold/templates/spec-template.md"
+index_file: "specs/_index.md"
+id_pattern: "SPEC-###"
+id_prefix: "SPEC"
+output_pattern: "specs/SPEC-*-*.md"
+
+preflight:
+  required_files:
+    - slices/_index.md
+    - design/systems/_index.md
+  blocked_message: "Slices and system designs must exist before seeding specs."
+
+upstream_sources:
+  - type: slice
+    glob: "slices/SLICE-*_approved*.md"
+    extract: "Each slice proof goal produces specs"
+    extract_sections:
+      - "### Goal"
+      - "### Proof Value"
+      - "### Specs Included"
+      - "### Done Criteria"
+  - type: system
+    glob: "design/systems/SYS-*-*.md"
+    extract: "System Player Actions and State Lifecycle produce spec behaviors. System Asset Needs identify art/audio requirements for the spec's Asset Requirements table."
+    extract_sections:
+      - "### Purpose"
+      - "### Player Actions"
+      - "### System Resolution"
+      - "### Owned State"
+      - "### State Lifecycle"
+      - "### Asset Needs"
+  - type: state_transitions
+    glob: "design/state-transitions.md"
+    extract: "State machines produce transition specs"
+
+dependency_checks:
+  - type: scaffold_doc
+    check: "Parent system has authored Player Actions"
+    creates_if_missing: null
+
+coverage_rules:
+  - "Every slice proof goal has at least one spec"
+  - "Every system Player Action has a spec in at least one slice"
+  - "Every spec traces to a system and a slice"
+  - "State transitions from state-transitions.md have corresponding specs"

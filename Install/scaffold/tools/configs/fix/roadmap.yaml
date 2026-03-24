@@ -1,0 +1,134 @@
+# roadmap.yaml — Fix config for roadmap.md
+
+layer: roadmap
+display_name: "Roadmap"
+target: phases/roadmap.md
+target_type: fixed
+
+preflight:
+  required_files:
+    - phases/roadmap.md
+    - design/design-doc.md
+  blocked_message: "No roadmap found."
+
+context:
+  budget: 20000
+
+  base:
+    - file: design/design-doc.md
+      class: canonical
+      sections: ["## Identity", "## Scope", "## Philosophy"]
+      priority: 1
+    - file: design/glossary.md
+      class: constraint
+      sections: ["## Terms"]
+      priority: 2
+
+  per_target:
+    - type: phase_files
+      sections: ["### Goal", "### Exit Criteria"]
+      priority: 3
+      class: adjacent
+
+  on_demand:
+    - file: scaffold/doc-authority.md
+      class: constraint
+      priority: 5
+
+editable_files:
+  - phases/roadmap.md
+
+defaults:
+  max_iterations: 10
+
+mechanical_checks:
+
+  completeness:
+    - id: template_text
+      description: "TODO or template placeholder"
+      detection: pattern_match
+      patterns: ["<!-- TODO:", "*TODO:"]
+      auto_fix: true
+      fix_action: "Replace with design-doc-derived content"
+
+    - id: vision_checkpoint_drift
+      description: "Vision checkpoints don't match design doc"
+      detection: design_doc_sync
+      auto_fix: true
+      fix_action: "Update to match design doc"
+
+    - id: capability_ladder_drift
+      description: "Capability Ladder doesn't match Phase Overview"
+      detection: internal_sync
+      auto_fix: true
+      fix_action: "Sync Capability Ladder to Phase Overview"
+
+    - id: missing_phase_link
+      description: "Phase referenced but no link"
+      detection: missing_link
+      auto_fix: true
+      fix_action: "Add link to phase file"
+
+  terminology:
+    - id: glossary_compliance
+      description: "NOT-column term used"
+      detection: glossary_not_column
+      auto_fix: true
+      fix_action: "Replace with canonical term"
+
+    - id: stale_adr_feedback
+      description: "Accepted ADR not reflected in roadmap"
+      detection: adr_impact_check
+      auto_fix: true
+      fix_action: "Add ADR feedback entry"
+
+    - id: registration_mismatch
+      description: "Roadmap phase status doesn't match phase file"
+      detection: status_sync
+      auto_fix: true
+      fix_action: "Update roadmap status (phase file is canonical)"
+
+    - id: system_coverage_drift
+      description: "System not assigned to any phase"
+      detection: coverage_check
+      auto_fix: true
+      fix_action: "Add to coverage map with 'Unassigned' note"
+
+  structural_quality:
+    - id: vague_phase_goal
+      description: "Phase goal is task-oriented, not outcome-oriented"
+      detection: vague_content
+      auto_fix: true
+      condition: "Explicit outcome in design doc"
+      fix_action: "Tighten to outcome language"
+
+judgment_checks:
+
+  scope:
+    - id: phase_coverage_gap
+      description: "Major features not assigned to any phase"
+      question: "Are there design doc features with no roadmap phase?"
+
+    - id: over_scoped
+      description: "Roadmap exceeds design doc scope"
+      question: "Does the roadmap promise more than the design doc describes?"
+
+    - id: phase_ordering_conflict
+      description: "Phase dependencies violated"
+      question: "Can each phase be built given only what previous phases deliver?"
+
+    - id: duplicate_scope
+      description: "Multiple phases claim same deliverables"
+      question: "Are any capabilities claimed by more than one phase?"
+
+    - id: missing_phase_demo
+      description: "Phase has no demonstrable outcome"
+      question: "Can each phase be demonstrated in a dev demo or playtest?"
+
+report:
+  log_name_pattern: "FIX-roadmap-{date}.md"
+
+rules:
+  - "Only edit the roadmap file"
+  - "Phase files are canonical for status — roadmap syncs to them"
+  - "Never auto-fix scope decisions"
