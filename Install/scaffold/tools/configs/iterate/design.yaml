@@ -114,12 +114,14 @@ l3_sections:
       - "Is it a full cycle (input → action → feedback → new state → new decision)?"
       - "Does it match the Player Control Model?"
       - "If control is indirect but the loop describes direct actions, which is wrong?"
+      - "What is the player physically doing for an uninterrupted 5 minutes? What inputs are repeated most?"
 
   "### Secondary Loops":
     parent: "## Shape"
     questions:
       - "Do secondary loops wrap around the Core Loop, or are they parallel tracks?"
       - "Do they recontextualize core loop decisions, or just add content surface area?"
+      - "Which loop is repeated most often? What prevents it from becoming mechanical after 20 repetitions?"
 
   "### Session Shape":
     parent: "## Shape"
@@ -143,6 +145,7 @@ l3_sections:
     parent: "## Shape"
     questions:
       - "Do decision types match the loops? If loops produce tactical decisions but this claims strategic depth, where do strategic decisions emerge?"
+      - "Which decisions feel high effort but low impact? Where can the player get outsized value for minimal engagement?"
 
   "### Decision Density":
     parent: "## Shape"
@@ -242,6 +245,8 @@ l3_sections:
     questions:
       - "Does the information model match the Simulation Transparency Policy?"
       - "Does it enable the Decision Types described? If decisions require planning but info is hidden, the player can't plan."
+      - "If 5 problems exist simultaneously, how does the player identify the top priority? What happens if they pick wrong?"
+      - "What must the player track simultaneously at peak complexity? What can safely be ignored without punishment?"
 
   # -- Content --
 
@@ -272,16 +277,22 @@ l3_sections:
     questions:
       - "Does the system list match registered systems in the index?"
       - "Are all systems needed for a functional game identified?"
+      - "For every behavior described in the document, can you name exactly one system that owns it? List any behaviors with no clear owner."
+      - "Are there behaviors that require multiple systems to coordinate without a defined boundary between them?"
+      - "What systems would need to exist to make this design work, even if they are not mentioned? (scheduling, conflict resolution, decay/timers, alert routing, etc.)"
 
   "### Major Mechanics":
     parent: "## System Domains"
     questions:
       - "Do mechanics map to systems? Are there mechanics with no system owner?"
+      - "Is any system doing 3+ unrelated jobs? Could it be split?"
+      - "If any system were removed, what specifically breaks? If nothing breaks, why does it exist?"
 
   "### System Interaction Philosophy":
     parent: "## System Domains"
     questions:
       - "Is the philosophy specific enough to guide system design?"
+      - "For each described interaction between systems: what triggers it, which direction does data flow, and what happens if one system is unavailable?"
 
   "### Simulation Depth Target":
     parent: "## System Domains"
@@ -296,6 +307,8 @@ l3_sections:
     questions:
       - "Does it describe what failure feels like, not just what triggers it?"
       - "Is failure interesting (player agency during failure) or just punitive?"
+      - "What does the player DO after failure? How long does recovery take? When does recovery feel pointless vs engaging?"
+      - "When something goes wrong, which system is responsible? Can two systems both try to resolve the same failure?"
 
   "### Risk / Reward Philosophy":
     parent: "## Philosophy"
@@ -418,6 +431,9 @@ l2_sections:
     questions:
       - "Is the system set complete for the game described in Identity and Shape?"
       - "Does the simulation depth target match the scope commitment?"
+      - "Walk through each loop, mechanic, and player verb — what system owns each step? Flag any step with no owner or ambiguous ownership."
+      - "What data does each described system own? Are there variables that two systems both need to write?"
+      - "For each entity type (colonist, structure, resource, etc.): how is it created, how does it change, how does it end? Which system owns each lifecycle stage?"
 
   "## Philosophy":
     questions:
@@ -442,6 +458,8 @@ l1_questions:
   - "Which governance mechanism is weakest — most likely to fail in practice?"
   - "What part of this design is most likely to be misbuilt even if the team follows the document in good faith?"
   - "Does the design describe a game where interruption, stale targets, and continuous world churn are normal — or does it implicitly assume clean execution paths?"
+  - "If you had to generate SYS-### docs from this document right now, what systems would you be forced to invent because the design implies behavior but never names a system for it?"
+  - "What will the player confidently believe about a mechanic that is actually wrong? Where will misinterpretation cause them to quit?"
 
 stress_test:
   mode: interrogation
@@ -460,6 +478,9 @@ stress_test:
     - "Emotional failure mode: when does the game stop being tense and become exhausting? What recovery mechanism prevents this?"
     - "Fantasy-mechanics convergence: what does the player actually spend 80% of their time doing? Does that match the Core Fantasy?"
     - "New player cliff: when does 'unfamiliar tools' stop feeling fresh and start feeling like a missing feature?"
+    - "Laziest viable strategy: what happens if the player ignores half the systems? What is the minimum engagement that avoids collapse?"
+    - "Exploit surface: what mechanics can be spammed safely? What penalties can be avoided entirely? What systems can be ignored without consequence?"
+    - "Accidental reward: what behavior does the system reward that the design didn't intend?"
 
 identity_check:
   questions:
@@ -524,6 +545,10 @@ report:
       prompt: "Which invariant/anchor/test/gravity is most likely to fail in practice, and why?"
     - name: "Most Likely Misbuilt"
       prompt: "What part of this design is most likely to be misbuilt even if the team follows the document in good faith?"
+    - name: "Missing Systems"
+      prompt: "What systems would need to be invented during SYS-### generation because the design implies behavior but never assigns ownership? List specific behaviors and the systems they need."
+    - name: "Player Reality Gap"
+      prompt: "Where is the biggest gap between what the design claims the player experiences and what the mechanics actually produce minute-to-minute?"
   rating:
     scale: 5
     descriptions:
