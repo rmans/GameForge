@@ -42,6 +42,10 @@ REVIEWS_DIR = SCAFFOLD_DIR / ".reviews" / "implement"
 ACTION_FILE = REVIEWS_DIR / "action.json"
 RESULT_FILE = REVIEWS_DIR / "result.json"
 
+# Add tools dir to sys.path so sibling imports (from utils import ...) work
+if str(TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DIR))
+
 
 # ---------------------------------------------------------------------------
 # YAML Parser (shared)
@@ -716,14 +720,9 @@ def _advance(session):
             _advance(session)
 
     elif phase == "sync_review":
-        # User reviewed sync findings — result says which to apply vs defer
-        applied = result.get("applied", [])
-        deferred = result.get("deferred", [])
-        session["results"]["sync_applied"] = len(applied)
-        session["results"]["sync_deferred"] = len(deferred)
-        session["phase"] = "complete"
-        _save_session(sid, session)
-        _advance(session)
+        # sync_review is handled in cmd_resolve (needs result.json)
+        # If we reach here via _advance without a result, just wait
+        return
 
     elif phase == "complete":
         # Run complete directly via utils — no sub-skill needed
@@ -822,6 +821,16 @@ def cmd_resolve(args):
             session["build_attempts"] = 0
         else:
             session["phase"] = "sync"
+        _save_session(sid, session)
+        _advance(session)
+
+    elif phase == "sync_review":
+        # User reviewed sync findings — result says which to apply vs defer
+        applied = result.get("applied", [])
+        deferred = result.get("deferred", [])
+        session["results"]["sync_applied"] = len(applied)
+        session["results"]["sync_deferred"] = len(deferred)
+        session["phase"] = "complete"
         _save_session(sid, session)
         _advance(session)
 

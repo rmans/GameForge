@@ -132,8 +132,9 @@ def _ripple_complete(completed_path, sd):
                 rippled.append({"doc": result.get("file", ""), "type": "spec"})
                 # Update parent slice's Specs table
                 _update_parent_table_status(sd, "slices", parent_spec_id, "Complete")
-                # Spec → Slice
-                rippled.extend(_ripple_complete(spec_files[0], sd))
+                # Spec → Slice — use the NEW path after rename
+                new_spec_path = sd / result.get("file", "")
+                rippled.extend(_ripple_complete(new_spec_path, sd))
 
     elif "SPEC-" in name:
         # Update parent slice's Specs table
@@ -149,8 +150,9 @@ def _ripple_complete(completed_path, sd):
                 if slice_id:
                     # Update parent phase's slice references
                     _update_parent_table_status(sd, "phases", slice_id.group(), "Complete")
-                # Slice → Phase
-                rippled.extend(_ripple_complete(parent_slice, sd))
+                # Slice → Phase — use the NEW path after rename
+                new_slice_path = sd / result.get("file", "")
+                rippled.extend(_ripple_complete(new_slice_path, sd))
 
     elif "SLICE-" in name:
         # Update parent phase

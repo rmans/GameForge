@@ -371,11 +371,15 @@ def cmd_resolve(args):
         # Copy iterate's next action to our action
         action = _copy_action_from_sub(ITERATE_ACTION)
         if action and action.get("action") == "done":
+            # Iterate complete — transition to validate phase
+            session["iterate_report"] = action.get("report_summary", "")
+            session["phase"] = "validate"
+            _save_session(args.session, session)
             _write_action({
-                "action": "done",
+                "action": "phase_complete",
                 "session_id": session["session_id"],
-                "fix_report": session.get("fix_report", ""),
-                "iterate_report": action.get("report_summary", ""),
+                "next_phase": "validate",
+                "message": "Adversarial review complete. Running validation gate...",
             })
         return
 

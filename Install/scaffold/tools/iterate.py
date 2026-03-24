@@ -23,7 +23,7 @@ Convergence rules:
     Reworded issues with the same root cause are deduped by _extract_root_cause().
   - Verification pass only re-reviews sections that had changes applied (not all sections).
   - Max iterations cap prevents infinite loops (default 10).
-  - Escalation: issues with severity CRITICAL that are rejected twice → stop iteration, report as blocking.
+  - Escalation: issues with severity CRITICAL that are rejected twice → stop iteration, report as blocking. (PLANNED — not yet implemented)
 
 Issue categorization:
   - Mechanical (LOW severity + concrete suggestion, or category:"mechanical"):
@@ -629,6 +629,18 @@ def _advance_and_write_action(session, config):
     target_abs = SCAFFOLD_DIR / target
 
     if item["pass"] in ("l3_apply", "l2_apply", "l1_apply"):
+        # Flush auto-accepted mechanical issues into changes_pending before apply
+        auto_accepted = session.pop("auto_accepted_issues", [])
+        if auto_accepted:
+            for issue in auto_accepted:
+                session.setdefault("changes_pending", []).append({
+                    "section": issue.get("section", ""),
+                    "fix_description": issue.get("suggestion", ""),
+                    "issue_description": issue.get("description", ""),
+                    "severity": issue.get("severity", "LOW"),
+                })
+            _save_session(session["session_id"], session)
+
         # Apply action
         if session.get("changes_pending"):
             _write_action({
