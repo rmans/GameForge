@@ -32,31 +32,6 @@ SCAFFOLD_DIR = TOOLS_DIR.parent
 REVIEWS_DIR = SCAFFOLD_DIR / ".reviews" / "revise"
 ACTION_FILE = REVIEWS_DIR / "action.json"
 RESULT_FILE = REVIEWS_DIR / "result.json"
-REVISION_HISTORY = REVIEWS_DIR / "revision-history.json"
-
-# Outer loop cost control: max revisions per layer before requiring explicit override
-MAX_REVISIONS_PER_LAYER = 3
-DIMINISHING_RETURNS_THRESHOLD = 2  # signals below this = "no material changes"
-
-
-def _load_revision_history():
-    """Load persistent revision count per layer."""
-    if REVISION_HISTORY.exists():
-        with open(REVISION_HISTORY, encoding="utf-8") as f:
-            return json.load(f)
-    return {}
-
-
-def _record_revision(layer, signal_count):
-    """Record that a revision was performed for cost tracking."""
-    REVIEWS_DIR.mkdir(parents=True, exist_ok=True)
-    history = _load_revision_history()
-    history.setdefault(layer, []).append({
-        "date": datetime.now().isoformat(),
-        "signals": signal_count,
-    })
-    with open(REVISION_HISTORY, "w", encoding="utf-8") as f:
-        json.dump(history, f, indent=2)
 
 
 # ---------------------------------------------------------------------------
@@ -289,25 +264,6 @@ def cmd_next_action(args):
     session = _load_session(sid)
 
     if not session:
-        # Outer loop cost control: check revision count for this layer
-        history = _load_revision_history()
-        layer_revisions = history.get(args.layer, [])
-        if len(layer_revisions) >= MAX_REVISIONS_PER_LAYER and not getattr(args, 'force', False):
-            _write_action({
-                "action": "blocked",
-                "session_id": sid,
-                "message": (
-                    f"Layer '{args.layer}' has been revised {len(layer_revisions)} times "
-                    f"(max {MAX_REVISIONS_PER_LAYER}). This suggests oscillation. "
-                    f"Options:\n"
-                    f"1. Accept current state — the docs are stable enough\n"
-                    f"2. Force revision — add --force to override the limit\n"
-                    f"3. File an ADR — lock the contested decision explicitly"
-                ),
-                "revision_history": layer_revisions,
-            })
-            return
-
         feedback = _gather_feedback(config, args.source, args.signals)
 
         if not feedback:
@@ -317,11 +273,6 @@ def cmd_next_action(args):
                 "message": f"No feedback signals found for {args.layer}. Nothing to revise.",
             })
             return
-
-        # Diminishing returns: if very few signals, warn but proceed
-        if len(feedback) <= DIMINISHING_RETURNS_THRESHOLD:
-            # Still proceed, but note it in the session
-            pass
 
         session = {
             "session_id": sid,
@@ -548,9 +499,6 @@ def cmd_resolve(args):
     elif phase == "report":
         session["phase"] = "done"
         _save_session(sid, session)
-        # Record revision for outer loop cost control
-        signal_count = len(session.get("feedback", []))
-        _record_revision(session.get("layer", "unknown"), signal_count)
         _write_action({
             "action": "done",
             "session_id": sid,
@@ -576,7 +524,6 @@ def main():
     p_next.add_argument("--layer", required=True)
     p_next.add_argument("--source", default="")
     p_next.add_argument("--signals", default="")
-    p_next.add_argument("--force", action="store_true", help="Override max revision limit")
 
     p_res = subparsers.add_parser("resolve")
     p_res.add_argument("--session", required=True)
