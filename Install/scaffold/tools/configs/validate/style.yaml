@@ -47,3 +47,10 @@ checks:
       target_files: ["design/style-guide.md", "design/color-system.md", "design/ui-kit.md", "design/interaction-model.md", "design/feedback-system.md", "design/audio-direction.md"]
       review_pattern: "ITERATE-style-*"
       severity: WARN
+
+    - id: style-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_docs:
+        - "design/design-doc.md"

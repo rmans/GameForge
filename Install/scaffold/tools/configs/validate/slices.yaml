@@ -38,3 +38,10 @@ checks:
       glob_pattern: "slices/SLICE-*-*.md"
       review_pattern: "ITERATE-slice-*"
       severity: WARN
+
+    - id: slices-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_field: "Phase"
+      upstream_dir: "phases"

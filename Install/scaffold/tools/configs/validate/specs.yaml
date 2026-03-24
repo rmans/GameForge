@@ -38,3 +38,10 @@ checks:
       glob_pattern: "specs/SPEC-*-*.md"
       review_pattern: "REVIEW-spec-*"
       severity: WARN
+
+    - id: specs-upstream-freshness
+      description: "Spec was last updated after its parent system was modified"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_field: "System"
+      upstream_dir: "design/systems"

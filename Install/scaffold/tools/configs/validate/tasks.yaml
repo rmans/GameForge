@@ -38,3 +38,10 @@ checks:
       glob_pattern: "tasks/TASK-*-*.md"
       review_pattern: "REVIEW-task-*"
       severity: WARN
+
+    - id: tasks-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_field: "Implements"
+      upstream_dir: "specs"

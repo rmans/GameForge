@@ -61,6 +61,13 @@ checks:
       glob_pattern: "design/systems/SYS-*-*.md"
       severity: WARN
 
+    - id: systems-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_docs:
+        - "design/design-doc.md"
+
   heuristic:
     - id: systems-glossary-compliance
       description: "NOT-column terms not used as authoritative terminology"

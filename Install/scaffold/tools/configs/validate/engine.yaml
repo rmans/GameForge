@@ -61,6 +61,13 @@ checks:
       review_pattern: "ITERATE-engine-*"
       severity: WARN
 
+    - id: engine-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_docs:
+        - "design/architecture.md"
+
   heuristic:
     - id: engine-no-design-content
       description: "No design-layer content in engine docs"

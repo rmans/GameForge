@@ -231,6 +231,42 @@ def _gather_feedback(config, source=None, signals=None):
     return feedback
 
 
+def _build_impact_preview(feedback):
+    """Scan scaffold docs to find which are affected by the gathered signals.
+    Returns a map of signal_source → list of affected doc paths."""
+    impact = {}
+
+    # Extract signal IDs from feedback (ADR-###, KI-###, DD-### etc.)
+    signal_ids = set()
+    for f in feedback:
+        for match in re.findall(r"(ADR|KI|DD|PF|XC)-\d+", f.get("source_file", "")):
+            signal_ids.add(match)
+        for match in re.findall(r"(ADR|KI|DD|PF|XC)-\d+", f.get("content_summary", "")):
+            signal_ids.add(match)
+
+    if not signal_ids:
+        return impact
+
+    # Scan all scaffold docs for references to these signal IDs
+    scan_dirs = ["design", "design/systems", "reference", "engine", "inputs",
+                 "phases", "slices", "specs", "tasks"]
+
+    for scan_dir in scan_dirs:
+        dir_path = SCAFFOLD_DIR / scan_dir
+        if not dir_path.exists():
+            continue
+        for doc in sorted(dir_path.glob("*.md")):
+            if doc.name.startswith("_"):
+                continue
+            content = doc.read_text(encoding="utf-8")
+            rel = str(doc.relative_to(SCAFFOLD_DIR))
+            for sid in signal_ids:
+                if sid in content:
+                    impact.setdefault(sid, []).append(rel)
+
+    return impact
+
+
 # ---------------------------------------------------------------------------
 # Preflight
 # ---------------------------------------------------------------------------
@@ -274,6 +310,9 @@ def cmd_next_action(args):
             })
             return
 
+        # Build impact preview — scan docs to show what signals affect
+        impact = _build_impact_preview(feedback)
+
         session = {
             "session_id": sid,
             "layer": args.layer,
@@ -281,7 +320,8 @@ def cmd_next_action(args):
             "signals_arg": args.signals or "",
             "feedback": feedback,
             "feedback_index": 0,
-            "phase": "classify",
+            "impact_preview": impact,
+            "phase": "impact_preview",
             "classifications": [],
             "auto_updates": [],
             "escalations": [],
@@ -297,7 +337,25 @@ def _advance(session, config):
     phase = session.get("phase", "classify")
     sid = session["session_id"]
 
-    if phase == "classify":
+    if phase == "impact_preview":
+        # Show user what signals affect which docs before classifying
+        impact = session.get("impact_preview", {})
+        feedback = session.get("feedback", [])
+        _write_action({
+            "action": "impact_preview",
+            "session_id": sid,
+            "layer": session["layer"],
+            "signal_count": len(feedback),
+            "impact": impact,
+            "message": (
+                f"{len(feedback)} signal(s) found. "
+                f"Impact: {sum(len(v) for v in impact.values())} doc(s) reference these signals. "
+                f"Proceed with classification?"
+            ),
+        })
+        return
+
+    elif phase == "classify":
         # Send one feedback signal at a time for classification
         idx = session.get("feedback_index", 0)
         feedback = session.get("feedback", [])
@@ -451,7 +509,14 @@ def cmd_resolve(args):
     sid = session["session_id"]
     phase = session.get("phase", "classify")
 
-    if phase == "classify":
+    if phase == "impact_preview":
+        # User acknowledged impact preview — proceed to classify
+        session["phase"] = "classify"
+        _save_session(args.session, session)
+        _advance(session, config)
+        return
+
+    elif phase == "classify":
         classification = result.get("classification", "skip")
         signal = session["feedback"][session.get("feedback_index", 0)]
 

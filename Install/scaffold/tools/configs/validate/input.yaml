@@ -31,6 +31,13 @@ checks:
       review_pattern: "ITERATE-input-*"
       severity: WARN
 
+    - id: input-upstream-freshness
+      description: "Doc's Last Updated is newer than upstream doc's Last Updated"
+      detection: upstream_freshness
+      severity: FAIL
+      upstream_docs:
+        - "design/design-doc.md"
+
   heuristic:
     - id: input-philosophy-binding-compliance
       description: "Bindings don't violate philosophy constraints"

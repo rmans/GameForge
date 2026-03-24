@@ -63,12 +63,47 @@ The walkthrough below is a **linear execution trace** — it shows the sequence 
    └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+### Impact Preview ✅
+
+Before classifying signals, revise.py scans all scaffold docs and shows what's affected:
+
+```
+PYTHON: _build_impact_preview(feedback)
+  → extracts signal IDs (ADR-###, KI-###) from feedback
+  → scans all scaffold docs for references to those IDs
+  → returns: { "ADR-012": ["design/systems/SYS-003.md", "specs/SPEC-023.md", ...] }
+
+action.json: {
+  action: "impact_preview",
+  signal_count: 3,
+  impact: { "ADR-012": [...], "KI-005": [...] },
+  message: "3 signals found. Impact: 7 docs reference these signals. Proceed?"
+}
+```
+
+The user sees the blast radius before any classification begins.
+
+### Upstream Freshness Enforcement ✅
+
+Validate checks whether a doc was last updated AFTER its upstream doc was modified. If upstream is newer → **FAIL** (not WARN). Forces restabilization before the pipeline can proceed.
+
+| Doc type | Upstream checked |
+|----------|-----------------|
+| Systems | design-doc.md |
+| Specs | parent system (System: field) |
+| Tasks | parent spec (Implements: field) |
+| Slices | parent phase (Phase: field) |
+| Phases | roadmap.md |
+| Engine | architecture.md |
+| Style | design-doc.md |
+| Input | design-doc.md |
+
 ### What Is NOT Automated
 
 | Capability | Status | How it works instead |
 |------------|--------|---------------------|
-| Full downstream artifact graph traversal | Not built | Signal-driven revise targets affected layers |
-| Automatic re-review when upstream changes | Not built | Validate freshness checks warn; user triggers review |
+| Full downstream artifact graph traversal | Not built | Signal-driven revise targets affected layers; impact preview shows blast radius |
+| Automatic re-review when upstream changes | Not built | Validate upstream freshness FAILS; user must restabilize |
 | Automatic re-seed when a doc is revised | Not built | User re-runs seed if new docs needed |
 | Real-time drift detection | Not built | Batch detection via `revise foundation --mode recheck` at phase boundaries |
 

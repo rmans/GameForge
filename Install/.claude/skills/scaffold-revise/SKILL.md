@@ -75,6 +75,13 @@ loop:
   read action.json
   switch action.type:
 
+    "impact_preview":
+      present impact summary to user:
+        "N signals found. M docs reference these signals:"
+        list each signal ID → affected doc paths
+      user acknowledges (or filters signals to skip)
+      python revise.py resolve --session <id>
+
     "classify":
       call /scaffold-review-adjudicate
       python revise.py resolve --session <id>
