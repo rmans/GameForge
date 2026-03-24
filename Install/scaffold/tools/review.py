@@ -384,6 +384,12 @@ def cmd_resolve(args):
             })
         return
 
+    if phase == "validate":
+        # Validate is one-shot via cmd_next_action — if resolve is called during
+        # validate phase, redirect to next-action which handles it.
+        cmd_next_action(args)
+        return
+
 
 # ---------------------------------------------------------------------------
 # CLI
