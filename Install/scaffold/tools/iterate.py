@@ -590,9 +590,14 @@ def _create_session(args, config, session_id, target):
 
 
 def _rebuild_queue_for_verification(session, config):
-    """Insert a verification pass into the queue — only re-reviews changed sections."""
+    """Insert a verification pass into the queue.
+    If we know which sections changed, do targeted re-review.
+    If we only know changes happened (but not where), do a full re-review."""
     changed_sections = session.get("sections_with_changes", [])
-    if not changed_sections:
+    changed_passes = session.get("passes_with_changes", [])
+
+    # Nothing changed at all — no verification needed
+    if not changed_passes:
         return
 
     session["iteration"] = session.get("iteration", 1) + 1
@@ -605,53 +610,64 @@ def _rebuild_queue_for_verification(session, config):
     verification_items = []
     added_passes = set()
 
-    # Re-queue the L3 subsections that had changes
-    for original_item in queue[:current_idx]:
-        if original_item.get("pass") == "l3":
-            section = original_item.get("section", "")
-            if section in changed_sections:
-                verification_items.append(dict(original_item))
-                added_passes.add("l3")
+    if changed_sections:
+        # Targeted verification: only re-review changed sections + siblings
 
-    # Blast radius expansion: also re-check sibling sections under the same parent
-    # (e.g., change in ### Owned State should also re-verify ### Dependencies)
-    changed_parents = set()
-    for original_item in queue[:current_idx]:
-        if original_item.get("pass") == "l3" and original_item.get("section", "") in changed_sections:
-            parent = original_item.get("parent", "")
-            if parent:
-                changed_parents.add(parent)
-
-    # Add sibling L3 sections from changed parents (if not already queued)
-    queued_sections = set(changed_sections)
-    linked_sections = config.get("linked_sections", {})
-    for original_item in queue[:current_idx]:
-        if original_item.get("pass") == "l3":
-            section = original_item.get("section", "")
-            parent = original_item.get("parent", "")
-            if section not in queued_sections:
-                # Include if: same parent as a changed section, OR explicitly linked
-                in_changed_parent = parent in changed_parents
-                explicitly_linked = any(
-                    section in linked_sections.get(cs, [])
-                    for cs in changed_sections
-                )
-                if in_changed_parent or explicitly_linked:
+        # Re-queue the L3 subsections that had changes
+        for original_item in queue[:current_idx]:
+            if original_item.get("pass") == "l3":
+                section = original_item.get("section", "")
+                if section in changed_sections:
                     verification_items.append(dict(original_item))
-                    queued_sections.add(section)
                     added_passes.add("l3")
 
-    if "l3" in added_passes:
-        verification_items.append({"pass": "l3_apply"})
+        # Blast radius expansion: also re-check sibling sections under the same parent
+        changed_parents = set()
+        for original_item in queue[:current_idx]:
+            if original_item.get("pass") == "l3" and original_item.get("section", "") in changed_sections:
+                parent = original_item.get("parent", "")
+                if parent:
+                    changed_parents.add(parent)
 
-    # Re-queue L2 parent sections of all affected L3 subsections
-    for original_item in queue[:current_idx]:
-        if original_item.get("pass") == "l2" and original_item.get("section", "") in changed_parents:
-            verification_items.append(dict(original_item))
-            added_passes.add("l2")
+        # Add sibling L3 sections from changed parents (if not already queued)
+        queued_sections = set(changed_sections)
+        linked_sections = config.get("linked_sections", {})
+        for original_item in queue[:current_idx]:
+            if original_item.get("pass") == "l3":
+                section = original_item.get("section", "")
+                parent = original_item.get("parent", "")
+                if section not in queued_sections:
+                    in_changed_parent = parent in changed_parents
+                    explicitly_linked = any(
+                        section in linked_sections.get(cs, [])
+                        for cs in changed_sections
+                    )
+                    if in_changed_parent or explicitly_linked:
+                        verification_items.append(dict(original_item))
+                        queued_sections.add(section)
+                        added_passes.add("l3")
 
-    if "l2" in added_passes:
-        verification_items.append({"pass": "l2_apply"})
+        if "l3" in added_passes:
+            verification_items.append({"pass": "l3_apply"})
+
+        # Re-queue L2 parent sections of all affected L3 subsections
+        for original_item in queue[:current_idx]:
+            if original_item.get("pass") == "l2" and original_item.get("section", "") in changed_parents:
+                verification_items.append(dict(original_item))
+                added_passes.add("l2")
+
+        if "l2" in added_passes:
+            verification_items.append({"pass": "l2_apply"})
+    else:
+        # Full verification: we know changes happened but not where.
+        # Re-queue all sections for changed pass levels.
+        for original_item in queue[:current_idx]:
+            pass_level = original_item.get("pass", "")
+            if pass_level in changed_passes:
+                verification_items.append(dict(original_item))
+                added_passes.add(pass_level)
+            elif pass_level in ("l3_apply", "l2_apply") and pass_level.replace("_apply", "") in changed_passes:
+                verification_items.append(dict(original_item))
 
     # Always re-run L1 after verification (changes may affect document coherence)
     if config.get("l1_questions"):
