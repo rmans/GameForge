@@ -1,4 +1,4 @@
-# ClaudeScaffold
+# GameForge
 
 A document-driven build system for game development. Python orchestrates, Claude judges, external LLMs review. Design decisions live in versioned markdown with strict authority ranks — not in conversation memory.
 
@@ -8,7 +8,7 @@ LLMs forget. Over a long project, Claude Code loses track of design decisions, c
 
 ## The Solution
 
-ClaudeScaffold installs a structured document pipeline into your project. Every design decision, system behavior, interface contract, and implementation constraint lives in a versioned markdown file with a clear authority rank. When documents conflict, the higher-ranked document wins. Claude never guesses.
+GameForge installs a structured document pipeline into your project. Every design decision, system behavior, interface contract, and implementation constraint lives in a versioned markdown file with a clear authority rank. When documents conflict, the higher-ranked document wins. Claude never guesses.
 
 ### Architecture
 
@@ -94,13 +94,13 @@ Art/audio tasks include file paths, dimensions, and generation prompts built fro
 
 ```bash
 # Download installer (once)
-curl -O https://raw.githubusercontent.com/rmans/ClaudeScaffold/main/claudescaffold.py
+curl -O https://raw.githubusercontent.com/rmans/GameForge/main/gameforge.py
 
 # Install into your project
-python claudescaffold.py --install /path/to/your/project
+python gameforge.py --install /path/to/your/project
 
 # Upgrade infrastructure (preserves your design work)
-python claudescaffold.py --upgrade /path/to/your/project
+python gameforge.py --upgrade /path/to/your/project
 ```
 
 Options: `--install`, `--upgrade`, `--remove --force`, `--version`, `--branch <name>`, `--dry-run`, `--force`, `--verbose`

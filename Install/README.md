@@ -1,4 +1,4 @@
-# ClaudeScaffold — Installation
+# GameForge — Installation
 
 This is the installable overlay. Copy its contents into any game project to give Claude Code a structured document pipeline, strict design authority, and 21 skills that automate the workflow from concept to code.
 
@@ -27,11 +27,11 @@ your-project/
 Download and run — no need to clone the repo:
 
 ```bash
-# Download claudescaffold.py (once)
-curl -O https://raw.githubusercontent.com/rmans/ClaudeScaffold/main/claudescaffold.py
+# Download gameforge.py (once)
+curl -O https://raw.githubusercontent.com/rmans/GameForge/main/gameforge.py
 
 # Install into your project
-python claudescaffold.py --install /path/to/your/project
+python gameforge.py --install /path/to/your/project
 ```
 
 ## Upgrade
@@ -39,7 +39,7 @@ python claudescaffold.py --install /path/to/your/project
 Replace infrastructure (skills, templates, theory, tools) while preserving your design work:
 
 ```bash
-python claudescaffold.py --upgrade /path/to/your/project
+python gameforge.py --upgrade /path/to/your/project
 ```
 
 Upgrade replaces `theory/`, `templates/`, `tools/`, root index files, and all scaffold skills. Your `design/`, `inputs/`, `reference/`, `decisions/`, `phases/`, `specs/`, `tasks/`, `slices/`, and `engine/` directories are never touched.
@@ -49,10 +49,10 @@ Upgrade replaces `theory/`, `templates/`, `tools/`, root index files, and all sc
 Remove the scaffold from a project (creates a backup zip first):
 
 ```bash
-python claudescaffold.py --remove --force /path/to/your/project
+python gameforge.py --remove --force /path/to/your/project
 ```
 
-This backs up everything to `claudescaffold-backup-YYYYMMDD-HHMMSS.zip`, then removes `scaffold/`, scaffold skills, `CLAUDE.md`, and the version stamp. Your `.claude/settings.local.json` and non-scaffold skills are preserved.
+This backs up everything to `gameforge-backup-YYYYMMDD-HHMMSS.zip`, then removes `scaffold/`, scaffold skills, `CLAUDE.md`, and the version stamp. Your `.claude/settings.local.json` and non-scaffold skills are preserved.
 
 ## Options
 
@@ -68,10 +68,10 @@ This backs up everything to `claudescaffold-backup-YYYYMMDD-HHMMSS.zip`, then re
 **Manual alternative** (requires cloning the repo):
 
 ```bash
-git clone https://github.com/rmans/ClaudeScaffold.git
-cp -r ClaudeScaffold/Install/.claude /path/to/your/project/
-cp -r ClaudeScaffold/Install/scaffold /path/to/your/project/
-cp ClaudeScaffold/Install/CLAUDE.md /path/to/your/project/
+git clone https://github.com/rmans/GameForge.git
+cp -r GameForge/Install/.claude /path/to/your/project/
+cp -r GameForge/Install/scaffold /path/to/your/project/
+cp GameForge/Install/CLAUDE.md /path/to/your/project/
 ```
 
 ## After Installing

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ClaudeScaffold — install, upgrade, or remove the scaffold pipeline."""
+"""GameForge — install, upgrade, or remove the scaffold pipeline."""
 
 import argparse
 import json
@@ -13,8 +13,8 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
-VERSION = "2.47.0"
-GITHUB_ZIP_URL = "https://github.com/rmans/ClaudeScaffold/archive/refs/heads/{branch}.zip"
+VERSION = "3.0.0"
+GITHUB_ZIP_URL = "https://github.com/rmans/GameForge/archive/refs/heads/{branch}.zip"
 EXCLUDE_DIRS = {"__pycache__"}
 SCAFFOLD_SKILL_PREFIX = "scaffold-"
 EXPECTED_SKILLS = 18
@@ -203,7 +203,7 @@ def write_version_stamp(target: Path, branch: str, mode: str, dry_run: bool):
 def create_removal_backup(target: Path, dry_run: bool) -> str:
     """Create a timestamped zip backup of scaffold files before removal."""
     ts = datetime.now().strftime("%Y%m%d-%H%M%S")
-    backup_name = f"claudescaffold-backup-{ts}.zip"
+    backup_name = f"gameforge-backup-{ts}.zip"
     backup_path = target / backup_name
 
     items_to_backup = []
@@ -244,10 +244,10 @@ def create_removal_backup(target: Path, dry_run: bool) -> str:
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="ClaudeScaffold — install, upgrade, or remove the scaffold pipeline.",
-        epilog="Example: python claudescaffold.py --install /path/to/your/project",
+        description="GameForge — install, upgrade, or remove the scaffold pipeline.",
+        epilog="Example: python gameforge.py --install /path/to/your/project",
     )
-    parser.add_argument("--version", action="version", version=f"ClaudeScaffold {VERSION}")
+    parser.add_argument("--version", action="version", version=f"GameForge {VERSION}")
 
     mode_group = parser.add_mutually_exclusive_group()
     mode_group.add_argument("--install", action="store_true", help="Install scaffold into the target project")
@@ -283,8 +283,8 @@ def validate_target(target: Path):
 
 def download_and_extract(branch: str):
     """Download from GitHub, extract, return (tmp_dir, install_dir, repo_root)."""
-    print(f"\n0. Downloading ClaudeScaffold ({branch})")
-    tmp_dir = tempfile.mkdtemp(prefix="claudescaffold-")
+    print(f"\n0. Downloading GameForge ({branch})")
+    tmp_dir = tempfile.mkdtemp(prefix="gameforge-")
     zip_path = Path(tmp_dir) / "repo.zip"
 
     download_zip(branch, zip_path)
@@ -314,16 +314,16 @@ def download_and_extract(branch: str):
 
 
 def self_update(repo_root: Path, dry_run: bool):
-    """Update claudescaffold.py itself from the downloaded archive. Returns True if updated."""
-    src_script = repo_root / "claudescaffold.py"
+    """Update gameforge.py itself from the downloaded archive. Returns True if updated."""
+    src_script = repo_root / "gameforge.py"
     dst_script = Path(__file__).resolve()
 
     if not src_script.is_file():
-        log("  WARNING: claudescaffold.py not found in downloaded archive — skipping self-update")
+        log("  WARNING: gameforge.py not found in downloaded archive — skipping self-update")
         return False
 
     if files_identical(src_script, dst_script):
-        log("  claudescaffold.py is already up to date")
+        log("  gameforge.py is already up to date")
         return False
 
     # Extract remote version for logging
@@ -337,12 +337,12 @@ def self_update(repo_root: Path, dry_run: bool):
         pass
 
     if dry_run:
-        log(f"  Would update claudescaffold.py ({VERSION} → {remote_version})")
+        log(f"  Would update gameforge.py ({VERSION} → {remote_version})")
         return False
 
     # Replace ourselves
     shutil.copy2(src_script, dst_script)
-    log(f"  Updated claudescaffold.py ({VERSION} → {remote_version})")
+    log(f"  Updated gameforge.py ({VERSION} → {remote_version})")
     return True
 
 
@@ -423,7 +423,7 @@ def do_install(args):
         dst_skills_dir = dst_claude_dir / "skills"
 
         label = "[DRY RUN] " if args.dry_run else ""
-        print(f"\n{label}Installing ClaudeScaffold into {target}\n")
+        print(f"\n{label}Installing GameForge into {target}\n")
 
         backups_created = []
         files_copied = 0
@@ -498,7 +498,7 @@ def do_install(args):
         # --- Summary ---
         print(f"\n{'=' * 50}")
         print(f"{label}Installation summary:")
-        print(f"  Source:           github.com/rmans/ClaudeScaffold ({args.branch})")
+        print(f"  Source:           github.com/rmans/GameForge ({args.branch})")
         print(f"  Files copied:     {files_copied}")
         print(f"  Skills installed: {skills_installed}")
         if backups_created:
@@ -556,7 +556,7 @@ def do_upgrade(args):
         dst_settings = dst_claude_dir / "settings.local.json"
 
         label = "[DRY RUN] " if args.dry_run else ""
-        print(f"\n{label}Upgrading ClaudeScaffold in {target}\n")
+        print(f"\n{label}Upgrading GameForge in {target}\n")
 
         files_updated = 0
         files_added = 0
@@ -744,7 +744,7 @@ def do_upgrade(args):
         # --- Summary ---
         print(f"\n{'=' * 50}")
         print(f"{label}Upgrade summary:")
-        print(f"  Source:            github.com/rmans/ClaudeScaffold ({args.branch})")
+        print(f"  Source:            github.com/rmans/GameForge ({args.branch})")
         print(f"  Files updated:     {files_updated}")
         print(f"  Files added:       {files_added}")
         print(f"  Files removed:     {files_removed}")
@@ -788,11 +788,11 @@ def do_remove(args):
         print("ERROR: --force is required for removal.", file=sys.stderr)
         print("  This will remove scaffold/, scaffold skills, and CLAUDE.md.", file=sys.stderr)
         print("  A backup zip will be created first.", file=sys.stderr)
-        print(f"\n  Run: python claudescaffold.py --remove --force {args.target}", file=sys.stderr)
+        print(f"\n  Run: python gameforge.py --remove --force {args.target}", file=sys.stderr)
         sys.exit(1)
 
     label = "[DRY RUN] " if args.dry_run else ""
-    print(f"\n{label}Removing ClaudeScaffold from {target}\n")
+    print(f"\n{label}Removing GameForge from {target}\n")
 
     # --- Step 1: Backup ---
     print("1. Creating backup")

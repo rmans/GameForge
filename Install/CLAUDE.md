@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This project uses ClaudeScaffold — a document-driven pipeline for game development. Every design decision, system behavior, and implementation constraint lives in `scaffold/` as a versioned markdown file with a clear authority rank.
+This project uses GameForge — a document-driven pipeline for game development. Every design decision, system behavior, and implementation constraint lives in `scaffold/` as a versioned markdown file with a clear authority rank.
 
 ## Rules
 
