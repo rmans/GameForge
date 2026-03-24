@@ -382,6 +382,21 @@ def verify_installation(target: Path, dry_run: bool):
         if missing:
             log(f"  WARNING: Missing key files: {', '.join(missing)}")
 
+    # Run meta-validate to check config/template drift
+    meta_validate = dst_scaffold_dir / "tools" / "meta-validate.py"
+    if meta_validate.exists():
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, str(meta_validate)],
+            capture_output=True, text=True, cwd=str(target),
+        )
+        if result.returncode == 0:
+            log(f"  Config/template check: PASS")
+        else:
+            log(f"  WARNING: Config/template drift detected:")
+            for line in result.stdout.strip().splitlines()[1:]:  # skip header
+                log(f"    {line.strip()}")
+
 
 # ---------------------------------------------------------------------------
 # Mode: --install
