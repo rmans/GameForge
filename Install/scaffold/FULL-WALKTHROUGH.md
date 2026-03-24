@@ -88,8 +88,8 @@ Not every issue needs full adjudication:
 | Category | Criteria | Flow |
 |----------|----------|------|
 | **Mechanical** | LOW severity + concrete suggestion, or `category: "mechanical"` | Auto-accept → batch apply (skip adjudication) |
-| **Quality** | MEDIUM/HIGH with suggestion, no cross-doc impact | Adjudicate → apply (scope-check skipped) |
-| **Architecture-affecting** | Description mentions ownership, authority, contracts, cross-system | Adjudicate → scope-check → apply |
+| **Quality** | MEDIUM/HIGH with suggestion, description has no cross-doc keywords | Adjudicate → apply (scope-check skipped) |
+| **Architecture-affecting** | Description contains: ownership, authority, contract, interface, cross-system, cross-doc, upstream, violat | Adjudicate → scope-check → apply |
 | **Critical** | Severity CRITICAL | Adjudicate → scope-check always → apply |
 | **Ambiguous** | No suggestion, unclear fix | Escalate to user |
 
@@ -119,7 +119,7 @@ Issues are deduped by root cause to prevent the same problem from cycling:
 |------------|------------|---------|
 | **Authoritative content** | Claude via sub-skill | Spec behavior, system design, task steps |
 | **Derived bookkeeping** | Python (utils.py) | Index updates, status changes, file renames, upstream table rows |
-| **Safe generated sync** | Python → user review | Signal registry entries, entity properties (presented as suggestions, not auto-applied). Confidence-filtered: concrete declarations (ADD_SIGNAL, bind_method) always surfaced; vague single-file matches filtered unless ≥2 occurrences. ✅ |
+| **Safe generated sync** | Python → user review | Signal registry entries, entity properties (presented as suggestions, not auto-applied). Currently only detects concrete declarations (ADD_SIGNAL, bind_method) — these are always surfaced. ✅ |
 | **Architecture suggestions** | Python → user → ADR | Architecture changes from sync-refs are findings, NOT auto-writes. File as drift finding or ADR. ✅ |
 
 ---
@@ -778,10 +778,11 @@ PYTHON: implement.py next-action --task TASK-007
     structured resolution:
       1. parent spec (SPEC-003) → loads it
       2. parent system (from spec's System field) → loads SYS-001
-      3. task_type = behavior → loads architecture.md
+      3. task_type in (foundation, behavior, integration) → loads architecture.md
       4. task_type = behavior → loads engine/*coding*.md + *simulation-runtime*.md
-      5. Steps section mentions "signal-registry" → loads it
-      6. Steps section doesn't mention "entity-components" → skips it
+      5. Steps section mentions "signal-registry" or "signal_registry" → loads it
+      6. Steps section mentions "interfaces.md" or "interface.*contract" → loads it
+      7. Steps section doesn't mention "entity-components" → skips it
   → _extract_task_steps() → [Step 1, Step 2, Step 3, ...]
   → creates session, phase: plan
 ```
@@ -806,7 +807,7 @@ PYTHON: resolve → phase: code, step_index: 0
 PYTHON → action.json: {
   action: "code",
   step: "Step 1: Create WallValidator class with can_place() method",
-  step_index: 0,
+  step_number: 1,
   total_steps: 3,
   context_docs: [...],
   file_manifest: []
@@ -828,8 +829,8 @@ CLAUDE: /scaffold-implement-code → edits existing files
 ```
 PYTHON → action.json: {
   action: "code",
-  step: "Add regression tests for WallValidator",
-  phase: "test",
+  step_number: "test",
+  step: "Add regression tests for all implemented functionality",
   file_manifest: [...]
 }
 
@@ -990,7 +991,7 @@ For each signal, one at a time:
 ```
 CLAUDE: /scaffold-review-adjudicate
   → classifies: auto-update (safe to apply) | escalate (user must decide) | skip (not relevant to remaining slices)
-CLAUDE ← result.json: { classification: "auto-update", target_doc: "slices/SLICE-002...", change: "Update integration points to reflect new ownership" }
+CLAUDE ← result.json: { classification: "auto_update", target_doc: "slices/SLICE-002...", change: "Update integration points to reflect new ownership" }
 ```
 
 After all signals classified:
