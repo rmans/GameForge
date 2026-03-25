@@ -529,11 +529,11 @@ adjudication:
     - design/design-doc.md
   outcomes: [accept_edit, reject, escalate, ambiguous_intent]
   rules:
-    # Bias toward action
-    - "Default to accept unless you have a specific, cited reason to reject"
-    - "If a finding improves clarity, specificity, or completeness — accept it"
-    - "If a finding identifies a gap (missing system, undefined ownership, unclear behavior) — accept it as a documentation improvement"
-    - "Rejecting requires citing the specific rule, section, or invariant that the change would violate"
+    # Evaluation standards
+    - "Every finding must be evaluated on merit — neither accept nor reject is the default"
+    - "Accepting requires: the finding is accurate AND the suggested change improves the document"
+    - "Rejecting requires: cite the specific rule, section, or invariant that makes the finding wrong or the change harmful"
+    - "If a finding identifies a real gap (missing system, undefined ownership, unclear behavior) — that is a valid finding even if the fix is imperfect"
     - "Prefer fixing the design doc over escalating — most issues are clarity or consistency"
     # Guardrails for actual design changes
     - "Never half-accept — choose exactly one outcome per issue"
@@ -578,10 +578,10 @@ rules:
   - "Project documents and authority order win"
   - "The design doc describes WHAT the game is, not HOW to build it"
   - "Only edit the design doc"
-  - "Edits that improve clarity, fill gaps, or tighten specificity are welcome — the bar for accepting improvements is LOW"
+  - "Edits that improve clarity, fill gaps, or tighten specificity are valid improvements — evaluate whether the specific change is accurate"
   - "Edits that change what the game IS (not how it's described) require escalation"
   - "Identifying missing systems, undefined ownership, or implicit behaviors is a valid finding — document the gap"
-  - "Governance edits must preserve intent — but adding specificity to vague governance is an improvement, not a change"
+  - "Governance edits must preserve intent — adding specificity to vague governance is an improvement, not a change"
   - "Never weaken governance without user confirmation"
   - "Stay at the design layer — no implementation detail"
   - "Theory observations are advisory, not authority"
