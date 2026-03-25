@@ -874,15 +874,11 @@ def _advance_and_write_action(session, config):
         })
         return
 
-    # Categorize issues — mechanical issues auto-accept, others go to adjudicate
+    # Categorize issues — only explicitly mechanical issues auto-accept
     auto_accept = []
     needs_adjudication = []
     for issue in filtered:
-        severity = issue.get("severity", "MEDIUM").upper()
-        suggestion = issue.get("suggestion", "")
-        # Auto-accept: LOW severity with concrete suggestion (mechanical quality)
-        # Also auto-accept: issues tagged as "mechanical" by reviewer
-        if issue.get("category") == "mechanical" or (severity == "LOW" and suggestion):
+        if issue.get("category") == "mechanical":
             auto_accept.append(issue)
         else:
             needs_adjudication.append(issue)
@@ -994,13 +990,11 @@ def cmd_resolve(args):
             })
             return
 
-        # Categorize — same logic as external reviewer results
+        # Categorize — only explicitly mechanical issues auto-accept
         auto_accept = []
         needs_adjudication = []
         for issue in filtered:
-            severity = issue.get("severity", "MEDIUM").upper()
-            suggestion = issue.get("suggestion", "")
-            if issue.get("category") == "mechanical" or (severity == "LOW" and suggestion):
+            if issue.get("category") == "mechanical":
                 auto_accept.append(issue)
             else:
                 needs_adjudication.append(issue)
@@ -1299,7 +1293,13 @@ def _call_reviewer(session, config, section_content, questions, context_files):
         review_script = DOC_REVIEW_SCRIPT
 
     # Build prompt with questions
-    prompt_parts = ["Review the following section:\n", section_content, "\n\nEvaluate against these questions:\n"]
+    prompt_parts = [
+        "Review the following section from the document. The full document is provided separately — cross-reference other sections as needed.\n\n",
+        "--- Section Under Review ---\n",
+        section_content,
+        "\n--- End Section ---\n\n",
+        "Evaluate against these questions:\n",
+    ]
     for q in questions:
         prompt_parts.append(f"- {q}\n")
 
