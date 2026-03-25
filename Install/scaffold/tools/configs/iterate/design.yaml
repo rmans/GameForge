@@ -440,6 +440,7 @@ l2_sections:
       - "For each entity type (colonist, structure, resource, etc.): how is it created, how does it change, how does it end? Which system owns each lifecycle stage?"
       - "If a player plays for 5 hours, what systems naturally become dominant? What systems become bottlenecks? What repeated behaviors require dedicated systems that aren't named?"
       - "What systems emerge only after extended play that aren't obvious from the design doc's early-game descriptions?"
+      - "For every system: what feeds into it, what does it feed, and is that loop stable, escalating, or degenerative?"
 
   "## Philosophy":
     questions:
