@@ -337,12 +337,12 @@ def self_update(repo_root: Path, dry_run: bool):
         pass
 
     if dry_run:
-        log(f"  Would update gameforge.py ({VERSION} → {remote_version})")
+        log(f"  Would update gameforge.py ({VERSION} -> {remote_version})")
         return False
 
     # Replace ourselves
     shutil.copy2(src_script, dst_script)
-    log(f"  Updated gameforge.py ({VERSION} → {remote_version})")
+    log(f"  Updated gameforge.py ({VERSION} -> {remote_version})")
     return True
 
 
