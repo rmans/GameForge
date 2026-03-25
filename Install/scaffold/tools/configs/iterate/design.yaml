@@ -172,6 +172,7 @@ l3_sections:
     questions:
       - "Are verbs concrete actions, not abstractions?"
       - "Does every verb trace to at least one system's Player Actions?"
+      - "Walk through every verb — what system receives and processes it? Flag any verb with no clear system handler."
 
   "### Player Mental Model":
     parent: "## Control"
@@ -276,23 +277,24 @@ l3_sections:
     parent: "## System Domains"
     questions:
       - "Does the system list match registered systems in the index?"
-      - "Are all systems needed for a functional game identified?"
       - "For every behavior described in the document, can you name exactly one system that owns it? List any behaviors with no clear owner."
-      - "Are there behaviors that require multiple systems to coordinate without a defined boundary between them?"
-      - "What systems would need to exist to make this design work, even if they are not mentioned? (scheduling, conflict resolution, decay/timers, alert routing, etc.)"
+      - "What systems would need to exist to make this design work, even if they are not mentioned? (scheduling, conflict resolution, decay/timers, alert routing, state persistence, UI data binding)"
+      - "What systems typically exist in colony sims / management games that are absent here? For each: is it intentionally excluded (cite Design Boundaries) or accidentally missing?"
+      - "Which named systems lack enough behavioral description to generate a SYS-### doc? What specific behaviors are missing?"
 
   "### Major Mechanics":
     parent: "## System Domains"
     questions:
       - "Do mechanics map to systems? Are there mechanics with no system owner?"
-      - "Is any system doing 3+ unrelated jobs? Could it be split?"
+      - "Which systems are doing 3+ unrelated jobs? What would a clean split look like?"
       - "If any system were removed, what specifically breaks? If nothing breaks, why does it exist?"
 
   "### System Interaction Philosophy":
     parent: "## System Domains"
     questions:
       - "Is the philosophy specific enough to guide system design?"
-      - "For each described interaction between systems: what triggers it, which direction does data flow, and what happens if one system is unavailable?"
+      - "For each described interaction: what triggers it, which direction does data flow, and what happens if one system is unavailable?"
+      - "Are there behaviors that require multiple systems to coordinate without a defined boundary between them?"
 
   "### Simulation Depth Target":
     parent: "## System Domains"
@@ -309,6 +311,7 @@ l3_sections:
       - "Is failure interesting (player agency during failure) or just punitive?"
       - "What does the player DO after failure? How long does recovery take? When does recovery feel pointless vs engaging?"
       - "When something goes wrong, which system is responsible? Can two systems both try to resolve the same failure?"
+      - "Trace every failure scenario in Failure Philosophy and Pressure Tests — what systems participate in each cascade? Are any steps unowned?"
 
   "### Risk / Reward Philosophy":
     parent: "## Philosophy"
@@ -432,7 +435,7 @@ l2_sections:
       - "Is the system set complete for the game described in Identity and Shape?"
       - "Does the simulation depth target match the scope commitment?"
       - "Walk through each loop, mechanic, and player verb — what system owns each step? Flag any step with no owner or ambiguous ownership."
-      - "What data does each described system own? Are there variables that two systems both need to write?"
+      - "For every piece of game state mentioned (health, mood, instability, skills, position, inventory) — what system writes it? Flag any state with no clear writer or multiple implied writers."
       - "For each entity type (colonist, structure, resource, etc.): how is it created, how does it change, how does it end? Which system owns each lifecycle stage?"
 
   "## Philosophy":
@@ -460,23 +463,6 @@ l1_questions:
   - "Does the design describe a game where interruption, stale targets, and continuous world churn are normal — or does it implicitly assume clean execution paths?"
   - "If you had to generate SYS-### docs from this document right now, what systems would you be forced to invent because the design implies behavior but never names a system for it?"
   - "What will the player confidently believe about a mechanic that is actually wrong? Where will misinterpretation cause them to quit?"
-
-system_coverage_audit:
-  reviewer_instruction: "You are a hostile designer trying to prove this game is incomplete. Your job is NOT to validate what exists — it is to discover what is ABSENT. Assume the design is wrong until proven otherwise. For every behavior, mechanic, and loop described: what system would you have to write to make that sentence real? If the answer is 'I'd have to invent one,' that's a missing system."
-  adjudication_rules:
-    - "Missing systems are flagged, not invented — the design doc should acknowledge them, not define them"
-    - "Overloaded systems are flagged for splitting consideration"
-    - "Classify as: missing_system (needs SYS-### created), underdefined (exists but incomplete), overloaded (should split), or already_covered (cite the system)"
-    - "Every finding must name the specific behavior that requires the system and what breaks without it"
-  questions:
-    - "System discovery: list every gameplay system that is implied by the loops, mechanics, verbs, and world but is NOT explicitly named in System Domains. For each: name it, what player behavior requires it, what breaks without it."
-    - "Genre gap analysis: what systems typically exist in colony sims / management games that are absent here? For each: is it intentionally excluded (cite Design Boundaries) or accidentally missing?"
-    - "Overloaded systems: which named systems are doing 3+ unrelated jobs? What would a clean split look like?"
-    - "Underdefined systems: which named systems lack enough behavioral description to generate a SYS-### doc? What specific behaviors are missing?"
-    - "Infrastructure gap: what connective tissue systems are needed but unnamed? (scheduling, prioritization, conflict resolution, event routing, decay/timer management, state persistence, UI data binding)"
-    - "Player action gap: walk through every Player Verb — what system receives and processes each one? Flag any verb with no clear system handler."
-    - "Failure cascade gap: trace every failure scenario in Failure Philosophy and Pressure Tests — what systems participate in each cascade? Are any steps unowned?"
-    - "Data authority gap: for every piece of game state mentioned (health, mood, instability, skills, position, inventory) — what system writes it? Flag any state with no clear writer or multiple implied writers."
 
 stress_test:
   mode: interrogation
