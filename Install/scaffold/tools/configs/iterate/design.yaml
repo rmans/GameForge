@@ -433,7 +433,7 @@ l2_sections:
 
   "## System Domains":
     questions:
-      - "Is the system set complete for the game described in Identity and Shape?"
+      - "List all systems required for the game described in Identity and Shape to function. Categorize each as: explicitly defined, underdefined, or missing. Do not assume completeness."
       - "Does the simulation depth target match the scope commitment?"
       - "Walk through each loop, mechanic, and player verb — what system owns each step? Flag any step with no owner or ambiguous ownership."
       - "For every piece of game state mentioned (health, mood, instability, skills, position, inventory) — what system writes it? Flag any state with no clear writer or multiple implied writers."
