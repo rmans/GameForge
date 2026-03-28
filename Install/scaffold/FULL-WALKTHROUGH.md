@@ -492,7 +492,7 @@ PYTHON: seed.py next-action --layer systems
 PYTHON → action.json: { action: "propose", requirement: { source: "design-doc.md", content: "## Simulation Requirements: Major Simulation Requirements..." } }
 
 CLAUDE: /scaffold-seed-propose
-  → reads design invariants, player control model, system domains, simulation depth
+  → reads design invariants, player control model, simulation requirements, simulation depth
   → proposes: "SYS-001 — BuildingSystem: owns construction lifecycle"
   → checks: overlap with other candidates? missing coverage? invariant conflicts?
 CLAUDE ← result.json: { candidates: [{ proposed_id: "SYS-001", name: "BuildingSystem", ... }] }
