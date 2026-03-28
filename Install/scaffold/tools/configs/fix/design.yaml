@@ -4,7 +4,7 @@ layer: design
 display_name: "Design Document"
 target: design/design-doc.md
 target_type: fixed
-template: null  # design doc uses init-design structure, not a single template
+template: "scaffold/templates/design-doc-template.md"
 
 preflight:
   required_files:
@@ -18,7 +18,7 @@ context:
   base:
     - file: design/design-doc.md
       class: canonical
-      sections: ["## Identity", "## Philosophy", "## Scope", "### Design Invariants", "### Decision Anchors", "### Design Pressure Tests"]
+      sections: ["## Identity", "## Shape", "## Control", "## Simulation Requirements", "## Philosophy", "## Scope", "### Design Invariants", "### Decision Anchors", "### Design Pressure Tests"]
       priority: 1
     - file: design/glossary.md
       class: constraint
@@ -126,6 +126,37 @@ judgment_checks:
       description: "Current feature would fail a defined Pressure Test"
       section: "### Design Pressure Tests"
       question: "Would any current system or feature fail this pressure test?"
+
+  simulation_requirements:
+    - id: vague_state
+      description: "State That Matters entry lacks consequences"
+      section: "### State That Matters"
+      question: "Does every state entry describe what changes, what the player sees, AND what consequences emerge? Flag entries that name state without explaining why it matters."
+
+    - id: behavior_is_ui
+      description: "Behaviors That Need Rules entry is really UI"
+      section: "### Behaviors That Need Rules"
+      question: "Is every entry a genuine gameplay behavior that needs rule-driven simulation, or are some really UI displays, information panels, or presentation concerns?"
+
+    - id: action_without_governance
+      description: "Player action lacks governance explanation"
+      section: "### Player Actions That Need Governance"
+      question: "Does every entry explain what evaluation, scheduling, or constraint the game must apply? Flag actions listed without explaining what makes them non-trivial."
+
+    - id: interaction_missing_endpoint
+      description: "Interaction pattern has no clear consequence"
+      section: "### Interaction Patterns"
+      question: "Does every causal chain end in a player-visible consequence? Flag chains that trail off or loop without observable outcome."
+
+    - id: depth_boundary_contradiction
+      description: "Simulation Depth Target contradicts Simulation Boundaries"
+      section: "### Simulation Depth Target"
+      question: "Does anything in Simulation Depth Target claim to simulate something that Simulation Boundaries says should NOT be simulated, or vice versa?"
+
+    - id: naming_systems
+      description: "Simulation Requirements section names systems instead of requirements"
+      section: "## Simulation Requirements"
+      question: "Does this section name specific systems (e.g., 'Task System', 'Power System') instead of describing behaviors, state, and interactions that REQUIRE systems to exist? The design doc defines demand, not architecture."
 
   layer_violations:
     - id: layer_violation

@@ -449,12 +449,13 @@ l2_sections:
     questions:
       - "List all simulation state, behaviors, and player actions required for the game described in Identity and Shape to function. Categorize each as: explicitly defined, underdefined, or missing. Do not assume completeness."
       - "Does the simulation depth target match the scope commitment?"
-      - "Walk through each loop, behavior, and player verb — what system owns each step? Flag any step with no owner or ambiguous ownership."
-      - "For every piece of game state mentioned (health, mood, instability, skills, position, inventory) — what system writes it? Flag any state with no clear writer or multiple implied writers."
-      - "For each entity type (colonist, structure, resource, etc.): how is it created, how does it change, how does it end? Which system owns each lifecycle stage?"
-      - "If a player plays for 5 hours, what simulation requirements naturally become dominant? What becomes a bottleneck? What repeated behaviors require dedicated systems that aren't named?"
+      - "Walk through each loop, behavior, and player verb — is the underlying state and governance requirement described? Flag any step where the design doc doesn't explain what persistent state or rule-driven behavior is needed."
+      - "For every piece of game state mentioned (health, mood, instability, skills, position, inventory) — is it listed in State That Matters with what changes, what the player sees, and what consequences emerge? Flag state mentioned elsewhere but missing from this section."
+      - "For each entity type (colonist, structure, resource, etc.): is the full lifecycle described — how is it created, how does it change, how does it end? Flag entities whose lifecycle is only partially specified."
+      - "If a player plays for 5 hours, what simulation requirements naturally become dominant? What becomes a bottleneck? What repeated behaviors are described elsewhere but missing from Simulation Requirements?"
       - "What simulation requirements emerge only after extended play that aren't obvious from the design doc's early-game descriptions?"
-      - "For every system: what feeds into it, what does it feed, and is that loop stable, escalating, or degenerative?"
+      - "For every interaction pattern: what triggers it, what direction does causality flow, and does the chain end in a player-visible consequence? Flag patterns that trail off or loop without observable outcome."
+      - "Does this section name specific systems (Task System, Power System, etc.) instead of describing requirements? The design doc defines WHAT the simulation must do, not WHICH systems do it."
 
   "## Philosophy":
     questions:
