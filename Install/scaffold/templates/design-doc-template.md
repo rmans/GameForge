@@ -143,19 +143,58 @@ Examples:
 
 ---
 
-## System Domains
+## Simulation Requirements
 
-### Major System Domains
-<!-- High-level gameplay domains the design requires. Not a full ownership map — that's Step 3. -->
+### State That Matters
+<!-- What persistent state does the game track that the player can observe or that drives gameplay?
+List the major state domains — not system names, but WHAT is being simulated and WHY it matters.
+For each: what changes, what the player sees, and what consequences emerge.
 
-### Major Mechanics
-<!-- The primary mechanics that support the core loop. -->
+Example:
+- **Colonist needs** — hunger, rest, morale change over time. Player sees mood indicators. Unmet needs cause work slowdowns, breakdowns, or abandonment.
+- **Power grid** — generation vs consumption. Player sees surplus/deficit. Brownouts disable rooms, cascade failures. -->
 
-### System Interaction Philosophy
-<!-- How should systems interact? Emergent problems from interaction, not isolated mechanics. -->
+### Behaviors That Need Rules
+<!-- What gameplay behaviors require persistent, rule-driven simulation?
+These are the interactions and dynamics that can't be hand-scripted — they need systems to govern them.
+
+Example:
+- Colonists autonomously select tasks based on skill and priority → requires task assignment logic
+- Damage propagates through connected rooms → requires structural integrity tracking
+- Weather events escalate based on biome instability → requires environmental hazard modeling -->
+
+### Player Actions That Need Governance
+<!-- What player actions affect the simulation and need rules to resolve?
+Focus on actions where the outcome isn't trivial — where the game must evaluate, schedule, or constrain.
+
+Example:
+- Player assigns zones → game must track zone types, permissions, and enforce boundaries
+- Player queues construction → game must schedule workers, track materials, resolve conflicts
+- Player dispatches expeditions → game must simulate off-map progress, risk, and return -->
+
+### Interaction Patterns
+<!-- How do different parts of the simulation affect each other?
+Describe the causal chains and feedback loops, not which systems talk to which.
+
+Example:
+- Low power → rooms go dark → colonist stress rises → work slows → less maintenance → more breakdowns
+- Storm damage → breaches → exposure risk → medical demand spikes → diverts workers from repair -->
 
 ### Simulation Depth Target
-<!-- What is simulated because it creates player decisions? What is deliberately NOT simulated? -->
+<!-- What is simulated because it creates player decisions? What is deliberately NOT simulated?
+Be explicit about where you draw the line.
+
+Example:
+Simulated: individual colonist needs, room-level power, per-tile damage
+NOT simulated: individual colonist pathfinding decisions, fluid dynamics, realistic physics -->
+
+### Simulation Boundaries
+<!-- What does the player NOT need a system for? What should be handled by simple rules, data tables, or UI?
+
+Example:
+- Tooltips and info panels are UI, not systems — they read state, they don't own it
+- Save/load is infrastructure, not gameplay — no persistent state to govern
+- Difficulty settings are data transforms, not behavioral domains -->
 
 ---
 

@@ -27,7 +27,7 @@ context:
   base:
     - file: design/design-doc.md
       class: canonical
-      sections: ["## System Domains", "## Control"]
+      sections: ["## Simulation Requirements", "## Control"]
       priority: 2
 
   per_target: []

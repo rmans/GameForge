@@ -127,7 +127,7 @@ Each step feeds the gate:
 /scaffold-seed design
 ```
 
-Scans the project (engine, languages, test frameworks, build system, CI, dependencies), presents findings for confirmation, then interviews the user one section group at a time (Identity, Shape, Control, World, Presentation, Content, System Domains, Philosophy, Scope). Technical Stack is pre-filled from the scan. The design doc is the highest-authority document — everything else flows from it.
+Scans the project (engine, languages, test frameworks, build system, CI, dependencies), presents findings for confirmation, then interviews the user one section group at a time (Identity, Shape, Control, World, Presentation, Content, Simulation Requirements, Philosophy, Scope). Technical Stack is pre-filled from the scan. The design doc is the highest-authority document — everything else flows from it.
 
 > For an existing design doc that needs updates: `/scaffold-seed design --mode fill-gaps|reconcile|refresh`
 
@@ -175,7 +175,7 @@ Called from the outer loop (Step 14) or when `/scaffold-revise foundation --mode
 /scaffold-seed systems
 ```
 
-Proposes systems from simulation responsibilities and owned player-facing concerns — not raw verbs. Reads Design Invariants, Player Control Model, Major System Domains, and Simulation Depth Target to shape proposals. Audits for overlap, missing coverage, invariant conflicts, and system category coverage before creation. Seeds glossary terms and creates system stubs with pre-filled purpose, simulation responsibility, design constraints, owned state, and dependencies.
+Proposes systems from simulation requirements — not system names. Reads the design doc's Simulation Requirements (State That Matters, Behaviors That Need Rules, Player Actions That Need Governance, Interaction Patterns), Core Loop, Secondary Loops, and Player Verbs to derive what systems must exist. Normalizes the candidate set (merge duplicates, enforce boundaries, rebalance domains, classify core vs support), then creates system stubs with pre-filled purpose, simulation responsibility, design constraints, owned state, and dependencies.
 
 To add a single system after initial seeding (e.g., when `revise-systems` detects emergent subsystem pressure, `validate` finds a design-to-systems gap, or a split is needed), use:
 

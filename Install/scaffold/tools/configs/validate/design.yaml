@@ -20,7 +20,7 @@ checks:
       description: "Required sections present"
       detection: section_structure
       target_files: ["design/design-doc.md"]
-      required_sections: [Identity, Shape, Control, World, Presentation, Content, "System Domains", Philosophy, Scope, "System Design Index"]
+      required_sections: [Identity, Shape, Control, World, Presentation, Content, "Simulation Requirements", Philosophy, Scope, "System Design Index"]
       severity: FAIL
 
     - id: design-section-health

@@ -19,7 +19,7 @@ context:
   base:
     - file: design/design-doc.md
       class: canonical
-      sections: ["## Identity", "## System Domains", "## Scope"]
+      sections: ["## Identity", "## Simulation Requirements", "## Scope"]
       priority: 1
     - file: design/systems/_index.md
       class: evidence

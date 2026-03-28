@@ -297,7 +297,7 @@ PYTHON: seed.py resolve → interview_index: 1
 PYTHON → action.json: { action: "interview", group: "Shape", ... group_index: 1 }
 CLAUDE: interviews user, writes answers
 ... repeats for Control, World, Presentation (incl Entity Presentation), Content,
-  System Domains, Philosophy, Scope (Technical Stack pre-filled from scan) ...
+  Simulation Requirements, Philosophy, Scope (Technical Stack pre-filled from scan) ...
 9 groups total
 ```
 
@@ -418,7 +418,7 @@ CLAUDE: /scaffold-review-apply → edits design-doc.md
 
 **L2 pass (one ## section at a time):**
 ```
-Same pattern but reviewing entire ## sections (Identity, Shape, Control, World, Presentation, Content, System Domains, Philosophy, Scope). Questions are holistic:
+Same pattern but reviewing entire ## sections (Identity, Shape, Control, World, Presentation, Content, Simulation Requirements, Philosophy, Scope). Questions are holistic:
   "Does the Identity section tell a coherent story from fantasy to invariants?"
 ```
 
@@ -480,7 +480,7 @@ PYTHON: seed.py preflight --layer systems
 PYTHON: seed.py next-action --layer systems
   → _build_inventory()
   → _extract_upstream_requirements() → reads design-doc.md
-    extract_sections: ["## Identity", "## Control", "## System Domains", "## Content"]
+    extract_sections: ["## Identity", "## Control", "## Simulation Requirements", "## Content"]
     (heading extraction — not raw 3000 chars)
   → _analyze_existing() → checks for existing SYS-*-*.md files
 
@@ -489,7 +489,7 @@ PYTHON: seed.py next-action --layer systems
 
 **Propose loop (one requirement at a time):**
 ```
-PYTHON → action.json: { action: "propose", requirement: { source: "design-doc.md", content: "## System Domains: Major System Domains..." } }
+PYTHON → action.json: { action: "propose", requirement: { source: "design-doc.md", content: "## Simulation Requirements: Major Simulation Requirements..." } }
 
 CLAUDE: /scaffold-seed-propose
   → reads design invariants, player control model, system domains, simulation depth
@@ -550,7 +550,7 @@ USER: /scaffold-seed references
 ```
 PYTHON: seed.py → reads all system designs
   extract_sections: ["### Purpose", "### Player Actions", "### Owned State", "### State Lifecycle", "### Asset Needs"]
-  → also reads design-doc.md: ["## Identity", "## Control", "## System Domains"]
+  → also reads design-doc.md: ["## Identity", "## Control", "## Simulation Requirements"]
 ```
 
 Seeds 9 docs: architecture.md, authority.md, interfaces.md, state-transitions.md, entity-components.md, resource-definitions.md, signal-registry.md, balance-params.md, enums-and-statuses.md
@@ -610,7 +610,7 @@ USER: /scaffold-seed roadmap
 ```
 
 ```
-PYTHON: seed.py → reads design-doc.md ["## Identity", "## System Domains", "## Scope"]
+PYTHON: seed.py → reads design-doc.md ["## Identity", "## Simulation Requirements", "## Scope"]
   → reads systems/_index.md
   → proposes phase skeleton, maps systems to phases
   → user confirms
@@ -636,7 +636,7 @@ USER: /scaffold-seed phases
 
 ```
 PYTHON: seed.py → reads roadmap ["### Phase Overview", "### Capability Ladder", "### System Coverage Map"]
-  → reads design-doc ["## Identity", "## System Domains", "## Content"]
+  → reads design-doc ["## Identity", "## Simulation Requirements", "## Content"]
   → reads systems ["### Purpose", "### Owned State"]
   → proposes phase stubs → user confirms → creates PHASE-001, PHASE-002, ...
   → updates roadmap Phase Overview table

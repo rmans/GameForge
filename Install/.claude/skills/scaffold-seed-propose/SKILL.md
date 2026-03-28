@@ -79,8 +79,8 @@ Read the Core Loop section. But NOT every loop step becomes a system. A loop ste
 **Priority 2 — Secondary Loops → extract supporting systems.**
 Read the Secondary Loops section. Each longer cycle implies supporting systems. If a secondary loop is already covered by a Tier 1 system, note the coverage rather than duplicating. Example: "Expedition Arc" → Expedition System. "Maintenance Cycle" → Containment System.
 
-**Priority 3 — State Domains → extract simulation systems.**
-Read System Domains, Content Categories, and narrative context. Identify major state domains — things the player can observe or that drive gameplay decisions. Each distinct state domain needs a simulation system. Example: Power, Instability, Colonist Needs, Containment, Resources.
+**Priority 3 — Simulation Requirements → extract simulation systems.**
+Read the Simulation Requirements section (State That Matters, Behaviors That Need Rules, Player Actions That Need Governance), Content Categories, and narrative context. Identify major state domains — things the player can observe or that drive gameplay decisions. Each distinct state domain needs a simulation system. Example: Power, Instability, Colonist Needs, Containment, Resources.
 
 **Priority 4 — Player Verbs → extract control systems.**
 Read the Player Verbs section. **Multiple verbs that operate on the same domain must be grouped into a single system.** Example: "assign", "prioritize", "queue", "cancel" are all Task System verbs — NOT four separate systems. A verb generates a NEW system only if no existing candidate from priorities 1-3 covers its domain. Example: "Build" → Construction System (new). "Zone" → Zone System (new). "Assign" → already covered by Task System (note coverage).

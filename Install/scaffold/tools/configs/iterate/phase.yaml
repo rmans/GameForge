@@ -23,7 +23,7 @@ context:
       priority: 1
     - file: design/design-doc.md
       class: canonical
-      sections: ["## System Domains", "## Scope"]
+      sections: ["## Simulation Requirements", "## Scope"]
       priority: 2
 
   per_target:

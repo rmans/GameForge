@@ -25,7 +25,7 @@ context:
   on_demand:
     - file: design/design-doc.md
       class: canonical
-      sections: ["## Identity", "## System Domains"]
+      sections: ["## Identity", "## Simulation Requirements"]
       priority: 4
 
 editable_files:

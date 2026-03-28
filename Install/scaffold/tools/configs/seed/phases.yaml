@@ -24,10 +24,10 @@ upstream_sources:
       - "### System Coverage Map"
   - type: design
     glob: "design/design-doc.md"
-    extract: "Design doc scope and system domains inform phase goals"
+    extract: "Design doc scope and simulation requirements inform phase goals"
     extract_sections:
       - "## Identity"
-      - "## System Domains"
+      - "## Simulation Requirements"
       - "## Content"
   - type: system
     glob: "design/systems/SYS-*-*.md"
@@ -40,5 +40,5 @@ dependency_checks: []
 
 coverage_rules:
   - "Every roadmap phase has a phase scope gate document"
-  - "Every design doc major mechanic maps to at least one phase"
+  - "Every design doc simulation requirement maps to at least one phase"
   - "Phase entry/exit criteria form a valid chain"

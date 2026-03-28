@@ -16,20 +16,21 @@ preflight:
 upstream_sources:
   - type: design
     glob: "design/design-doc.md"
-    extract: "Gameplay loops, player verbs, state domains, system domains, and simulation depth drive system identification"
+    extract: "Gameplay loops, player verbs, simulation requirements, and state domains drive system identification"
     extract_sections:
       - "## Identity"
       - "## Shape"
       - "## Control"
-      - "## System Domains"
+      - "## Simulation Requirements"
       - "## Content"
       - "## Philosophy"
 
 dependency_checks: []
 
 coverage_rules:
-  - "Every Major System Domain has at least one system"
-  - "Every Major Mechanic has an owning system"
+  - "Every entry in State That Matters has at least one owning system"
+  - "Every entry in Behaviors That Need Rules has at least one owning system"
+  - "Every entry in Player Actions That Need Governance has at least one owning system"
   - "No two systems have overlapping Simulation Responsibility"
   - "Core Loop steps are covered by the system set"
   - "Every Secondary Loop has at least one owning system"
@@ -47,7 +48,7 @@ propose_rules:
       rule: "Each Secondary Loop implies at least one supporting system. If a secondary loop is already covered by a Tier 1 system, do not create a duplicate — note the coverage."
     - priority: 3
       source: "State Domains"
-      rule: "Identify major state domains from System Domains, Content Categories, and narrative context. Each distinct state domain that players can observe or that drives gameplay needs a simulation system. These are the simulation backbone."
+      rule: "Identify major state domains from Simulation Requirements (State That Matters, Behaviors That Need Rules), Content Categories, and narrative context. Each distinct state domain that players can observe or that drives gameplay needs a simulation system. These are the simulation backbone."
     - priority: 4
       source: "Player Verbs"
       rule: "Multiple verbs that operate on the same domain must be grouped into a single system. Example: assign, prioritize, queue, cancel all belong to the Task System — not four separate systems. A verb generates a NEW system only if no existing candidate covers its domain."

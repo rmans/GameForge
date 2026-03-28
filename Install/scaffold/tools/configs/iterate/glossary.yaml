@@ -18,7 +18,7 @@ context:
   base:
     - file: design/design-doc.md
       class: canonical
-      sections: ["## Identity", "## System Domains"]
+      sections: ["## Identity", "## Simulation Requirements"]
       priority: 1
     - file: design/systems/_index.md
       class: evidence
@@ -46,7 +46,7 @@ l2_sections:
   "## Terms":
     questions:
       - "Is each term defined unambiguously — could two people read the definition and agree on meaning?"
-      - "Does every term from the design doc's Core Fantasy, Pillars, and System Domains appear here?"
+      - "Does every term from the design doc's Core Fantasy, Pillars, and Simulation Requirements appear here?"
       - "Are NOT-column entries specific enough to catch misuse? 'Don't say worker' is useful. 'Don't use synonyms' is vague."
       - "Are there terms used across system designs that aren't in the glossary?"
       - "Are definitions player-facing (behavioral) not implementation-facing (technical)?"

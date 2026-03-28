@@ -20,7 +20,7 @@ context:
   base:
     - file: design/design-doc.md
       class: canonical
-      sections: ["## Identity", "## Control", "## System Domains"]
+      sections: ["## Identity", "## Control", "## Simulation Requirements"]
       priority: 1
 
   per_target:

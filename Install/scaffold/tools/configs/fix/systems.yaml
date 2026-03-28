@@ -20,7 +20,7 @@ context:
   base:
     - file: design/design-doc.md
       class: canonical
-      sections: ["## Identity", "## Control", "## System Domains"]
+      sections: ["## Identity", "## Control", "## Simulation Requirements"]
       priority: 1
     - file: design/glossary.md
       class: constraint
@@ -281,7 +281,7 @@ signals:
 
     - id: missing_coverage
       description: "Design doc mechanics not covered by any system"
-      detection: "Compare design doc Core Loop, Major Mechanics, Domains against system set"
+      detection: "Compare design doc Core Loop, Behaviors That Need Rules, Simulation Requirements against system set"
       range_only: true
 
     - id: state_machine_mismatch

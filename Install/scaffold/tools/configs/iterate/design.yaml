@@ -30,7 +30,7 @@ context:
       - file: design/systems/_index.md
         class: evidence
         priority: 3
-    "### Major System Domains":
+    "### State That Matters":
       - file: design/systems/_index.md
         class: evidence
         priority: 2
@@ -271,37 +271,51 @@ l3_sections:
     questions:
       - "Is the replay model supported by the content structure, or is it aspirational?"
 
-  # -- System Domains --
+  # -- Simulation Requirements --
 
-  "### Major System Domains":
-    parent: "## System Domains"
+  "### State That Matters":
+    parent: "## Simulation Requirements"
     questions:
-      - "List ALL implied systems required to make this design functional. Do not assume they exist. For each: what player behavior requires it, what breaks without it, whether it is currently defined, underdefined, or missing."
-      - "What systems typically exist in colony sims / management games that are absent here? For each: is it intentionally excluded (cite Design Boundaries) or accidentally missing?"
-      - "Which named systems lack enough behavioral description to generate a SYS-### doc? What specific behaviors are missing?"
-      - "Which 3 systems are absolutely load-bearing — they define the core experience minute-to-minute? Which systems support those? Which are optional flavor-layer?"
-      - "At what point in the game does each system become relevant? What systems are irrelevant early but critical late? What systems overwhelm the player if introduced too early?"
+      - "List ALL simulation state implied by the design. For each: what player behavior depends on it, what breaks without it, whether it is currently defined, underdefined, or missing."
+      - "What state typically exists in colony sims / management games that is absent here? For each: is it intentionally excluded (cite Design Boundaries) or accidentally missing?"
+      - "Is each piece of state described concretely enough to assign to a system? What state is named but behaviorally undefined?"
+      - "Which 3-5 pieces of state are absolutely load-bearing — they define the core experience minute-to-minute? Which state supports those? Which is optional flavor-layer?"
+      - "At what point in the game does each piece of state become relevant? What state is irrelevant early but critical late?"
 
-  "### Major Mechanics":
-    parent: "## System Domains"
+  "### Behaviors That Need Rules":
+    parent: "## Simulation Requirements"
     questions:
-      - "Do mechanics map to systems? Are there mechanics with no system owner?"
-      - "Which systems are doing 3+ unrelated jobs? What would a clean split look like?"
-      - "Over-design test: which systems do not meaningfully affect player decisions? Which could be removed with minimal gameplay impact? Which are solving a problem that doesn't exist?"
+      - "Does every described behavior map to at least one system? Are there behaviors with no system owner?"
+      - "Which behaviors are doing 3+ unrelated jobs within a single system? What would a clean split look like?"
+      - "Over-design test: which behaviors do not meaningfully affect player decisions? Which could be removed with minimal gameplay impact? Which are solving a problem that doesn't exist?"
 
-  "### System Interaction Philosophy":
-    parent: "## System Domains"
+  "### Player Actions That Need Governance":
+    parent: "## Simulation Requirements"
     questions:
-      - "Is the philosophy specific enough to guide system design?"
+      - "Does every player action have a clear system that receives and processes it?"
+      - "Are there player actions that require validation, authorization, or conflict resolution that no system currently owns?"
+      - "Which player actions have ambiguous ownership — where two systems could plausibly handle the same action?"
+
+  "### Interaction Patterns":
+    parent: "## Simulation Requirements"
+    questions:
+      - "Are interaction patterns specific enough to guide system design?"
       - "For each described interaction: what triggers it, which direction does data flow, and what happens if one system is unavailable?"
       - "Are there behaviors that require multiple systems to coordinate without a defined boundary between them?"
       - "What system becomes the 'meta driver' — the one that most other systems depend on or respond to? Is that dependency explicit?"
 
   "### Simulation Depth Target":
-    parent: "## System Domains"
+    parent: "## Simulation Requirements"
     questions:
       - "Does the depth target match the scope commitment?"
       - "Does the doc acknowledge the depth-vs-breadth tradeoff?"
+
+  "### Simulation Boundaries":
+    parent: "## Simulation Requirements"
+    questions:
+      - "Are boundaries concrete — do they name specific things the simulation will NOT model?"
+      - "Do boundaries prevent scope creep into unnecessary simulation detail?"
+      - "Are there implicit simulation assumptions that should be explicit boundaries?"
 
   # -- Philosophy --
 
@@ -431,15 +445,15 @@ l2_sections:
       - "Is content scope honest? Does structure support replayability claims?"
       - "Is the procedural/authored boundary clear?"
 
-  "## System Domains":
+  "## Simulation Requirements":
     questions:
-      - "List all systems required for the game described in Identity and Shape to function. Categorize each as: explicitly defined, underdefined, or missing. Do not assume completeness."
+      - "List all simulation state, behaviors, and player actions required for the game described in Identity and Shape to function. Categorize each as: explicitly defined, underdefined, or missing. Do not assume completeness."
       - "Does the simulation depth target match the scope commitment?"
-      - "Walk through each loop, mechanic, and player verb — what system owns each step? Flag any step with no owner or ambiguous ownership."
+      - "Walk through each loop, behavior, and player verb — what system owns each step? Flag any step with no owner or ambiguous ownership."
       - "For every piece of game state mentioned (health, mood, instability, skills, position, inventory) — what system writes it? Flag any state with no clear writer or multiple implied writers."
       - "For each entity type (colonist, structure, resource, etc.): how is it created, how does it change, how does it end? Which system owns each lifecycle stage?"
-      - "If a player plays for 5 hours, what systems naturally become dominant? What systems become bottlenecks? What repeated behaviors require dedicated systems that aren't named?"
-      - "What systems emerge only after extended play that aren't obvious from the design doc's early-game descriptions?"
+      - "If a player plays for 5 hours, what simulation requirements naturally become dominant? What becomes a bottleneck? What repeated behaviors require dedicated systems that aren't named?"
+      - "What simulation requirements emerge only after extended play that aren't obvious from the design doc's early-game descriptions?"
       - "For every system: what feeds into it, what does it feed, and is that loop stable, escalating, or degenerative?"
 
   "## Philosophy":
@@ -451,7 +465,7 @@ l2_sections:
 
   "## Scope":
     questions:
-      - "Does scope honestly reflect what Shape + System Domains promise?"
+      - "Does scope honestly reflect what Shape + Simulation Requirements promise?"
       - "Is the MVP real — does it include the Core Loop?"
       - "Are there features that appear small but are structurally central and likely to expand?"
 

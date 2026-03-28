@@ -37,7 +37,7 @@ upstream_sources:
     extract_sections:
       - "## Identity"
       - "## Control"
-      - "## System Domains"
+      - "## Simulation Requirements"
 
 dependency_checks: []
 

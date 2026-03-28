@@ -19,7 +19,7 @@ context:
       priority: 1
     - file: design/design-doc.md
       class: canonical
-      sections: ["## System Domains"]
+      sections: ["## Simulation Requirements"]
       priority: 2
 
 editable_files:

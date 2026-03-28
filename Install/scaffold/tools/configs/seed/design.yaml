@@ -64,11 +64,14 @@ project_context:
       questions:
         - "What content does the game have?"
         - "What's procedural vs hand-authored?"
-    - group: "System Domains"
-      subsections: ["Major System Domains", "Major Mechanics", "System Interaction Philosophy", "Simulation Depth Target"]
+    - group: "Simulation Requirements"
+      subsections: ["State That Matters", "Behaviors That Need Rules", "Player Actions That Need Governance", "Interaction Patterns", "Simulation Depth Target", "Simulation Boundaries"]
       questions:
-        - "What are the major system domains?"
-        - "How deep is the simulation?"
+        - "What persistent state does the game track that the player can observe or that drives consequences?"
+        - "What gameplay behaviors need rule-driven simulation (can't be hand-scripted)?"
+        - "What player actions affect the simulation and need the game to evaluate or constrain them?"
+        - "How do different parts of the simulation affect each other (causal chains, feedback loops)?"
+        - "What is deliberately NOT simulated?"
     - group: "Philosophy"
       subsections: ["Failure Philosophy", "Risk / Reward Philosophy", "Simulation Transparency Policy", "Information Clarity Principle", "Decision Anchors", "Design Pressure Tests", "Design Gravity", "Design Boundaries", "Learning Curve Strategy"]
       questions:

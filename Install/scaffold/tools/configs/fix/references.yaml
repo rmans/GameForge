@@ -25,7 +25,7 @@ context:
   base:
     - file: design/design-doc.md
       class: canonical
-      sections: ["## System Domains"]
+      sections: ["## Simulation Requirements"]
       priority: 1
     - file: design/glossary.md
       class: constraint
