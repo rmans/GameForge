@@ -89,7 +89,7 @@ l3_sections:
   "### Core Pillars":
     parent: "## Identity"
     questions:
-      - "Does each pillar appear in at least one concrete section (a loop, a mechanic, a system domain)?"
+      - "Does each pillar appear in at least one concrete section (a loop, a mechanic, a simulation requirement)?"
       - "Are pillars distinct from each other, or do they overlap?"
       - "Are there pillars that exist only as aspirations with no mechanical expression?"
 
@@ -159,7 +159,7 @@ l3_sections:
     parent: "## Control"
     questions:
       - "Is the control model specific and consistent with Core Fantasy?"
-      - "Does it match what Player Actions in system designs describe?"
+      - "Is it consistent with the Player Verbs and Player Actions That Need Governance sections?"
 
   "### Control Philosophy":
     parent: "## Control"
@@ -171,13 +171,13 @@ l3_sections:
     parent: "## Control"
     questions:
       - "Are verbs concrete actions, not abstractions?"
-      - "Does every verb trace to at least one system's Player Actions?"
-      - "Walk through every verb — what system receives and processes it? Flag any verb with no clear system handler."
+      - "Does every verb appear in Player Actions That Need Governance or is it trivial enough to not need governance?"
+      - "Walk through every verb — is the underlying state change and governance requirement described in Simulation Requirements? Flag any verb where the design doc doesn't explain what makes the action non-trivial."
 
   "### Player Mental Model":
     parent: "## Control"
     questions:
-      - "Does it align with what the loops and systems actually produce?"
+      - "Does it align with what the loops, simulation requirements, and interaction patterns actually produce?"
       - "If the mental model says 'manage a living colony' but loops describe clicking timers, the player will feel deceived."
 
   "### Feedback Loops":
@@ -209,7 +209,7 @@ l3_sections:
   "### Factions / Forces":
     parent: "## World"
     questions:
-      - "Do factions have mechanical impact described elsewhere (loops, systems, decisions)?"
+      - "Do factions have mechanical impact described elsewhere (loops, simulation requirements, decisions)?"
       - "Factions without mechanics are worldbuilding without gameplay."
 
   # -- Presentation --
@@ -238,7 +238,7 @@ l3_sections:
       - "Are all major content categories represented with visual identity, animations, and sound identity?"
       - "Do animation sets cover the player verbs and state transitions for each entity type?"
       - "Does the sound identity support the game's audio direction?"
-      - "Is this specific enough for system designs and specs to inherit asset needs?"
+      - "Is this specific enough for downstream docs (system designs, specs) to inherit asset needs?"
       - "Are there content categories listed in Content Categories that have no presentation entry?"
 
   "### Player Information Model":
@@ -277,32 +277,32 @@ l3_sections:
     parent: "## Simulation Requirements"
     questions:
       - "List ALL simulation state implied by the design. For each: what player behavior depends on it, what breaks without it, whether it is currently defined, underdefined, or missing."
-      - "What state typically exists in colony sims / management games that is absent here? For each: is it intentionally excluded (cite Design Boundaries) or accidentally missing?"
-      - "Is each piece of state described concretely enough to assign to a system? What state is named but behaviorally undefined?"
+      - "What state typically exists in this genre that is absent here? For each: is it intentionally excluded (cite Design Boundaries or Simulation Boundaries) or accidentally missing?"
+      - "Does every entry describe three things: what changes, what the player sees, and what consequences emerge? Flag entries that name state without explaining why it matters to the player."
       - "Which 3-5 pieces of state are absolutely load-bearing — they define the core experience minute-to-minute? Which state supports those? Which is optional flavor-layer?"
       - "At what point in the game does each piece of state become relevant? What state is irrelevant early but critical late?"
 
   "### Behaviors That Need Rules":
     parent: "## Simulation Requirements"
     questions:
-      - "Does every described behavior map to at least one system? Are there behaviors with no system owner?"
-      - "Which behaviors are doing 3+ unrelated jobs within a single system? What would a clean split look like?"
+      - "Is every entry a genuine gameplay behavior that needs persistent, rule-driven simulation? Or are some really UI concerns, one-time events, or data lookups disguised as behaviors?"
+      - "Are any behaviors described so broadly that they conflate 3+ unrelated dynamics? What would a clean decomposition look like?"
       - "Over-design test: which behaviors do not meaningfully affect player decisions? Which could be removed with minimal gameplay impact? Which are solving a problem that doesn't exist?"
 
   "### Player Actions That Need Governance":
     parent: "## Simulation Requirements"
     questions:
-      - "Does every player action have a clear system that receives and processes it?"
-      - "Are there player actions that require validation, authorization, or conflict resolution that no system currently owns?"
-      - "Which player actions have ambiguous ownership — where two systems could plausibly handle the same action?"
+      - "Does every entry explain what makes the action non-trivial — what evaluation, scheduling, conflict resolution, or constraint the game must apply?"
+      - "Are there player actions described in Player Verbs or the Core Loop that are missing from this section?"
+      - "Are any entries trivial actions that don't actually need governance (e.g., opening a menu, scrolling a list)?"
 
   "### Interaction Patterns":
     parent: "## Simulation Requirements"
     questions:
-      - "Are interaction patterns specific enough to guide system design?"
-      - "For each described interaction: what triggers it, which direction does data flow, and what happens if one system is unavailable?"
-      - "Are there behaviors that require multiple systems to coordinate without a defined boundary between them?"
-      - "What system becomes the 'meta driver' — the one that most other systems depend on or respond to? Is that dependency explicit?"
+      - "Are interaction patterns specific enough to derive system boundaries from? Could two developers read this and agree on where one simulation concern ends and another begins?"
+      - "For each described interaction: what triggers it, which direction does causality flow, and does the chain end in a player-visible consequence? Flag patterns that trail off or loop without observable outcome."
+      - "Are there interactions that span multiple distinct state domains without clarifying how they connect? What are the handoff points?"
+      - "Which interaction pattern is the 'meta driver' — the one most other patterns depend on or respond to? Is that centrality explicit or accidental?"
 
   "### Simulation Depth Target":
     parent: "## Simulation Requirements"
@@ -325,8 +325,8 @@ l3_sections:
       - "Does it describe what failure feels like, not just what triggers it?"
       - "Is failure interesting (player agency during failure) or just punitive?"
       - "What does the player DO after failure? How long does recovery take? When does recovery feel pointless vs engaging?"
-      - "When something goes wrong, which system is responsible? Can two systems both try to resolve the same failure?"
-      - "Trace every failure scenario in Failure Philosophy and Pressure Tests — what systems participate in each cascade? Are any steps unowned?"
+      - "When something goes wrong, which simulation domain handles it? Could two distinct areas of the simulation both try to resolve the same failure — and is that overlap described in Interaction Patterns?"
+      - "Trace every failure scenario in Failure Philosophy and Pressure Tests through the simulation requirements — what state changes, what behaviors fire, what consequences cascade? Are any steps in the chain not covered by Simulation Requirements?"
 
   "### Risk / Reward Philosophy":
     parent: "## Philosophy"
@@ -362,7 +362,7 @@ l3_sections:
     parent: "## Philosophy"
     questions:
       - "Does gravity describe evolution directions distinct from Core Pillars?"
-      - "Are the directions achievable given the systems described?"
+      - "Are the directions achievable given the simulation requirements described?"
       - "Are there 3-4 gravity directions?"
 
   "### Design Boundaries":
@@ -374,7 +374,7 @@ l3_sections:
   "### Learning Curve Strategy":
     parent: "## Philosophy"
     questions:
-      - "Does it match the actual complexity in the loops, decisions, and systems?"
+      - "Does it match the actual complexity in the loops, decisions, and simulation requirements?"
 
   # -- Scope --
 
