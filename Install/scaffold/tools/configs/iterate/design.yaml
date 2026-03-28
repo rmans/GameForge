@@ -115,6 +115,7 @@ l3_sections:
       - "Does it match the Player Control Model?"
       - "If control is indirect but the loop describes direct actions, which is wrong?"
       - "What is the player physically doing for an uninterrupted 5 minutes? What inputs are repeated most?"
+      - "Do the Player Verbs actually appear in the loop steps? List every verb and check — verbs that aren't in any loop are aspirational."
 
   "### Secondary Loops":
     parent: "## Shape"
@@ -152,6 +153,7 @@ l3_sections:
     questions:
       - "Does the cadence match the session shape?"
       - "A 30-minute session with only 2 meaningful decisions is a watching game."
+      - "Is the Core Loop fast enough to support the claimed density? Count the loop steps and estimate real-time duration per cycle."
 
   # -- Control --
 
@@ -185,6 +187,7 @@ l3_sections:
     questions:
       - "Does every player action have a described feedback path?"
       - "Are positive and negative feedback loops balanced?"
+      - "Do feedback loops promise real-time visibility into state that the Simulation Transparency Policy or Player Information Model says is hidden or delayed? If so, which is wrong?"
 
   # -- World --
 
@@ -193,24 +196,28 @@ l3_sections:
     questions:
       - "Is the setting specific enough to guide art and audio direction?"
       - "Does it support the Core Fantasy?"
+      - "Does the setting constrain or enable the mechanics? Could this game work equally well in a different setting? If yes, the setting is decoration — either commit to it mechanically or acknowledge it's flavor."
 
   "### Tone":
     parent: "## World"
     questions:
       - "Does the tone match the Core Fantasy? Grim tone + whimsical fantasy = dissonance."
       - "Is it consistent across the document?"
+      - "Does the tone match what the gameplay actually produces? A 'tense survival' tone with a forgiving simulation creates dissonance the player feels but can't name."
 
   "### Narrative Wrapper":
     parent: "## World"
     questions:
       - "Does it carry gameplay weight, or is it only flavor?"
       - "If factions exist in the narrative but have no mechanical expression, they're decoration."
+      - "What happens to the narrative over a full playthrough? Does it evolve, escalate, or just repeat the same frame?"
 
   "### Factions / Forces":
     parent: "## World"
     questions:
       - "Do factions have mechanical impact described elsewhere (loops, simulation requirements, decisions)?"
       - "Factions without mechanics are worldbuilding without gameplay."
+      - "Do factions create asymmetric gameplay (different strategies, different threats) or are they just flavor labels with identical behavior?"
 
   # -- Presentation --
 
@@ -248,6 +255,7 @@ l3_sections:
       - "Does it enable the Decision Types described? If decisions require planning but info is hidden, the player can't plan."
       - "If 5 problems exist simultaneously, how does the player identify the top priority? What happens if they pick wrong?"
       - "What must the player track simultaneously at peak complexity? What can safely be ignored without punishment?"
+      - "Imagine the busiest possible screen state — every active simulation element competing for attention. What gets lost? What overlaps? What information hierarchy prevents overload?"
 
   # -- Content --
 
@@ -255,21 +263,28 @@ l3_sections:
     parent: "## Content"
     questions:
       - "Does it support the Replayability Model?"
+      - "Is content organized by how the player encounters it (progression), or by how the developer organizes it (taxonomy)? The former drives design, the latter is just filing."
 
   "### Content Categories":
     parent: "## Content"
     questions:
       - "Are categories complete for the game described?"
+      - "For each loop and player verb, what content does it consume or produce? Are there implied categories not listed here?"
+      - "Which content category has the highest volume? Is that volume achievable given scope?"
 
   "### Procedural vs Authored":
     parent: "## Content"
     questions:
       - "Is the boundary explicit? Fuzzy boundaries create scope creep."
+      - "What happens when procedural output produces something that contradicts the tone, narrative, or balance? Is there a described filter or rejection mechanism?"
+      - "What is the minimum authored content needed for the procedural system to produce coherent output?"
 
   "### Replayability Model":
     parent: "## Content"
     questions:
       - "Is the replay model supported by the content structure, or is it aspirational?"
+      - "What changes between run 1 and run 5? If nothing mechanical changes, replay relies entirely on player-generated goals."
+      - "Does replay come from variety (different content), mastery (better execution), or emergence (different systemic outcomes)? Is the source explicit?"
 
   # -- Simulation Requirements --
 
@@ -375,6 +390,9 @@ l3_sections:
     parent: "## Philosophy"
     questions:
       - "Does it match the actual complexity in the loops, decisions, and simulation requirements?"
+      - "What mechanics are introduced in what order? Is there a dependency chain — does mechanic B require understanding mechanic A?"
+      - "What happens if the player skips or misunderstands early teaching? Can they recover, or do they hit a wall hours later?"
+      - "At what complexity point do most players in this genre quit? Does the design acknowledge this threshold and plan for it?"
 
   # -- Scope --
 
@@ -455,6 +473,7 @@ l2_sections:
       - "If a player plays for 5 hours, what simulation requirements naturally become dominant? What becomes a bottleneck? What repeated behaviors are described elsewhere but missing from Simulation Requirements?"
       - "What simulation requirements emerge only after extended play that aren't obvious from the design doc's early-game descriptions?"
       - "For every interaction pattern: what triggers it, what direction does causality flow, and does the chain end in a player-visible consequence? Flag patterns that trail off or loop without observable outcome."
+      - "Count the distinct simulation requirements (state domains, behaviors, governed actions). Is this achievable for the scope described? Simulation requirements are where scope creep hides — each one implies a system, specs, tasks, and testing."
       - "Does this section name specific systems (Task System, Power System, etc.) instead of describing requirements? The design doc defines WHAT the simulation must do, not WHICH systems do it."
 
   "## Philosophy":
@@ -482,6 +501,7 @@ l1_questions:
   - "Does the design describe a game where interruption, stale targets, and continuous world churn are normal — or does it implicitly assume clean execution paths?"
   - "This design is incomplete. Prove it: list every system you would be forced to invent during SYS-### generation because the design implies behavior but never assigns ownership. For each: name the behavior, name the system it needs, and state what breaks without it."
   - "What will the player confidently believe about a mechanic that is actually wrong? Where will misinterpretation cause them to quit?"
+  - "Which section adds the least to the design? Could it be removed without changing what gets built? Sections that exist because the template had a slot — not because the game needs them — are bloat that dilutes the signal."
 
 stress_test:
   mode: interrogation
