@@ -805,6 +805,13 @@ def cmd_next_action(args):
     session_id = _session_id(args.layer, args.target)
     session = _load_session(session_id)
 
+    # Discard exhausted sessions so re-running starts fresh
+    if session and session.get("phase") == "done":
+        session_path = _session_path(session_id)
+        if session_path.exists():
+            session_path.unlink()
+        session = None
+
     if not session:
         # Build inventory and extract requirements
         inventory = _build_inventory(config)

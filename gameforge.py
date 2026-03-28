@@ -13,7 +13,7 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
-VERSION = "3.5.2"
+VERSION = "3.5.3"
 GITHUB_ZIP_URL = "https://github.com/rmans/GameForge/archive/refs/heads/{branch}.zip"
 EXCLUDE_DIRS = {"__pycache__"}
 SCAFFOLD_SKILL_PREFIX = "scaffold-"
