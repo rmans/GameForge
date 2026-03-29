@@ -42,28 +42,35 @@ project_context:
         - "What does the player do moment-to-moment? (Core Loop)"
         - "What wraps around the core loop? (Secondary Loops)"
         - "How long is a session and what's its arc?"
-        - "How does the player progress over time?"
+        - "How does the player progress over time — what changes between hour 1 and hour 20?"
+        - "What kinds of decisions does the game demand — tactical, strategic, economic, risk, information?"
+        - "How often does the player make a meaningful decision — every few seconds, every minute, every few minutes?"
     - group: "Control"
       subsections: ["Player Control Model", "Control Philosophy", "Player Verbs", "Player Mental Model", "Feedback Loops"]
       questions:
-        - "How does the player interact — direct control, indirect, hybrid?"
+        - "How does the player interact — direct control, indirect, hybrid? What do they directly control, indirectly influence, and have no control over?"
         - "What are the player's verbs (concrete actions)?"
+        - "How does the game communicate the results of player actions — what feedback loops exist?"
     - group: "World"
       subsections: ["Place & Time", "Tone", "Narrative Wrapper", "Factions / Forces"]
       questions:
         - "Where and when is the game set?"
         - "What's the tone — grim, whimsical, clinical, warm?"
+        - "What story or context frames the gameplay? Does the narrative carry gameplay weight or is it flavor?"
+        - "What opposing or allied forces exist? Do they have mechanical impact?"
     - group: "Presentation"
       subsections: ["Camera", "Aesthetic Pillars", "Audio Direction", "Player Information Model"]
       questions:
         - "What's the camera perspective?"
         - "What does the game look like (art style)?"
-        - "How much information does the player see?"
+        - "What information is always visible vs available on demand vs hidden? What's the priority hierarchy?"
+        - "How deep can the player drill into any piece of information — just the state, the reason why, or exact numbers?"
     - group: "Content"
       subsections: ["Content Structure", "Content Categories", "Procedural vs Authored", "Replayability Model"]
       questions:
-        - "What content does the game have?"
-        - "What's procedural vs hand-authored?"
+        - "What are the major content categories — structures, units, resources, events, biomes, etc.?"
+        - "What's procedural vs hand-authored? What's the minimum authored content needed?"
+        - "What drives replay value — procedural variety, mastery, emergence, or something else?"
     - group: "Simulation Requirements"
       subsections: ["State That Matters", "Behaviors That Need Rules", "Player Actions That Need Governance", "Interaction Patterns", "Simulation Depth Target", "Simulation Boundaries"]
       questions:
@@ -75,9 +82,14 @@ project_context:
     - group: "Philosophy"
       subsections: ["Failure Philosophy", "Risk / Reward Philosophy", "Simulation Transparency Policy", "Information Clarity Principle", "Decision Anchors", "Design Pressure Tests", "Design Gravity", "Design Boundaries", "Learning Curve Strategy"]
       questions:
-        - "What happens when the player fails?"
-        - "How transparent is the simulation?"
-        - "What is the game NOT?"
+        - "What happens when the player fails — how severe are consequences, how long is recovery, can failures cascade?"
+        - "How does the game reward risk-taking vs cautious play?"
+        - "How transparent is the simulation — can the player see the numbers, or just the effects?"
+        - "When two valid design choices conflict, what 3-5 tie-breaker rules apply? (Decision Anchors, format: 'X over Y')"
+        - "What 3-6 extreme scenarios should the design survive without breaking? (Pressure Tests)"
+        - "Where should the game deepen over time — what are 3-4 evolution directions? (Design Gravity)"
+        - "What is the game NOT? What boundaries prevent scope drift?"
+        - "How are complex mechanics introduced to the player? What's the learning curve strategy?"
     - group: "Scope"
       subsections: ["Scope Reality Check", "Target Platforms", "Accessibility Goals", "Performance Targets", "Technical Stack"]
       questions:

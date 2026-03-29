@@ -51,7 +51,14 @@ Downstream docs cite them using `Invariant: <ShortName>`. -->
 <!-- What does a typical play session look like from start to save? -->
 
 ### Progression Arc
-<!-- How does the player's experience change from first hour to endgame? -->
+<!-- How does the player's experience change from first hour to endgame?
+
+Describe at least three phases:
+- **Early game** (first 1-2 hours) — what is the player learning? What mechanics are available?
+- **Mid game** — what new decisions emerge? What changes from the early game?
+- **Late game / endgame** — what does mastery look like? What keeps the player engaged?
+
+What stays the same across the arc? What fundamentally changes? -->
 
 ### Player Goals
 <!-- Short-term, mid-term, and long-term motivations. Why does the player keep playing? -->
@@ -67,13 +74,26 @@ Downstream docs cite them using `Invariant: <ShortName>`. -->
 ## Control
 
 ### Player Control Model
-<!-- What the player directly controls, indirectly influences, and cannot control. -->
+<!-- What the player directly controls, indirectly influences, and cannot control.
+For each category, explain WHY it's in that category — what design goal does the control level serve?
+
+- **Direct control** — player acts, world responds immediately. Why direct?
+- **Indirect influence** — player sets policy/priority, simulation executes. Why indirect?
+- **No control** — happens regardless of player action. Why uncontrollable? -->
 
 ### Control Philosophy
 <!-- How does control feel? Steering a system, commanding units, managing policy? -->
 
 ### Player Verbs
-<!-- The actions the player performs. Build, assign, research, explore, etc. -->
+<!-- The actions the player performs. Build, assign, research, explore, etc.
+
+| Verb | Input | Target | Outcome |
+|------|-------|--------|---------|
+
+Examples:
+| Build | Click placement grid | Empty tile | Structure begins construction |
+| Assign | Drag colonist to task | Task queue slot | Colonist prioritizes that task |
+| Zone | Paint area on map | Tile region | Area gains type and permissions | -->
 
 ### Player Mental Model
 <!-- How should the player conceptually understand the world? What do they believe is happening? -->
@@ -123,7 +143,23 @@ Examples:
 | Environment | Procedural terrain with biome-specific vegetation | Wind sway (vegetation), weather particles | Biome ambience loops, weather layers, wildlife | -->
 
 ### Player Information Model
-<!-- What information is always visible, partially visible, hidden, or must be discovered? -->
+<!-- What information is always visible, partially visible, hidden, or must be discovered?
+
+Information Hierarchy — categorize every major piece of game state:
+- **Critical** (always visible) — state the player needs for core loop decisions
+- **Supplementary** (available on demand) — state that enriches understanding but isn't required moment-to-moment
+- **Discoverable** (hidden until earned/triggered) — state the player uncovers through play
+- **Opaque** (deliberately hidden) — state the simulation uses but the player never sees directly
+
+Explanation Depth — how deep can the player drill into any piece of information?
+- Surface: what is the current state? (e.g., mood icon: unhappy)
+- Reason: why is it this way? (e.g., tooltip: "hungry, overworked")
+- Detail: what are the exact numbers? (e.g., expanded panel: hunger 72/100, work hours 14/8)
+
+History & Logs — what can the player look back at?
+- What events are logged and for how long?
+- What information is ephemeral (gone once dismissed)?
+- What historical data helps the player spot trends? -->
 
 ---
 
@@ -148,11 +184,14 @@ Examples:
 ### State That Matters
 <!-- What persistent state does the game track that the player can observe or that drives gameplay?
 List the major state domains — not system names, but WHAT is being simulated and WHY it matters.
-For each: what changes, what the player sees, and what consequences emerge.
 
-Example:
-- **Colonist needs** — hunger, rest, morale change over time. Player sees mood indicators. Unmet needs cause work slowdowns, breakdowns, or abandonment.
-- **Power grid** — generation vs consumption. Player sees surplus/deficit. Brownouts disable rooms, cascade failures. -->
+| State Domain | What Changes | Player Sees | Consequence If Ignored |
+|-------------|-------------|-------------|----------------------|
+
+Examples:
+| Colonist needs | hunger, rest, morale over time | mood indicators, behavior changes | work slowdowns, breakdowns, abandonment |
+| Power grid | generation vs consumption balance | surplus/deficit meter | brownouts disable rooms, cascade failures |
+| Structural integrity | damage accumulates from events | cracks, warnings, visual damage | breaches, room loss, exposure risk | -->
 
 ### Behaviors That Need Rules
 <!-- What gameplay behaviors require persistent, rule-driven simulation?
@@ -201,7 +240,14 @@ Example:
 ## Philosophy
 
 ### Failure Philosophy
-<!-- How should failure feel? Traceable causes, fair consequences, learning opportunities. -->
+<!-- How should failure feel? Traceable causes, fair consequences, learning opportunities.
+
+Address each:
+- **Consequence severity** — how bad can things get? Setback, loss, or game over?
+- **Recovery cost** — how long does recovery take? Is it proportional to the mistake?
+- **Cascading failure** — can one failure trigger others? How far does a cascade go before stabilizing?
+- **Teaching through failure** — does the player learn something useful from every failure, or are some just punitive?
+- **Failure signals** — how does the player know things are going wrong BEFORE catastrophic failure? -->
 
 ### Risk / Reward Philosophy
 <!-- How are risk and reward linked? Safe play vs aggressive play tradeoffs. -->
