@@ -116,7 +116,16 @@ Classification criteria:
 
 Include these consequences in the `tier_note` field so the user sees the implications during confirmation.
 
-### Pass 7 — Weight Validation
+### Pass 7 — Contract Compliance
+
+If `propose_rules.contract_rules` exist in action.json and the design doc defines Failure and/or Risk contracts:
+
+- **Failure Contract** — For each candidate that can produce failure states, verify it has a `failure_contract` field. Flag systems that produce failures but don't declare which contract rules apply.
+- **Risk Contract** — Verify every candidate has a `risk_class` field (risk_generating, risk_neutral, or risk_immune). Flag any system with no classification. Check that classifications align with the contract's MUST/MUST NEVER lists — a system classified as risk_neutral must not overlap with activities on the MUST list.
+
+Record contract violations in `normalization_log`.
+
+### Pass 8 — Weight Validation
 
 Check each candidate against the weight heuristic:
 
@@ -148,6 +157,8 @@ Write `.reviews/seed/result.json`:
       "produces": "task_completed, task_failed, colonist_idle",
       "content_outline": "...",
       "needs": {},
+      "risk_class": "risk_neutral",
+      "failure_contract": ["upstream player decision required", "mid-stage warning required"],
       "weight_flag": null
     }
   ],

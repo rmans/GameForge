@@ -365,6 +365,8 @@ l3_sections:
       - "When something goes wrong, which simulation domain handles it? Could two distinct areas of the simulation both try to resolve the same failure — and is that overlap described in Interaction Patterns?"
       - "Trace every failure scenario in Failure Philosophy and Pressure Tests through the simulation requirements — what state changes, what behaviors fire, what consequences cascade? Are any steps in the chain not covered by Simulation Requirements?"
       - "Does this section address all five aspects: consequence severity, recovery cost, cascading failure behavior, teaching through failure, and failure signals (early warning before catastrophe)? Flag any that are missing."
+      - "If a Failure Contract exists: are the MUST and MUST NOT rules enforceable at the system level? Could a reviewer check each SYS doc against these rules with a binary pass/fail? If any rule is too vague to test, flag it."
+      - "If a Failure Contract exists: does the testability rule actually work? Pick the most complex failure scenario and attempt to reconstruct the cause chain using only the information the contract says must be available."
 
   "### Risk / Reward Philosophy":
     parent: "## Philosophy"
@@ -372,6 +374,8 @@ l3_sections:
       - "Is the risk/reward balance consistent with the Core Design Tension?"
       - "Are high-risk actions recoverable? If the player takes a calculated risk and fails, how long does recovery take? If recovery exceeds session length, the risk is actually punitive."
       - "Does the risk/reward curve change over the progression arc? Early game risk should teach. Late game risk should challenge. If the curve is flat, the game feels the same at hour 1 and hour 20."
+      - "If a Risk Contract exists: are the MUST and MUST NEVER lists complete? Walk through every player verb and simulation behavior — does each clearly fall into a risk category per the contract?"
+      - "If a Risk Contract exists: do the risk guarantees hold under stress? What happens at peak activity when multiple risk-generating and risk-neutral activities overlap? Can the guarantees still be enforced?"
 
   "### Simulation Transparency Policy":
     parent: "## Philosophy"

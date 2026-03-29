@@ -83,7 +83,9 @@ project_context:
       subsections: ["Failure Philosophy", "Risk / Reward Philosophy", "Simulation Transparency Policy", "Information Clarity Principle", "Decision Anchors", "Design Pressure Tests", "Design Gravity", "Design Boundaries", "Learning Curve Strategy"]
       questions:
         - "What happens when the player fails — how severe are consequences, how long is recovery, can failures cascade?"
+        - "What rules must EVERY failure obey? (Failure Contract — e.g., every failure must have a warning, no failure can use hidden variables)"
         - "How does the game reward risk-taking vs cautious play?"
+        - "What activities MUST generate risk and what MUST NEVER generate risk? (Risk Contract)"
         - "How transparent is the simulation — can the player see the numbers, or just the effects?"
         - "When two valid design choices conflict, what 3-5 tie-breaker rules apply? (Decision Anchors, format: 'X over Y')"
         - "What 3-6 extreme scenarios should the design survive without breaking? (Pressure Tests)"

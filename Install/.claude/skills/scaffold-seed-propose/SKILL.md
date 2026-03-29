@@ -105,6 +105,15 @@ Follow `propose_rules.ownership_rules` from action.json. Each candidate MUST dec
 
 If two candidates own the same state, they must be merged or the contested state must be assigned to one owner. These declarations feed directly into `authority.md` and `interfaces.md` during the references seeding step.
 
+### Contract Compliance
+
+Follow `propose_rules.contract_rules` from action.json. If the design doc defines enforceable contracts in Philosophy:
+
+- **Failure Contract** — For each candidate that can produce failure states, note which contract rules apply. Include a `failure_contract` field listing the MUST/MUST NOT rules the system must obey.
+- **Risk Contract** — For each candidate, classify it as `risk_generating`, `risk_neutral`, or `risk_immune` per the contract's MUST/MUST NEVER lists. Include a `risk_class` field.
+
+Contract compliance is verified during system review (iterate). Non-compliant systems are flagged.
+
 ### System Boundary Rules
 
 Follow `propose_rules.boundary_rules` and `propose_rules.kill_rules` from action.json. The core principles:

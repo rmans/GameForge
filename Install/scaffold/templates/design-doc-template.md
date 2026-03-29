@@ -247,10 +247,34 @@ Address each:
 - **Recovery cost** — how long does recovery take? Is it proportional to the mistake?
 - **Cascading failure** — can one failure trigger others? How far does a cascade go before stabilizing?
 - **Teaching through failure** — does the player learn something useful from every failure, or are some just punitive?
-- **Failure signals** — how does the player know things are going wrong BEFORE catastrophic failure? -->
+- **Failure signals** — how does the player know things are going wrong BEFORE catastrophic failure?
+
+#### Failure Contract
+Define enforceable rules that every system must obey. These are tested during system design review.
+
+Every failure MUST have:
+- (list the required elements — e.g., upstream player decision, mid-stage warning, logged trigger)
+
+No failure may have:
+- (list the prohibited elements — e.g., hidden variables, silent thresholds, unlogged modifiers)
+
+Testability rule:
+- (how to verify a failure is fair — e.g., "can you reconstruct the full cause chain from the event log using only player-accessible information?") -->
 
 ### Risk / Reward Philosophy
-<!-- How are risk and reward linked? Safe play vs aggressive play tradeoffs. -->
+<!-- How are risk and reward linked? Safe play vs aggressive play tradeoffs.
+
+#### Risk Contract
+Define enforceable rules about what generates risk and what doesn't. These are tested during system design review.
+
+Activities that MUST generate risk:
+- (list activities that always carry risk — e.g., exploration, aggressive expansion, resource exploitation)
+
+Activities that MUST NEVER generate risk:
+- (list safe activities — e.g., basic construction, routine maintenance, observation)
+
+Risk guarantees:
+- (enforceable properties — e.g., "risk always decays without active exploitation", "every capability must have a traceable risk cost", "every unit of risk must be source-attributable") -->
 
 ### Simulation Transparency Policy
 <!-- How understandable should the simulation be? Transparent, partially opaque, or narrative? -->

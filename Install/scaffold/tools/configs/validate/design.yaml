@@ -154,6 +154,20 @@ checks:
       min_length: 50
       severity: WARN
 
+    - id: design-failure-contract
+      description: "Failure Philosophy contains enforceable contract"
+      detection: pattern_present
+      target_files: ["design/design-doc.md"]
+      pattern: "(MUST have|must have|Every failure).*(MUST NOT|must not|No failure)"
+      severity: WARN
+
+    - id: design-risk-contract
+      description: "Risk/Reward Philosophy contains enforceable contract"
+      detection: pattern_present
+      target_files: ["design/design-doc.md"]
+      pattern: "(MUST generate|MUST NEVER|must never.*risk|always.*risk)"
+      severity: WARN
+
   heuristic:
     - id: design-glossary-compliance
       description: "NOT-column terms not used"

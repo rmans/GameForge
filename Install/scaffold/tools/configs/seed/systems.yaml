@@ -70,6 +70,10 @@ propose_rules:
     - "Each candidate must declare: owns (what state it controls), consumes (what it reads from other systems), produces (what signals/events it outputs)."
     - "No two systems may own the same state. If ownership overlaps, merge the systems or split the contested state to one owner."
     - "Ownership declarations feed directly into authority.md and interfaces.md during the references seeding step."
+  contract_rules:
+    - "If the design doc defines a Failure Contract (under Failure Philosophy), every system that can produce failure states must comply. Note which contract rules apply to each candidate."
+    - "If the design doc defines a Risk Contract (under Risk/Reward Philosophy), every system must be classified as risk-generating, risk-neutral, or risk-immune per the contract's MUST/MUST NEVER lists."
+    - "Contract compliance is verified during system review (iterate) — non-compliant systems are flagged."
   domain_definition: "A domain is a persistent simulation state space with its own rules and player interaction surface. Every system must belong to exactly one domain. A domain must have 2-5 systems — 1 system means the domain should be merged into a neighbor, 6+ means it should be split."
   scale_target: "Expect 12-25 systems for a typical game. Fewer than 8 likely means under-coverage. More than 30 likely means over-splitting or including technical concerns."
   grouping_hint: "Organize systems into domains (e.g., Colonist Domain, Facility Domain, Resource Domain, Risk Domain, Progression Domain, Simulation Core). Domains are NOT systems — they are organizational labels for related systems."

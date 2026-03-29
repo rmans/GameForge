@@ -144,6 +144,25 @@ mechanical_checks:
       auto_fix: false
       fix_action: "Flag that information hierarchy is undefined"
 
+  contracts:
+    - id: failure_contract_missing
+      description: "Failure Philosophy has no enforceable contract"
+      detection: pattern_present_any
+      section: "### Failure Philosophy"
+      expected_concepts: ["MUST have|must have|Every failure", "MUST NOT|must not|must never|No failure may", "[Tt]estability|[Rr]econstruct|[Vv]erif"]
+      min_concepts: 2
+      auto_fix: false
+      fix_action: "Flag that Failure Philosophy lacks enforceable contract rules (MUST/MUST NOT/testability)"
+
+    - id: risk_contract_missing
+      description: "Risk/Reward Philosophy has no enforceable contract"
+      detection: pattern_present_any
+      section: "### Risk / Reward Philosophy"
+      expected_concepts: ["MUST generate|must generate|always.*risk", "MUST NEVER|must never|never.*risk", "[Gg]uarantee|[Dd]ecay|[Aa]ttribut"]
+      min_concepts: 2
+      auto_fix: false
+      fix_action: "Flag that Risk/Reward Philosophy lacks enforceable contract rules (MUST/MUST NEVER/guarantees)"
+
   terminology:
     - id: glossary_compliance
       description: "NOT-column term used as authoritative terminology"
